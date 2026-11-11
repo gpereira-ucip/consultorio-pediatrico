@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.62 (2026-11-11)
+  VERSION: 1.4.63 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.63 — Respaldo completo en Ajustes: «Descargar respaldo (.json)» guarda en un archivo los ajustes, Mis frases, Mis plantillas y el contador de cuadros más usados; «Importar respaldo» lo lee y deja elegir entre agregar a lo que hay (sin duplicar) o reemplazar todo. No incluye datos de pacientes. Los exportar/importar anteriores de frases y plantillas siguen funcionando.
   1.4.62 — Pantalla «Novedades» (enlace al pie y en Ajustes): lista lo que cambió en cada versión, marca «nuevo» lo agregado desde la última vez que se miró y, al abrir una versión más nueva, avisa con un punto en el enlace. Se arma sola con la lista de cambios del propio archivo. Sin contenido clínico.
   1.4.61 — Microanimaciones suaves (0,15-0,25 s): aparición de la pestaña y del contenido de las tarjetas al abrirlas, pulso del botón COPIAR al copiar, aviso (toast) que sube, ventanas que entran desde abajo, botones y chips con transición de color y leve efecto al presionar. Se desactivan solas si el sistema tiene «reducir movimiento». Sin cambios de contenido.
   1.4.60 — Calculadoras: conversor de unidades en los dos sentidos (libras y onzas ↔ kilogramos, °F ↔ °C, pulgadas ↔ centímetros) y botón para cargar los kg y cm convertidos en el encabezado del paciente.
@@ -1051,6 +1052,12 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     <p class="hint">Versión <span id="ver"></span> · <button type="button" class="linkbtn" id="novBtn2">ver novedades</button> · Realizado por Dr. Gonzalo Gabriel Pereira.</p>
   </section>
   <section class="card">
+    <h2 style="font-size:17px">💾 Respaldo de toda la configuración</h2>
+    <p class="hint" style="margin:4px 0 8px">Un solo archivo con los ajustes, Mis frases, Mis plantillas y el contador de cuadros más usados. Sirve para tener copia o pasar todo a otra computadora o navegador. No incluye datos de pacientes (la app no los guarda).</p>
+    <div class="btns"><button type="button" class="btn sm" id="bkExport">⬇ Descargar respaldo (.json)</button><button type="button" class="btn sec sm" id="bkImportBtn">⬆ Importar respaldo…</button><input type="file" id="bkFile" accept=".json,application/json" class="hidden" aria-label="Archivo de respaldo"></div>
+    <div id="bkBox" class="plbox hidden" style="margin-top:8px"><span id="bkTxt" style="flex:1"></span><button type="button" class="btn sm" id="bkSumar">Agregar a lo que tengo</button><button type="button" class="btn sec sm" id="bkReemp">Reemplazar todo</button><button type="button" class="btn ghost sm" id="bkCancel">Cancelar</button></div>
+  </section>
+  <section class="card">
     <h2 style="font-size:17px">★ Mis frases</h2>
     <p class="hint" style="margin:4px 0 8px">Frases propias para insertar con un clic (botón ★ debajo de cada campo). Se guardan solo en este navegador: exportalas para tener copia o pasarlas a otra computadora. Podés usar <b>{o}</b> para la concordancia de género (ej. «tranquil{o}, activ{o} y reactiv{o}»).</p>
     <div id="mfResumen" class="hint"></div>
@@ -1195,7 +1202,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.62";
+const VERSION = "1.4.63";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3816,6 +3823,26 @@ function plBorrar(i){
   };
 })();
 update();
+/* ---------- respaldo completo (v1.4.63, ítem 97): ajustes + frases + plantillas + uso en un archivo JSON. Sin datos de pacientes. ---------- */
+let BK=null;
+function bkArmar(){ const aj={}; SET_IDS.forEach(id=>aj[id]=$(id).value); return {app:"consultorio-pediatrico", version:VERSION, fecha:isoHoy(), ajustes:aj, frases:MF, plantillas:PL, uso:USO}; }
+$("bkExport").onclick=()=>{ const blob=new Blob([JSON.stringify(bkArmar(),null,1)],{type:"application/json"}); descargar(blob, "consultorio_pediatrico_respaldo_"+isoHoy()+".json"); toast("Respaldo descargado"); };
+$("bkImportBtn").onclick=()=>$("bkFile").click();
+$("bkFile").addEventListener("change", ev=>{ ev.stopPropagation(); const f=$("bkFile").files[0]; if(!f) return; const rd=new FileReader();
+  rd.onload=()=>{ let o; try{ o=JSON.parse(rd.result); }catch(e){ o=null; } $("bkFile").value="";
+    if(!o || typeof o!=="object" || !(o.ajustes||o.frases||o.plantillas)){ toast("El archivo no es un respaldo de Consultorio Pediátrico"); return; }
+    BK=o; const nf=o.frases&&typeof o.frases==="object"? Object.values(o.frases).reduce((a,x)=>a+(Array.isArray(x)?x.length:0),0) : 0, np=Array.isArray(o.plantillas)? o.plantillas.length : 0;
+    $("bkTxt").textContent=`Respaldo${o.fecha? " del "+dmy(parseD(o.fecha)) : ""}${o.version? " (v"+o.version+")" : ""}: ${nf} frases, ${np} plantillas${o.ajustes? ", ajustes" : ""}. ¿Qué hago?`; $("bkBox").classList.remove("hidden"); };
+  rd.onerror=()=>toast("No se pudo leer el archivo"); rd.readAsText(f); });
+$("bkCancel").onclick=()=>{ BK=null; $("bkBox").classList.add("hidden"); };
+function bkAplicar(reemplazar){ const o=BK; if(!o) return; let nf=0, np=0;
+  if(o.ajustes && typeof o.ajustes==="object") SET_IDS.forEach(id=>{ const v=o.ajustes[id]; if(typeof v!=="string") return; if(!reemplazar && (id==="sMed"||id==="sMat"||id==="sEsp") && $(id).value.trim()) return; const el=$(id); if(el.tagName==="SELECT" && ![...el.options].some(op=>op.value===v)) return; el.value=v; });
+  if(o.frases && typeof o.frases==="object"){ if(reemplazar) for(const g in MF_GRUPOS) MF[g]=[]; for(const g in MF_GRUPOS) if(Array.isArray(o.frases[g])) o.frases[g].forEach(t=>{ if(typeof t==="string" && t.trim() && !MF[g].includes(t.trim())){ MF[g].push(t.trim()); nf++; } }); }
+  if(Array.isArray(o.plantillas)){ if(reemplazar) PL=[]; o.plantillas.forEach(x=>{ const p=plLimpia(x); if(!p) return; if(PL.some(y=>y.n.toLowerCase()===p.n.toLowerCase())) return; if(PL.some(y=>y.uid===p.uid)) p.uid+="i"+np; PL.push(p); np++; }); }
+  if(o.uso && typeof o.uso==="object" && !Array.isArray(o.uso)){ if(reemplazar) USO={}; Object.keys(o.uso).forEach(k=>{ const n=+o.uso[k]; if(n>0) USO[k]=reemplazar? n : Math.max(USO[k]||0, n); }); usoSave(); }
+  saveSettings(); mfSave(); plSave(); $("fmtBar").value=$("sEnc").value; $("sInicioChk").checked=$("sInicio").value!=="no"; aplicarCompacto(); aplicarZoom(); usoResumen(); update();
+  BK=null; $("bkBox").classList.add("hidden"); toast((reemplazar? "Respaldo restaurado: " : "Respaldo agregado: ")+nf+" frases y "+np+" plantillas"); }
+$("bkSumar").onclick=()=>bkAplicar(false); $("bkReemp").onclick=()=>bkAplicar(true);
 </script>
 </body>
 </html>

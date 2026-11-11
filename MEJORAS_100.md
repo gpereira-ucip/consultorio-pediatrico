@@ -117,7 +117,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 ## I. Calidad, respaldo y confianza
 95. [ ] Sección «Fuentes y actualización» con fecha de cada referencia.
 96. [ ] Autodiagnóstico interno (botón en Ajustes) que verifique todas las plantillas y cálculos.
-97. [ ] Exportar e importar toda la configuración (frases, plantillas, ajustes) en un solo archivo.
+97. [x] (v1.4.63, 11/11) Exportar e importar toda la configuración (frases, plantillas, ajustes) en un solo archivo.
 98. [!] Adaptar el texto al sistema de HC que usa Gonzalo (campos separados para pegar uno por uno). Necesita que Gonzalo diga qué campos tiene su sistema.
 99. [ ] Revisión ortográfica y de estilo de todo el contenido.
 100. [ ] Optimizar peso y velocidad del archivo (fuentes, imágenes, código) sin perder funciones.
