@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.60 (2026-11-11)
+  VERSION: 1.4.61 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.61 — Microanimaciones suaves (0,15-0,25 s): aparición de la pestaña y del contenido de las tarjetas al abrirlas, pulso del botón COPIAR al copiar, aviso (toast) que sube, ventanas que entran desde abajo, botones y chips con transición de color y leve efecto al presionar. Se desactivan solas si el sistema tiene «reducir movimiento». Sin cambios de contenido.
   1.4.60 — Calculadoras: conversor de unidades en los dos sentidos (libras y onzas ↔ kilogramos, °F ↔ °C, pulgadas ↔ centímetros) y botón para cargar los kg y cm convertidos en el encabezado del paciente.
   1.4.59 — Calculadoras: superficie corporal por la fórmula de Mosteller (√(talla en cm × peso en kg ÷ 3600); N Engl J Med 1987;317:1098), con peso y talla del paciente precargados y dosis por m² opcional; botón Copiar.
   1.4.58 — Ventana «Calculadoras» (Alt+0 o enlace al pie) con la calculadora de dosis por peso: peso (toma el del paciente), mg/kg por día o por dosis, intervalo, tope opcional y concentración (mg en ml, gotas por ml); muestra mg y ml por toma, total diario y mg/kg/día, avisa si actuó el tope, copia la indicación o la agrega a la conducta de Intercurrencia. Solo aritmética: no trae dosis cargadas. Alt+6 pasa a ser Recetas y Alt+7 Ajustes (orden de las pestañas).
@@ -255,6 +256,22 @@ body{padding-bottom:90px}
 .hidden{display:none!important}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 18px;border-radius:20px;opacity:0;transition:.25s;pointer-events:none;z-index:60;font-size:13.5px}
 .toast.on{opacity:1}
+/* microanimaciones (v1.4.61, ítem 88): suaves y cortas; se desactivan con «reducir movimiento» del sistema */
+@media (prefers-reduced-motion:no-preference){
+  details.card[open]>.inner{animation:cardIn .22s ease-out}
+  #formPanel>div[id^="t-"]:not(.hidden){animation:tabIn .2s ease-out}
+  .chip,.btn,nav.tabs button[data-t],.qchips button,.seg button,.linkbtn{transition:background-color .15s,border-color .15s,color .15s,box-shadow .15s,transform .08s}
+  .btn:active,.chip:active,.qchips button:active{transform:scale(.96)}
+  .bigcopy.ok{animation:copyOk .5s ease-out}
+  .toast{transform:translate(-50%,8px);transition:opacity .22s,transform .22s}.toast.on{transform:translate(-50%,0)}
+  .modal:not(.hidden){animation:fadeIn .15s ease-out}.modal:not(.hidden) .sheet{animation:sheetIn .22s ease-out}
+  .crecbox:not(.hidden),.fiebox:not(.hidden),.calcres:not(:empty){animation:cardIn .2s ease-out}
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@keyframes tabIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes copyOk{0%{transform:scale(1)}35%{transform:scale(1.04);box-shadow:0 0 0 8px rgba(47,111,109,.18)}100%{transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes sheetIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .foot{font-size:11.5px;color:var(--muted);text-align:center;padding:10px 0 20px}
 /* mis frases */
 .mfbar{display:flex;justify-content:flex-end;margin-top:3px}
@@ -1165,7 +1182,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.60";
+const VERSION = "1.4.61";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 

@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.4.60 (11/11/2026)
+- Versión actual: 1.4.61 (11/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -77,6 +77,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - **Calculadoras** (v1.4.58-60): ventana `calc` (fuera de `formPanel`: no entra en deshacer ni se borra con «Nuevo paciente»), `calcAbrir()` (Alt+0, enlace `calcBtn` al pie, Esc cierra; precarga peso y talla del encabezado). **Dosis por peso** (`dosisCalc`, `dosisTxt`, `calcDosis`): mg/kg por día o por dosis, intervalo, tope, concentración mg/ml y gotas/ml; `dcCopy`, `dcAdd` (agrega a `iCondOtro`). `TAB_ORDEN` sigue ahora el orden visual: Alt+6 = Recetas, Alt+7 = Ajustes.
 - **Superficie corporal** (v1.4.59): `scCalc`, `scTxt`, `calcSC` en la ventana Calculadoras (Mosteller; dosis mg/m² opcional).
 - **Conversor de unidades** (v1.4.60): `cvCalc(src)` en la ventana Calculadoras (lb + oz ↔ kg, °F ↔ °C, in ↔ cm; factores exactos) y `cvUsar` (pasa kg y cm a `peso` y `talla`).
+- **Microanimaciones** (v1.4.61): bloque CSS dentro de `@media (prefers-reduced-motion:no-preference)` (keyframes `cardIn`, `tabIn`, `copyOk`, `fadeIn`, `sheetIn`). Sin animación en los chips que se redibujan con `innerHTML` (parpadeaban).
 - **Apto físico** con constancia modelo. **Ajustes** (médico, matrícula, mayúsculas, títulos) en localStorage.
 
 ## Identidad visual
@@ -177,6 +178,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 1.4.61 (11/11/2026): ítem 88 — microanimaciones (con respeto de «reducir movimiento»). Probado con Playwright (animaciones activas, desactivadas con reducedMotion, posición final de toast y ventanas; regresión completa).
 - 1.4.60 (11/11/2026): ítems 86, 82 y 83 — ventana Calculadoras completa (dosis por peso, superficie corporal, conversor). Ítems 84 y 85 quedan [~] sin empezar (sin acceso web). Probado con Playwright (Alt+0, precarga de peso/talla, dosis por día y por dosis, tope, gotas, agregar a la conducta, SC 1,82 m² con 70 kg/170 cm, conversiones en ambos sentidos, usar en el encabezado, Esc, Alt+6/Alt+7, 1440/390 px; regresión completa).
 - 1.4.59 (11/11/2026): ítem 82 — superficie corporal (Mosteller). Probado con Playwright junto con 83 y 86 (ver 1.4.60).
 - 1.4.58 (11/11/2026): ítem 83 — calculadora de dosis libre en la ventana Calculadoras. Ítems 77-81 quedan [~] sin empezar (sin acceso web). Sin contenido clínico (aritmética). Probado con Playwright junto con 82 y 86 (ver 1.4.60).

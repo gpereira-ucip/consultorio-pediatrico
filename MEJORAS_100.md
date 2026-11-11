@@ -106,7 +106,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 
 ## H. Diseño y experiencia
 87. [ ] Íconos propios, coherentes con los logos, en lugar de emojis.
-88. [ ] Microanimaciones suaves al copiar, abrir tarjetas y cambiar de pestaña.
+88. [x] (v1.4.61, 11/11) Microanimaciones suaves al copiar, abrir tarjetas y cambiar de pestaña.
 89. [ ] Vista previa con resaltado de lo agregado o modificado respecto de la plantilla.
 90. [ ] Modo oscuro opcional para guardias nocturnas.
 91. [ ] Diseño de impresión (Ctrl+P) limpio para indicaciones, recetas y curvas.
