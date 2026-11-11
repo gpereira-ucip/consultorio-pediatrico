@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.61 (2026-11-11)
+  VERSION: 1.4.62 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.62 — Pantalla «Novedades» (enlace al pie y en Ajustes): lista lo que cambió en cada versión, marca «nuevo» lo agregado desde la última vez que se miró y, al abrir una versión más nueva, avisa con un punto en el enlace. Se arma sola con la lista de cambios del propio archivo. Sin contenido clínico.
   1.4.61 — Microanimaciones suaves (0,15-0,25 s): aparición de la pestaña y del contenido de las tarjetas al abrirlas, pulso del botón COPIAR al copiar, aviso (toast) que sube, ventanas que entran desde abajo, botones y chips con transición de color y leve efecto al presionar. Se desactivan solas si el sistema tiene «reducir movimiento». Sin cambios de contenido.
   1.4.60 — Calculadoras: conversor de unidades en los dos sentidos (libras y onzas ↔ kilogramos, °F ↔ °C, pulgadas ↔ centímetros) y botón para cargar los kg y cm convertidos en el encabezado del paciente.
   1.4.59 — Calculadoras: superficie corporal por la fórmula de Mosteller (√(talla en cm × peso en kg ÷ 3600); N Engl J Med 1987;317:1098), con peso y talla del paciente precargados y dosis por m² opcional; botón Copiar.
@@ -209,6 +210,9 @@ h3 .hint{text-transform:none;letter-spacing:0}
 .fiebox .fieT{font:600 13.5px var(--font);color:#9b3a2f;align-self:center}
 .fiebox .fg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
 .fiebox .fg>small{min-width:84px;color:var(--muted);font-size:12px}
+.novlist{overflow:auto;padding-right:6px}.novlist .nv{padding:8px 0;border-top:1px solid var(--line);font:400 13.5px/1.5 var(--font)}.novlist .nv:first-child{border-top:0}
+.novlist .nv b{display:inline-block;min-width:54px;color:var(--acc);font-weight:600}.novlist .nv.new b::after{content:"nuevo";margin-left:6px;font:600 10px var(--font);background:var(--coralbg);color:#9b3a2f;border-radius:8px;padding:1px 6px;vertical-align:1px}
+.novdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--coral);margin-left:5px;vertical-align:1px}
 .sheet.calc{width:min(860px,100%)}.calcbody{overflow:auto;padding-right:4px}.calcsec{border-top:1px solid var(--line);padding:10px 0 12px}.calcsec:first-child{border-top:0}.calcsec h3{margin:0 0 6px}
 .calcres{margin:8px 0;padding:8px 12px;border-radius:10px;background:var(--okbg);color:#1f4d33;font:500 13.5px/1.45 var(--font);min-height:20px}.calcres:empty{display:none}.calcres.warn{background:var(--coralbg);color:#8a2f25}
 .cveq{align-self:flex-end;padding-bottom:9px;color:var(--muted)}.cvsep{flex-basis:18px}
@@ -1044,7 +1048,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     <p class="hint">Se guardan en este navegador. No se guarda ningún dato de pacientes.</p>
     <p class="hint">★ Cuadros más usados: cada vez que copiás una intercurrencia para la HC se suma 1 a ese cuadro (una vez por paciente); los 6 más usados aparecen primero en el selector. <span id="usoTxt"></span> <button type="button" class="linkbtn" id="usoReset">Reiniciar contador</button></p>
     <div class="okbox">Las dosis de medicamentos son orientativas (mg/kg con tope máximo) y deben verificarse antes de indicar. Fuentes: plantillas propias, Manual Breve SAP, guía MSAL 2018, Calendario Nacional 2026 y patrones OMS.</div>
-    <p class="hint">Versión <span id="ver"></span> · Realizado por Dr. Gonzalo Gabriel Pereira.</p>
+    <p class="hint">Versión <span id="ver"></span> · <button type="button" class="linkbtn" id="novBtn2">ver novedades</button> · Realizado por Dr. Gonzalo Gabriel Pereira.</p>
   </section>
   <section class="card">
     <h2 style="font-size:17px">★ Mis frases</h2>
@@ -1067,8 +1071,17 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     </div>
   </section>
 </div>
-<div class="foot">Herramienta de apoyo para la escritura de la HC. No reemplaza el juicio clínico. Funciona sin conexión. · <button type="button" class="linkbtn" id="atajosBtn">⌨ Atajos de teclado (?)</button> · <button type="button" class="linkbtn" id="calcBtn">🧮 Calculadoras (Alt+0)</button></div>
+<div class="foot">Herramienta de apoyo para la escritura de la HC. No reemplaza el juicio clínico. Funciona sin conexión. · <button type="button" class="linkbtn" id="atajosBtn">⌨ Atajos de teclado (?)</button> · <button type="button" class="linkbtn" id="calcBtn">🧮 Calculadoras (Alt+0)</button> · <button type="button" class="linkbtn" id="novBtn">✨ Novedades<span id="novDot" class="novdot hidden" title="Hay novedades desde la última vez"></span></button></div>
 </main>
+
+<!-- ================= NOVEDADES (v1.4.62) ================= -->
+<div class="modal hidden" id="nov">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="novT" style="width:min(760px,100%)">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 style="font-size:18px" id="novT">✨ Novedades</h2><button class="btn ghost sm" id="novCerrar">Cerrar</button></div>
+    <div class="hint" id="novSub" style="margin-bottom:6px"></div>
+    <div id="novList" class="novlist"></div>
+  </div>
+</div>
 
 <!-- ================= CALCULADORAS (v1.4.58-60) ================= -->
 <div class="modal hidden" id="calc">
@@ -1182,7 +1195,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.61";
+const VERSION = "1.4.62";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3400,6 +3413,22 @@ document.addEventListener("keydown", e=>{
   if((e.ctrlKey||e.metaKey) && !e.altKey && (e.key==="k"||e.key==="K")){ e.preventDefault(); buscarCuadro(); return; }
   if(e.key==="?" && !enCampo && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); toggleAtajos(); }
 });
+/* ---------- novedades (v1.4.62, ítem 93): lee el CHANGELOG del comentario inicial de este mismo archivo ----------
+   Guarda solo la última versión vista (consultorioPed.verVista) para marcar lo nuevo. */
+const vCmp=(a,b)=>{ const x=a.split(".").map(Number), y=b.split(".").map(Number); for(let i=0;i<3;i++){ if((x[i]||0)!==(y[i]||0)) return (x[i]||0)-(y[i]||0); } return 0; };
+function novLeer(){ if(novLeer._c) return novLeer._c; const out=[]; try{ const w=document.createTreeWalker(document, NodeFilter.SHOW_COMMENT); let n;
+    while((n=w.nextNode())){ const t=n.nodeValue; const i=t.indexOf("CHANGELOG:"); if(i<0) continue; t.slice(i).split("\n").forEach(l=>{ const m=l.match(/^\s*(\d+\.\d+\.\d+)\s+—\s+(.+)$/); if(m) out.push({v:m[1], t:m[2].trim()}); }); break; } }catch(e){}
+  out.sort((a,b)=>vCmp(b.v,a.v)); return novLeer._c=out; }
+function novVista(){ try{ return localStorage.getItem("consultorioPed.verVista")||""; }catch(e){ return ""; } }
+function novAbrir(v){ const m=$("nov"), show = v===undefined? m.classList.contains("hidden") : v; m.classList.toggle("hidden", !show); if(!show) return;
+  const l=novLeer(), vista=novVista(), nuevas=vista? l.filter(x=>vCmp(x.v,vista)>0).length : 0;
+  $("novSub").textContent = "Versión instalada: "+VERSION+(nuevas? " · "+nuevas+(nuevas===1?" novedad":" novedades")+" desde la última vez que miraste (v"+vista+")" : "")+".";
+  $("novList").innerHTML = l.length? l.map(x=>`<div class="nv${vista && vCmp(x.v,vista)>0? " new":""}"><b>${x.v}</b> ${mfEsc(x.t)}</div>`).join("") : '<div class="hint">No se pudo leer la lista de cambios.</div>';
+  try{ localStorage.setItem("consultorioPed.verVista", VERSION); }catch(e){} $("novDot").classList.add("hidden"); $("novList").scrollTop=0; $("novCerrar").focus(); }
+$("novBtn").onclick=()=>novAbrir(true); $("novBtn2").onclick=()=>novAbrir(true); $("novCerrar").onclick=()=>novAbrir(false);
+$("nov").addEventListener("click", ev=>{ if(ev.target.id==="nov") novAbrir(false); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") novAbrir(false); });
+(function(){ const v=novVista(); if(!v){ try{ localStorage.setItem("consultorioPed.verVista", VERSION); }catch(e){} } else if(vCmp(VERSION,v)>0){ $("novDot").classList.remove("hidden"); setTimeout(()=>toast("Versión nueva "+VERSION+": mirá «✨ Novedades» al pie"), 900); } })();
 /* ---------- calculadoras (v1.4.58-60, ítems 83, 82 y 86): solo aritmética, sin dosis ni rangos cargados ---------- */
 const nv=id=>{ const v=parseFloat(($(id).value||"").replace(",",".")); return isNaN(v)? null : v; };
 const fmg=x=> x<10? fmtN(x,2) : x<100? fmtN(x,1) : fmtN(x,0);

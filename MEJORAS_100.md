@@ -111,7 +111,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 90. [ ] Modo oscuro opcional para guardias nocturnas.
 91. [ ] Diseño de impresión (Ctrl+P) limpio para indicaciones, recetas y curvas.
 92. [ ] Accesibilidad: foco visible, navegación completa con Tab, etiquetas ARIA, contraste AA.
-93. [ ] Pantalla «Novedades» con lo que cambió en cada versión.
+93. [x] (v1.4.62, 11/11) Pantalla «Novedades» con lo que cambió en cada versión.
 94. [ ] Tarjeta del paciente más compacta cuando se hace scroll (encabezado pegajoso con edad, sexo y peso).
 
 ## I. Calidad, respaldo y confianza
