@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.52 (2026-11-11)
+  VERSION: 1.4.53 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.53 — Certificado de apto escolar / educación física (pestaña Recetas): actividad (educación física escolar, concurrir a la escuela, actividad recreativa, colonia, campamento u otra), resultado (apto, apto con restricciones, no apto transitoriamente), restricciones o motivo, validez editable (1 año) y observaciones. Texto administrativo, sin contenido clínico.
   1.4.52 — Certificado de reposo / evicción (pestaña Recetas): tipo (reposo domiciliario, evicción escolar, sin educación física o solo constancia de atención), desde, días y hasta (se calculan entre sí; «hasta» es inclusive y agrega la fecha de reintegro), diagnóstico opcional, cuidador que acompaña y observaciones; botón para traer el diagnóstico y el reposo de Intercurrencia. Texto administrativo, sin contenido clínico.
   1.4.51 — Pestaña nueva «Recetas» (recetas y certificados; Alt+7) con la receta de medicamentos: renglones con fármaco (genérico), presentación, dosis, frecuencia, duración y envases; «Traer de la conducta de Intercurrencia» crea un renglón por cada medicamento con dosis tildado; diagnóstico, datos del paciente, peso opcional, una receta por medicamento o todas juntas, firma. Botones Copiar y Ver; COPIAR de la barra inferior copia el documento activo. No calcula dosis ni guarda nada. Encabezado ajustado para 7 pestañas.
   1.4.50 — Vacunas: tarjeta «Mensaje para la familia» con un texto simple para WhatsApp (vacunas que le corresponden ahora, pendientes de antes si se tildó el carnet, próximas vacunas con fecha, y el recordatorio de que no requieren orden médica y de llevar el carnet) y botón «Copiar mensaje». Usa solo el primer nombre si está cargado. Sin contenido clínico nuevo (las notas son las que ya traía el calendario de la app).
@@ -923,6 +924,20 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="cr">Copiar certificado</button><button type="button" class="btn sec sm" data-doc-ver="cr">Ver</button><button type="button" class="btn sec sm" id="crInter">↧ Traer diagnóstico y reposo de Intercurrencia</button></div>
     </div>
   </details>
+  <details class="card" id="ceCard" data-doc="ce">
+    <summary><span class="ic">🏃</span>Certificado de apto escolar / educación física<span class="sum" id="sumCe"></span></summary>
+    <div class="inner">
+      <div class="row">
+        <label class="f" style="flex:2;min-width:240px">Apto para<select id="ceAct"><option value="ef">Realizar educación física escolar</option><option value="esc">Concurrir a la escuela</option><option value="rec">Realizar actividad física recreativa acorde a su edad</option><option value="col">Concurrir a colonia de vacaciones</option><option value="camp">Concurrir a campamento</option><option value="otro">Otra (escribir)</option></select></label>
+        <label class="f hidden" id="ceActOtroL" style="flex:2;min-width:200px">Actividad<input id="ceActOtro" placeholder="ej. practicar fútbol recreativo"></label>
+        <label class="f">Resultado<select id="ceRes"><option value="apto">Apto</option><option value="rest">Apto con restricciones</option><option value="no">No apto transitoriamente</option></select></label>
+        <label class="f">Validez<input id="ceVal" class="s" value="1 año"></label>
+      </div>
+      <input id="ceDet" placeholder="Restricciones o motivo (si corresponde)" style="width:100%;margin-top:8px">
+      <input id="ceObs" placeholder="Observaciones (opcional)" style="width:100%;margin-top:8px">
+      <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="ce">Copiar certificado</button><button type="button" class="btn sec sm" data-doc-ver="ce">Ver</button><span class="hint">Para el apto con examen completo (ECG, antecedentes, constancia) usá la pestaña Apto físico; el certificado de salud escolar está ahí.</span></div>
+    </div>
+  </details>
 </div>
 
 <!-- ================= AJUSTES ================= -->
@@ -1036,7 +1051,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.52";
+const VERSION = "1.4.53";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -2961,7 +2976,15 @@ function crSync(src){ const d=parseD($("crDesde").value)||parseD($("fc").value);
   else { const n=parseInt($("crDias").value,10); $("crHasta").value = n>0? iso(sumar(d,n-1)) : ""; } }
 ["crDias","crDesde"].forEach(id=>$(id).addEventListener("input", ()=>{ crSync("dias"); update(); })); $("crHasta").addEventListener("input", ()=>{ crSync("hasta"); update(); });
 $("crInter").onclick=()=>{ if(!iCur) return; $("crDx").value=$("iDx").value; const r=parseInt($("iRep").value,10); if(r>0){ $("crDias").value=Math.round(r/24); $("crTipo").value=$("iRepTipo").value==="evic"? "evic" : $("iRepTipo").value==="const"? "const" : "reposo"; } crSync("dias"); S.doc="cr"; update(); toast("Datos traídos de Intercurrencia"); };
-const DOCS={rp:genRp, cr:genCr};
+/* certificado de apto escolar / educación física (ítem 69). Redacción administrativa propia. */
+function genCe(){ const act=$("ceAct").value==="otro"? ($("ceActOtro").value.trim()||"……………………") : $("ceAct").selectedOptions[0].textContent.toLowerCase(), res=$("ceRes").value, det=$("ceDet").value.trim().replace(/\.$/,""), val=$("ceVal").value.trim(), obs=$("ceObs").value.trim();
+  const L=["CERTIFICADO DE APTITUD"]; let t=`Certifico que ${certQuien()} fue evaluad{o} clínicamente en el día de la fecha y, al momento del examen, `;
+  if(res==="apto") t+=`no presenta contraindicaciones clínicas para ${act}. Se encuentra apt{o}.`;
+  else if(res==="rest") t+=`se encuentra apt{o} para ${act} con las siguientes restricciones: ${det||"……………………"}.`;
+  else t+=`no se encuentra en condiciones de ${act} en forma transitoria`+(det? " ("+det+")" : "")+", hasta nueva evaluación.";
+  L.push(G(t)); if(val && res!=="no") L.push("Válido por "+val+" a partir de la fecha, salvo que se presente una enfermedad o lesión.");
+  if(obs) L.push("Observaciones: "+obs.replace(/\.$/,"")+"."); L.push(certPie()); return L.join("\n"); }
+const DOCS={rp:genRp, cr:genCr, ce:genCe};
 function genDoc(k){ return DOCS[k]? DOCS[k]() : ""; }
 function docMay(t){ return $("sMay").value==="mayus"? t.toUpperCase() : t; }
 $("rpList").addEventListener("input", ev=>{ const d=ev.target.dataset.rp; if(!d) return; const [i,k]=d.split(":"); rpItems[+i][k]=ev.target.value; S.doc="rp"; update(); });
@@ -3041,6 +3064,7 @@ function updateSums(e, pr){
   }
   if($("sumRp")){ const n=rpItems.filter(it=>(it.f||"").trim()).length; $("sumRp").textContent = n? n+(n===1?" medicamento":" medicamentos") : "sin medicamentos"; }
   if($("sumCr")){ const f=crFechas(); $("sumCr").textContent = $("crTipo").value==="const"? "constancia" : f && f.h? f.n+(f.n===1?" día":" días")+" · hasta el "+dmy(f.h) : ""; }
+  if($("sumCe")){ $("ceActOtroL").classList.toggle("hidden", $("ceAct").value!=="otro"); $("sumCe").textContent = $("ceRes").selectedOptions[0].textContent.toLowerCase(); }
   if(iCur){ const ne=cnt("#iEst"); $("sumIEst").textContent = ne? ne+" seleccionado(s)" : "ninguno"; }
   const sexo = S.sexo==="v"?"Varón":S.sexo==="m"?"Mujer":"elegí sexo";
   const ctx = {control:"Control de salud", inter:"Intercurrencia: "+(iCur?iCur.n:""), perc:"Percentilos", vac:"Vacunas", apto:"Apto físico", docs:"Recetas y certificados", ajustes:"Ajustes"}[S.tab]||"";
@@ -3288,7 +3312,7 @@ document.addEventListener("keydown", e=>{
 $("nuevo").onclick = ()=>{
   undoGuardar();
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
-   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta"].forEach(id=>$(id).value=""); $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
+   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta","ceDet","ceObs","ceActOtro"].forEach(id=>$(id).value=""); $("ceRes").value="apto"; $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
   $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();
