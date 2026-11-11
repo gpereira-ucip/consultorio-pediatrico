@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.46 (2026-11-11)
+  VERSION: 1.4.47 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.47 — Blanco genético en la curva de talla: con las tallas de la madre y del padre cargadas, la curva de talla dibuja en violeta el canal que llega al blanco genético a los 19 años (línea punteada), la banda de su rango (± 8,5 cm) y, en la curva de 5 a 19 años, la marca del blanco y su rango a la edad adulta; la leyenda dice el valor y el percentilo adulto. También sale en la hoja A4. Sin contenido clínico nuevo (misma fórmula que ya usaba la app).
   1.4.46 — Hoja A4 con todas las curvas (pestaña Percentilos): botones Copiar, Descargar PNG y Ver. Arma una sola imagen A4 (1654 × 2339 px) con título, datos del paciente (nombre y DNI solo si está tildado «nombre y fecha en la imagen»), tabla de percentilos y puntaje z, velocidad de crecimiento, blanco genético, TA, todas las curvas visibles en grilla y el pie con la firma. Arreglo: las curvas con percentilo «< P1» no se podían copiar como imagen. Sin contenido clínico nuevo.
   1.4.45 — Lector de mediciones previas más tolerante (pestaña Percentilos): acepta fechas sin año o con año corto, guiones, puntos o formato 2026-03-12; valores con unidades o etiquetas en cualquier orden («12/3 7,2kg 66cm», «Peso: 7200 g Talla 0,66 m PC 42»), gramos y metros, separadores con punto y coma, coma o tabulación, y renglones copiados de la HC. Debajo del campo muestra lo que entendió («3 mediciones leídas: …») y cuántas líneas no pudo leer. Sin contenido clínico nuevo.
   1.4.44 — Percentilo de presión arterial (1 a 17 años): con TA, sexo, edad y talla ubica la sistólica y la diastólica respecto de P50, P90 y P95 de las tablas de la guía AAP 2017; sale en el encabezado («TA S P50-P90 · D < P50», con P90 y P95 al pasar el mouse), en la antropometría del texto («TA 100/60 mmHg (PAS P50-P90, PAD < P50)») y, si alguna es ≥ P90, como alerta con frase para datos positivos. Sin talla asume P50 y lo aclara. No clasifica estadios.
@@ -982,7 +983,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.46";
+const VERSION = "1.4.47";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1477,6 +1478,14 @@ function svgChart(k){
   curves.forEach((c,i)=>{ if(!c.length) return; const z=ZL[i][0];
     g+=`<polyline fill="none" stroke="${z===0?"#1a7f37":Math.abs(z)>1.5?"#c0392b":"#d68910"}" stroke-width="${z===0?2:1.5}" points="${c.map(p=>X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join(" ")}"/>`;
     const last=c[c.length-1]; g+=`<text x="${ml+pw+4}" y="${Y(last[1])+4}" font-size="11" fill="#333">${ZL[i][1]}</text>`; });
+  // blanco genético (v1.4.47, ítem 57): canal de talla que llega al blanco genético a los 19 años (línea punteada) y su rango ± 8,5 cm (banda)
+  const bv = k==="h"? blancoVal() : null, l19 = bv? lmsAt("h",sx,6935) : null;
+  if(bv && l19){ const zc=[bv.lo,bv.bg,bv.hi].map(x=>zOf(x,l19)), ln=z=>{ const o=[]; for(let d=d0; d<=d1; d+=step){ const l=lmsAt("h",sx,d); if(l) o.push(X(d).toFixed(1)+","+Y(xOf(z,l)).toFixed(1)); } return o; };
+    const A=ln(zc[0]), B=ln(zc[2]);
+    g+=`<clipPath id="cpBG"><rect x="${ml}" y="${mt}" width="${pw}" height="${ph}"/></clipPath><g clip-path="url(#cpBG)"><polygon fill="#7b4fb5" fill-opacity=".10" points="${A.concat(B.slice().reverse()).join(" ")}"/><polyline fill="none" stroke="#7b4fb5" stroke-width="1.6" stroke-dasharray="7 4" points="${ln(zc[1]).join(" ")}"/>`;
+    if(b>=216){ const xa=X(6935); g+=`<line x1="${xa-3}" x2="${xa-3}" y1="${Y(bv.hi)}" y2="${Y(bv.lo)}" stroke="#7b4fb5" stroke-width="2.5"/><circle cx="${xa-3}" cy="${Y(bv.bg)}" r="4.5" fill="#7b4fb5"/>`; }
+    const lb=`Blanco genético ${fmtN(bv.bg)} cm (${fmtN(bv.lo)}-${fmtN(bv.hi)}) · ${pcStr(zc[1])} adulto`;
+    g+=`</g><line x1="${ml+10}" x2="${ml+34}" y1="${mt+ph-12}" y2="${mt+ph-12}" stroke="#7b4fb5" stroke-width="1.6" stroke-dasharray="7 4"/><text x="${ml+40}" y="${mt+ph-8}" font-size="11" fill="#5b3a8c">${xe(lb)}</text>`; }
   // puntos paciente
   if(pts.length>1) g+=`<polyline fill="none" stroke="#111" stroke-width="1.2" stroke-dasharray="3 2" points="${pts.map(p=>X(p[0]).toFixed(1)+","+Y(p[1]).toFixed(1)).join(" ")}"/>`;
   pts.forEach(p=>{ g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="${p[2]?5:3.5}" fill="${p[2]?"#111":"#fff"}" stroke="#111" stroke-width="1.5"/>`; });
@@ -2338,6 +2347,8 @@ function velCrec(){
   const lapso = meses>=23.5? fmtN(m.dias/365.25,1)+" años" : Math.round(meses)<=1? m.dias+" días" : Math.round(meses)+" meses";
   return {v, dif, corto:!ok, d:m.d, txt:`Velocidad de crecimiento ${fmtN(v,1)} cm/año (${dif>=0?"+":""}${fmtN(dif,1)} cm en ${lapso}, desde el ${dmy(m.d)})`+(ok? "" : " — intervalo corto, valor orientativo")};
 }
+function blancoVal(){ const m=num("tMadre"), p=num("tPadre"); if(!m||!p||!S.sexo) return null;
+  const bg = S.sexo==="m"? (m+p-12.5)/2 : (m+p+12.5)/2; return {bg, lo:bg-8.5, hi:bg+8.5}; }
 function blanco(){
   const m=num("tMadre"), p=num("tPadre"); if(!m||!p) return "";
   const bg = S.sexo==="m"? (m+p-12.5)/2 : S.sexo==="v"? (m+p+12.5)/2 : null;

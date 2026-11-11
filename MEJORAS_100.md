@@ -67,7 +67,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 54. [~] Curvas para síndrome de Down (SAP), si se consiguen los datos oficiales. No empezado: sin acceso web a sap.org.ar el 11/11 (ver ítem 46). Reintentar; si la SAP no publica tablas numéricas (LMS o percentilos), pasar a [!].
 55. [x] (v1.4.45, 11/11) Lector de mediciones previas más tolerante (pegar «12/3 7,2kg 66cm» o el texto de la HC).
 56. [x] (v1.4.46, 11/11) Imagen única con las curvas en formato A4 para pegar o imprimir.
-57. [ ] Blanco genético dibujado en la curva de talla.
+57. [x] (v1.4.47, 11/11) Blanco genético dibujado en la curva de talla.
 58. [ ] Frase automática de crecimiento («crece en el canal del Pc 50, sin cruces de líneas»).
 
 ## E. Vacunas
