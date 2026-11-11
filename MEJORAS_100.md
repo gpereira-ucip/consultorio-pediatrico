@@ -93,16 +93,16 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 76. [x] (v1.4.57, 11/11) Pedido de estudios redactado (laboratorio, Rx, ecografía) con diagnóstico presuntivo.
 
 ## G. Scores y calculadoras
-77. [ ] Pulmonary Score (Guía SAP de asma; conseguir la tabla oficial).
-78. [ ] Score de Westley (laringitis) con texto para la HC.
-79. [ ] Escala de Gorelick (deshidratación).
-80. [ ] Glasgow pediátrico.
-81. [ ] Holliday-Segar y déficit de líquidos.
-82. [ ] Superficie corporal (Mosteller).
-83. [ ] Calculadora de dosis libre (mg/kg → ml según concentración, con tope).
-84. [ ] Score de McIsaac para faringitis (en pantalla, apoya la decisión del test).
-85. [ ] Fiebre sin foco en menores de 3 meses: criterios de bajo riesgo como recordatorio en pantalla.
-86. [ ] Conversor de unidades (lb↔kg, °F↔°C, pulgadas↔cm).
+77. [~] Pulmonary Score (Guía SAP de asma; conseguir la tabla oficial). No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+78. [~] Score de Westley (laringitis) con texto para la HC. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+79. [~] Escala de Gorelick (deshidratación). No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+80. [~] Glasgow pediátrico. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+81. [~] Holliday-Segar y déficit de líquidos. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar. (La ventana de calculadoras de la v1.4.58 ya está: solo falta cargar la fórmula con su fuente.)
+82. [x] (v1.4.59, 11/11) Superficie corporal (Mosteller).
+83. [x] (v1.4.58, 11/11) Calculadora de dosis libre (mg/kg → ml según concentración, con tope).
+84. [~] Score de McIsaac para faringitis (en pantalla, apoya la decisión del test). No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+85. [~] Fiebre sin foco en menores de 3 meses: criterios de bajo riesgo como recordatorio en pantalla. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+86. [x] (v1.4.60, 11/11) Conversor de unidades (lb↔kg, °F↔°C, pulgadas↔cm).
 
 ## H. Diseño y experiencia
 87. [ ] Íconos propios, coherentes con los logos, en lugar de emojis.

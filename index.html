@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.57 (2026-11-11)
+  VERSION: 1.4.60 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,9 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.60 — Calculadoras: conversor de unidades en los dos sentidos (libras y onzas ↔ kilogramos, °F ↔ °C, pulgadas ↔ centímetros) y botón para cargar los kg y cm convertidos en el encabezado del paciente.
+  1.4.59 — Calculadoras: superficie corporal por la fórmula de Mosteller (√(talla en cm × peso en kg ÷ 3600); N Engl J Med 1987;317:1098), con peso y talla del paciente precargados y dosis por m² opcional; botón Copiar.
+  1.4.58 — Ventana «Calculadoras» (Alt+0 o enlace al pie) con la calculadora de dosis por peso: peso (toma el del paciente), mg/kg por día o por dosis, intervalo, tope opcional y concentración (mg en ml, gotas por ml); muestra mg y ml por toma, total diario y mg/kg/día, avisa si actuó el tope, copia la indicación o la agrega a la conducta de Intercurrencia. Solo aritmética: no trae dosis cargadas. Alt+6 pasa a ser Recetas y Alt+7 Ajustes (orden de las pestañas).
   1.4.57 — Pedido de estudios (pestaña Recetas): chips de laboratorio, imágenes y otros estudios (37 nombres frecuentes), campo de otros estudios, diagnóstico presuntivo, observaciones, datos del paciente y opción de un pedido por tipo; «Traer estudios tildados en Control e Intercurrencia». La lista es de nombres para tildar, no una recomendación de qué pedir.
   1.4.56 — Interconsulta / derivación (pestaña Recetas): tipo, especialidad (24 opciones u otra), prioridad, motivo, resumen, estudios realizados, diagnóstico presuntivo y lo que se solicita; arma la nota («Estimado/a colega: solicito interconsulta para la paciente de … por …») con datos del paciente, fecha y firma. Botón para traer los datos positivos, antecedentes y diagnóstico de la consulta. El contenido lo escribe el médico.
   1.4.55 — Mensaje para la familia en Intercurrencia (tarjeta al final): «Copiar indicaciones + alarma» arma un texto para WhatsApp con el diagnóstico, lo tildado en la conducta en lista (sin el cálculo en mg/kg, con los ml y la fecha de fin), el reposo, las pautas de alarma del cuadro una por renglón y el control; «Copiar solo pautas de alarma» manda solo esa parte. No agrega contenido clínico: reordena lo que ya está en la conducta.
@@ -205,6 +208,9 @@ h3 .hint{text-transform:none;letter-spacing:0}
 .fiebox .fieT{font:600 13.5px var(--font);color:#9b3a2f;align-self:center}
 .fiebox .fg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
 .fiebox .fg>small{min-width:84px;color:var(--muted);font-size:12px}
+.sheet.calc{width:min(860px,100%)}.calcbody{overflow:auto;padding-right:4px}.calcsec{border-top:1px solid var(--line);padding:10px 0 12px}.calcsec:first-child{border-top:0}.calcsec h3{margin:0 0 6px}
+.calcres{margin:8px 0;padding:8px 12px;border-radius:10px;background:var(--okbg);color:#1f4d33;font:500 13.5px/1.45 var(--font);min-height:20px}.calcres:empty{display:none}.calcres.warn{background:var(--coralbg);color:#8a2f25}
+.cveq{align-self:flex-end;padding-bottom:9px;color:var(--muted)}.cvsep{flex-basis:18px}
 .rprow{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:flex-end;padding:8px 0;border-bottom:1px dashed var(--line)}.rprow .rpn{align-self:center;min-width:16px;color:var(--muted);font:600 12px var(--font)}.rprow input{width:100%}
 .st.rec{background:var(--okbg);color:#24603b}
 .chip.on{background:var(--okbg);border-color:#a9d4b7;color:#24603b}
@@ -1044,8 +1050,56 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     </div>
   </section>
 </div>
-<div class="foot">Herramienta de apoyo para la escritura de la HC. No reemplaza el juicio clínico. Funciona sin conexión. · <button type="button" class="linkbtn" id="atajosBtn">⌨ Atajos de teclado (?)</button></div>
+<div class="foot">Herramienta de apoyo para la escritura de la HC. No reemplaza el juicio clínico. Funciona sin conexión. · <button type="button" class="linkbtn" id="atajosBtn">⌨ Atajos de teclado (?)</button> · <button type="button" class="linkbtn" id="calcBtn">🧮 Calculadoras (Alt+0)</button></div>
 </main>
+
+<!-- ================= CALCULADORAS (v1.4.58-60) ================= -->
+<div class="modal hidden" id="calc">
+  <div class="sheet calc" role="dialog" aria-modal="true" aria-labelledby="calcT">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px"><h2 style="font-size:18px" id="calcT">🧮 Calculadoras</h2><button class="btn ghost sm" id="calcCerrar">Cerrar</button></div>
+    <div class="calcbody">
+      <section class="calcsec">
+        <h3>Dosis por peso</h3>
+        <div class="row">
+          <label class="f" style="flex:2;min-width:150px">Fármaco (opcional)<input id="dcF" placeholder="ej. amoxicilina"></label>
+          <label class="f">Peso kg<input id="dcPeso" class="n" inputmode="decimal"></label>
+          <label class="f">Dosis mg/kg<input id="dcDosis" class="n" inputmode="decimal"></label>
+          <label class="f">Base<select id="dcBase"><option value="dia">por día</option><option value="dosis">por dosis</option></select></label>
+          <label class="f">Intervalo<select id="dcInt"><option value="24">cada 24 hs</option><option value="12" selected>cada 12 hs</option><option value="8">cada 8 hs</option><option value="6">cada 6 hs</option><option value="4">cada 4 hs</option></select></label>
+          <label class="f"><span id="dcMaxL">Tope mg/día</span><input id="dcMax" class="n" inputmode="decimal" placeholder="—"></label>
+        </div>
+        <div class="row" style="margin-top:6px">
+          <label class="f">Concentración: mg<input id="dcMg" class="n" inputmode="decimal" placeholder="250"></label>
+          <label class="f">en ml<input id="dcMl" class="n" inputmode="decimal" placeholder="5"></label>
+          <label class="f">Gotas por ml (opcional)<input id="dcGt" class="n" inputmode="decimal" placeholder="20"></label>
+        </div>
+        <div id="dcRes" class="calcres"></div>
+        <div class="btns"><button type="button" class="btn sm" id="dcCopy">Copiar indicación</button><button type="button" class="btn sec sm" id="dcAdd">＋ Agregar a la conducta de Intercurrencia</button><span class="hint">Solo hace la cuenta: la dosis en mg/kg, el tope y la concentración los cargás vos. Verificá siempre.</span></div>
+      </section>
+      <section class="calcsec">
+        <h3>Superficie corporal <span class="hint">fórmula de Mosteller</span></h3>
+        <div class="row">
+          <label class="f">Peso kg<input id="scPeso" class="n" inputmode="decimal"></label>
+          <label class="f">Talla cm<input id="scTalla" class="n" inputmode="decimal"></label>
+          <label class="f">Dosis mg/m² (opcional)<input id="scDosis" class="n" inputmode="decimal"></label>
+        </div>
+        <div id="scRes" class="calcres"></div>
+        <div class="btns"><button type="button" class="btn sec sm" id="scCopy">Copiar</button><span class="hint">SC (m²) = √(talla en cm × peso en kg ÷ 3600). Mosteller RD, N Engl J Med 1987;317:1098.</span></div>
+      </section>
+      <section class="calcsec">
+        <h3>Conversor de unidades</h3>
+        <div class="row">
+          <label class="f">Libras<input id="cvLb" class="n" inputmode="decimal"></label><label class="f">Onzas<input id="cvOz" class="n" inputmode="decimal"></label><span class="cveq">=</span><label class="f">Kilogramos<input id="cvKg" class="n" inputmode="decimal"></label>
+          <span class="cvsep"></span>
+          <label class="f">°F<input id="cvF" class="n" inputmode="decimal"></label><span class="cveq">=</span><label class="f">°C<input id="cvC" class="n" inputmode="decimal"></label>
+          <span class="cvsep"></span>
+          <label class="f">Pulgadas<input id="cvIn" class="n" inputmode="decimal"></label><span class="cveq">=</span><label class="f">Centímetros<input id="cvCm" class="n" inputmode="decimal"></label>
+        </div>
+        <div class="btns" style="margin-top:8px"><button type="button" class="btn sec sm" id="cvUsar">Usar kg y cm en el encabezado del paciente</button><span class="hint">1 lb = 0,45359237 kg · 1 oz = 28,349523 g · °C = (°F − 32) × 5 ÷ 9 · 1 pulgada = 2,54 cm.</span></div>
+      </section>
+    </div>
+  </div>
+</div>
 
 <!-- ================= BARRA DE ACCIÓN ================= -->
 <div class="actionbar">
@@ -1075,7 +1129,8 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     <div class="row" style="justify-content:space-between;margin-bottom:8px"><h2 style="font-size:18px" id="atajosT">Atajos de teclado</h2><button class="btn ghost sm" id="atajosCerrar">Cerrar</button></div>
     <table class="kbdl"><tbody>
       <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td><td>Copiar el texto para la HC</td></tr>
-      <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>7</kbd></td><td>Ir a Control · Intercurrencia · Percentilos · Vacunas · Apto físico · Ajustes · Recetas y certificados</td></tr>
+      <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>7</kbd></td><td>Ir a Control · Intercurrencia · Percentilos · Vacunas · Apto físico · Recetas y certificados · Ajustes</td></tr>
+      <tr><td><kbd>Alt</kbd>+<kbd>0</kbd></td><td>Calculadoras (dosis por peso, superficie corporal, conversor de unidades)</td></tr>
       <tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td><td>Buscar cuadro de intercurrencia</td></tr>
       <tr><td><kbd>Esc</kbd></td><td>Cerrar ventanas (vista previa, Mis frases, Copiar parte, esta ayuda)</td></tr>
       <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>+</kbd> / <kbd>−</kbd></td><td>Agrandar o achicar la letra del formulario (también en Ajustes)</td></tr>
@@ -1110,7 +1165,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.57";
+const VERSION = "1.4.60";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3307,7 +3362,7 @@ document.addEventListener("keydown", ev=>{ if(ev.key==="Escape") parteCerrar(); 
 $("copiarRec").onclick = ()=>{ const r=genReceta(); r? copy($("sMay").value==="mayus"?r.toUpperCase():r, "Receta copiada") : toast("No hay vacunas para recetar"); };
 document.addEventListener("keydown", e=>{ if((e.ctrlKey||e.metaKey) && e.key==="Enter"){ e.preventDefault(); $("copiar").click(); } });
 /* ---------- atajos de teclado (v1.4.2) ---------- */
-const TAB_ORDEN=["control","inter","perc","vac","apto","ajustes","docs"];
+const TAB_ORDEN=["control","inter","perc","vac","apto","docs","ajustes"];
 function irTab(t){ const b=document.querySelector('#tabs button[data-t="'+t+'"]'); if(b && S.tab!==t) b.click(); }
 function buscarCuadro(){
   irTab("inter");
@@ -3328,6 +3383,46 @@ document.addEventListener("keydown", e=>{
   if((e.ctrlKey||e.metaKey) && !e.altKey && (e.key==="k"||e.key==="K")){ e.preventDefault(); buscarCuadro(); return; }
   if(e.key==="?" && !enCampo && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); toggleAtajos(); }
 });
+/* ---------- calculadoras (v1.4.58-60, ítems 83, 82 y 86): solo aritmética, sin dosis ni rangos cargados ---------- */
+const nv=id=>{ const v=parseFloat(($(id).value||"").replace(",",".")); return isNaN(v)? null : v; };
+const fmg=x=> x<10? fmtN(x,2) : x<100? fmtN(x,1) : fmtN(x,0);
+function calcAbrir(v){ const m=$("calc"), show = v===undefined? m.classList.contains("hidden") : v; m.classList.toggle("hidden", !show);
+  if(show){ const p=$("peso").value, t=$("talla").value; if(p){ if(!$("dcPeso").value || $("dcPeso").dataset.auto) { $("dcPeso").value=p; $("dcPeso").dataset.auto="1"; } if(!$("scPeso").value || $("scPeso").dataset.auto){ $("scPeso").value=p; $("scPeso").dataset.auto="1"; } }
+    if(t && (!$("scTalla").value || $("scTalla").dataset.auto)){ $("scTalla").value=t; $("scTalla").dataset.auto="1"; } calcDosis(); calcSC(); setTimeout(()=>$("dcF").focus(),0); } }
+function dosisCalc(){ const w=nv("dcPeso"), d=nv("dcDosis"); if(!w || !d || w<=0 || d<=0) return null;
+  const h=+$("dcInt").value, n=24/h, base=$("dcBase").value, max=nv("dcMax"); let por, dia, tope=false;
+  if(base==="dia"){ dia=d*w; if(max && dia>max){ dia=max; tope=true; } por=dia/n; } else { por=d*w; if(max && por>max){ por=max; tope=true; } dia=por*n; }
+  const mg=nv("dcMg"), mlc=nv("dcMl"), gt=nv("dcGt"), ml = mg && mlc? por/(mg/mlc) : null, gotas = ml!==null && gt? ml*gt : null;
+  return {w, d, h, n, base, por, dia, tope, ml, gotas, mg, mlc}; }
+const fml=x=> x<1? fmtN(x,2) : fmtN(x,1);
+function dosisTxt(r){ const f=cap($("dcF").value.trim())||"Dosis", conc = r.ml!==null? ` (${fml(r.ml)} ml de ${fmtN(r.mg,2)} mg/${fmtN(r.mlc,2)} ml${r.gotas!==null? " = "+fmtN(r.gotas,0)+" gotas" : ""})` : "";
+  return `${f} ${fmg(r.por)} mg${conc} cada ${r.h} hs`; }
+function calcDosis(){ $("dcMaxL").textContent = $("dcBase").value==="dia"? "Tope mg/día" : "Tope mg/dosis"; const r=dosisCalc(), b=$("dcRes"); if(!r){ b.textContent=""; return; }
+  b.className="calcres"+(r.tope?" warn":"");
+  b.innerHTML = `<b>${mfEsc(dosisTxt(r))}</b><br>${fmtN(r.d,2)} mg/kg/${r.base==="dia"?"día":"dosis"} × ${fmtN(r.w,2)} kg · ${r.n} ${r.n===1?"toma":"tomas"} por día · total ${fmg(r.dia)} mg/día (${fmtN(r.dia/r.w,1)} mg/kg/día)`+(r.tope? "<br>⚠ Limitada por el tope cargado." : ""); }
+["dcF","dcPeso","dcDosis","dcBase","dcInt","dcMax","dcMg","dcMl","dcGt"].forEach(id=>{ $(id).addEventListener("input", ev=>{ if(id==="dcPeso") $("dcPeso").dataset.auto=""; ev.stopImmediatePropagation(); calcDosis(); }, true); $(id).addEventListener("change", ev=>{ ev.stopPropagation(); calcDosis(); }); });
+$("dcCopy").onclick=()=>{ const r=dosisCalc(); r? copy(dosisTxt(r), "Indicación copiada") : toast("Cargá peso y dosis en mg/kg"); };
+$("dcAdd").onclick=()=>{ const r=dosisCalc(); if(!r){ toast("Cargá peso y dosis en mg/kg"); return; } const el=$("iCondOtro"), t=dosisTxt(r); el.value = el.value.trim()? el.value.trim()+"; "+t : t; update(); toast("Agregado a «Agregar indicación» de Intercurrencia"); };
+/* superficie corporal — Mosteller RD. Simplified calculation of body-surface area. N Engl J Med 1987;317:1098: SC (m²) = √(talla cm × peso kg / 3600). */
+function scCalc(){ const w=nv("scPeso"), t=nv("scTalla"); if(!w || !t || w<=0 || t<=0) return null; const sc=Math.sqrt(t*w/3600), d=nv("scDosis"); return {w, t, sc, d, tot: d? d*sc : null}; }
+function scTxt(r){ return `Superficie corporal ${fmtN(r.sc,2)} m² (Mosteller; peso ${fmtN(r.w,2)} kg, talla ${fmtN(r.t,1)} cm)`+(r.tot!==null? `. Dosis ${fmtN(r.d,2)} mg/m² = ${fmg(r.tot)} mg` : ""); }
+function calcSC(){ const r=scCalc(); $("scRes").textContent = r? scTxt(r) : ""; }
+["scPeso","scTalla","scDosis"].forEach(id=>$(id).addEventListener("input", ev=>{ $(id).dataset.auto=""; ev.stopImmediatePropagation(); calcSC(); }, true));
+$("scCopy").onclick=()=>{ const r=scCalc(); r? copy(scTxt(r), "Copiado") : toast("Cargá peso y talla"); };
+/* conversor de unidades: 1 lb = 0,45359237 kg; 1 oz = 1/16 lb; °C = (°F − 32) × 5/9; 1 in = 2,54 cm (definiciones exactas). */
+const cvSet=(id,x,d)=>{ $(id).value = x===null||isNaN(x)? "" : fmtN(x,d); };
+function cvCalc(src){ const LB=0.45359237;
+  if(src==="cvLb"||src==="cvOz"){ const lb=nv("cvLb"), oz=nv("cvOz"); cvSet("cvKg", lb===null&&oz===null? null : ((lb||0)+(oz||0)/16)*LB, 3); }
+  else if(src==="cvKg"){ const kg=nv("cvKg"); if(kg===null){ $("cvLb").value=""; $("cvOz").value=""; } else { const tl=kg/LB, lb=Math.floor(tl+1e-9); cvSet("cvLb", lb, 0); cvSet("cvOz", (tl-lb)*16, 1); } }
+  else if(src==="cvF"){ const f=nv("cvF"); cvSet("cvC", f===null? null : (f-32)*5/9, 1); }
+  else if(src==="cvC"){ const c=nv("cvC"); cvSet("cvF", c===null? null : c*9/5+32, 1); }
+  else if(src==="cvIn"){ const i=nv("cvIn"); cvSet("cvCm", i===null? null : i*2.54, 1); }
+  else if(src==="cvCm"){ const c=nv("cvCm"); cvSet("cvIn", c===null? null : c/2.54, 2); } }
+["cvLb","cvOz","cvKg","cvF","cvC","cvIn","cvCm"].forEach(id=>$(id).addEventListener("input", ev=>{ ev.stopImmediatePropagation(); cvCalc(id); }, true));
+$("cvUsar").onclick=()=>{ const kg=nv("cvKg"), cm=nv("cvCm"); if(kg===null && cm===null){ toast("Convertí primero un peso o una talla"); return; } if(kg!==null) $("peso").value=fmtN(kg,3); if(cm!==null) $("talla").value=fmtN(cm,1); if(iCur) renderInterDoses(); update(); toast("Cargado en el encabezado"); };
+$("calcBtn").onclick=()=>calcAbrir(true); $("calcCerrar").onclick=()=>calcAbrir(false);
+$("calc").addEventListener("click", ev=>{ if(ev.target.id==="calc") calcAbrir(false); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") calcAbrir(false); else if(e.altKey && !e.ctrlKey && !e.metaKey && e.code==="Digit0"){ e.preventDefault(); calcAbrir(); } });
 /* ---------- buscador rápido de cuadros (v1.4.3) ---------- */
 // palabras de búsqueda coloquiales (solo para encontrar el cuadro; no se usan en el texto)
 const BUS_SIN = {cvas:"resfrio catarro mocos rinorrea tos congestion",rinofa:"resfrio mocos garganta",faring:"garganta angina dolor de garganta",strep:"garganta angina estreptococo",
