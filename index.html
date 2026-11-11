@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.47 (2026-11-11)
+  VERSION: 1.4.48 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.48 — Frase automática de crecimiento en el control y en Percentilos: «Crecimiento: Peso y talla en el canal P15-P50 para la edad, sin cruces de líneas de percentil respecto de la medición previa (11/08/2026)»; avisa ascensos o descensos de 2 o más líneas y usa edad corregida si corresponde. Se desactiva en Ajustes. Redacción propia, sin contenido clínico nuevo.
   1.4.47 — Blanco genético en la curva de talla: con las tallas de la madre y del padre cargadas, la curva de talla dibuja en violeta el canal que llega al blanco genético a los 19 años (línea punteada), la banda de su rango (± 8,5 cm) y, en la curva de 5 a 19 años, la marca del blanco y su rango a la edad adulta; la leyenda dice el valor y el percentilo adulto. También sale en la hoja A4. Sin contenido clínico nuevo (misma fórmula que ya usaba la app).
   1.4.46 — Hoja A4 con todas las curvas (pestaña Percentilos): botones Copiar, Descargar PNG y Ver. Arma una sola imagen A4 (1654 × 2339 px) con título, datos del paciente (nombre y DNI solo si está tildado «nombre y fecha en la imagen»), tabla de percentilos y puntaje z, velocidad de crecimiento, blanco genético, TA, todas las curvas visibles en grilla y el pie con la firma. Arreglo: las curvas con percentilo «< P1» no se podían copiar como imagen. Sin contenido clínico nuevo.
   1.4.45 — Lector de mediciones previas más tolerante (pestaña Percentilos): acepta fechas sin año o con año corto, guiones, puntos o formato 2026-03-12; valores con unidades o etiquetas en cualquier orden («12/3 7,2kg 66cm», «Peso: 7200 g Talla 0,66 m PC 42»), gramos y metros, separadores con punto y coma, coma o tabulación, y renglones copiados de la HC. Debajo del campo muestra lo que entendió («3 mediciones leídas: …») y cuántas líneas no pudo leer. Sin contenido clínico nuevo.
@@ -889,6 +890,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
         <select id="sInicio" class="hidden" aria-hidden="true"><option value="si">si</option><option value="no">no</option></select>
         <select id="sZoom" class="hidden" aria-hidden="true"><option>0.85</option><option>0.9</option><option>0.95</option><option selected>1</option><option>1.1</option><option>1.2</option><option>1.3</option><option>1.4</option></select></div>
       <label class="f">Fecha de fin del tratamiento<select id="sFin"><option value="si">Agregar («por 10 días, hasta el 21/11»)</option><option value="no">No agregar</option></select></label>
+      <label class="f">Frase de crecimiento en el control<select id="sCrecF"><option value="si">Agregar («Peso y talla en el canal P15-P50…»)</option><option value="no">No agregar</option></select></label>
       <label class="f">Modo compacto<select id="sComp"><option value="auto">Automático (ventana angosta)</option><option value="si">Siempre</option><option value="no">Nunca</option></select></label>
     </div>
     <p class="hint">Se guardan en este navegador. No se guarda ningún dato de pacientes.</p>
@@ -983,7 +985,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.47";
+const VERSION = "1.4.48";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1071,6 +1073,26 @@ function crecAlertas(){
   if(p && t && e.months>=24 && !(ptA && e.months<60)){ const r=percentil("imc", p/((t/100)**2), e); const c=r && imcClase(r.z, e.months);
     if(c) out.push({t:`IMC ${fmtN(p/((t/100)**2))} kg/m²: ${c.c} según OMS (IMC/edad z ${zs(r.z)}${e.months<60?"; en menores de 5 años la OMS usa peso/talla":""}).`, f:`IMC con ${c.c} según OMS (IMC/edad z ${zs(r.z)})`, imc:c}); }
   return out;
+}
+/* frase automática de crecimiento (v1.4.48, ítem 58): canal de percentilos de peso, talla y PC (franjas P3-P15-P50-P85-P97) y si hubo cruce
+   de líneas respecto de la última medición previa de cada uno. Sale en el control y en Percentilos (Ajustes → sCrecF). Redacción propia. */
+function crecFrase(){
+  if($("sCrecF").value==="no") return "";
+  const e=edadCrec(); if(!e || !S.sexo || e.days<0) return "";
+  const nm={w:"peso",h:"talla",pc:"perímetro cefálico"}, can=[], cru=[]; let fPrev=null, conPrev=0;
+  ["w","h","pc"].forEach(k=>{ const x=medida(k); if(x===null || (k==="pc" && e.months>=36)) return; const r=percentil(k,x,e); if(!r) return;
+    const b=zona(r.z); can.push({k, b});
+    const prev=prevMediciones().filter(pm=>pm[k]!==null && pm[k]!==undefined && pm.d<e.fc).sort((a,c)=>c.d-a.d)[0]; if(!prev) return;
+    const dd=Math.round((prev.d-e.fn)/864e5), l=dd>=0? lmsAt(k,S.sexo,dd) : null; if(!l) return;
+    conPrev++; if(!fPrev || prev.d>fPrev) fPrev=prev.d;
+    const a=zona(zOf(prev[k],l)); if(Math.abs(b-a)>=2) cru.push(`${b>a?"ascenso":"descenso"} de ${Math.abs(b-a)} líneas en ${nm[k]} (de ${PCN[a]} a ${PCN[b]})`); });
+  if(!can.length) return "";
+  const grupos={}; can.forEach(c=>{ (grupos[c.b]=grupos[c.b]||[]).push(nm[c.k]); });
+  const canTxt=n=> n===0? "por debajo del P3" : n===5? "por encima del P97" : "en el canal "+PCN[n];
+  const partes=Object.keys(grupos).map(n=>`${joinY(grupos[n])} ${canTxt(+n)}`);
+  let t=cap(joinY(partes))+" para la edad"+(e.corr?" corregida":"");
+  if(conPrev) t+= cru.length? `, con ${joinY(cru)} respecto de la medición previa (${dmy(fPrev)})` : `, sin cruces de líneas de percentil respecto de la medición previa (${dmy(fPrev)})`;
+  return t+".";
 }
 function renderCrec(){
   const a=crecAlertas(), box=$("crecTxt"); box.classList.toggle("hidden", !a.length);
@@ -2431,6 +2453,7 @@ function genControl(){
     L.push(sec("Neurodesarrollo", t));
   }
   L.push(sec("Antropometría", antropo(e)));
+  L.push(sec("Crecimiento", crecFrase()));
   L.push(sec("Examen físico", efConTanner($("cEF").value.trim())));
   L.push(sec("Datos positivos", $("cPos").value.trim()));
   const est = cEstState.filter(s=>s[1]).map(s=>G(s[0])); if($("cEstOtro").value) est.push($("cEstOtro").value);
@@ -2803,12 +2826,12 @@ function genParte(tipo){
     if(t==="control"){ L.push(sec("Impresión diagnóstica", $("cDx").value.trim())); const p=planControl(e?e.months:cB.min); if(p.length) L.push(encL("Plan")+p.join("\n")); L.push(sec("Pendientes",$("cPend").value.trim()), sec("Próximo control",$("cProx").value)); if($("cObs").value) L.push(sec("Observaciones",$("cObs").value)); }
     else if(t==="inter"){ L.push(sec("Diagnóstico"+($("iDxPres").checked && S.iModo==="ini"?" presuntivo":""), $("iDx").value)); const c=conductaInter(); if(c.length) L.push(encL("Conducta")+c.join("\n")); L.push(sec("Pendientes",$("iPend").value.trim())); }
     else if(t==="apto") L.push(sec("Pendientes",$("aPend").value.trim()), sec("Conclusión", concluApto()));
-  } else if(tipo==="antropo") L.push(sec("Antropometría", antropo(e)));
+  } else if(tipo==="antropo"){ L.push(sec("Antropometría", antropo(e))); if(t==="control") L.push(sec("Crecimiento", crecFrase())); }
   let txt=L.filter(Boolean).join("\n");
   if($("sMay").value==="mayus") txt=txt.toUpperCase();
   return txt;
 }
-function genPerc(){ const e=edad(); return sec("Antropometría", antropo(e)) || "Cargá mediciones en el encabezado."; }
+function genPerc(){ const e=edad(); return [sec("Antropometría", antropo(e)), sec("Crecimiento", crecFrase())].filter(Boolean).join("\n") || "Cargá mediciones en el encabezado."; }
 function firma(){ const m=$("sMed").value, mat=$("sMat").value, esp=$("sEsp").value; return [m, esp, mat].filter(Boolean).join(" - ") || "Firma y sello"; }
 
 function genReceta(){
@@ -3131,7 +3154,7 @@ $("nuevo").onclick = ()=>{
 };
 
 /* ---------- ajustes persistentes ---------- */
-const SET_IDS=["sMed","sMat","sEsp","sMay","sEnc","sComp","sZoom","sInicio","sFin"];
+const SET_IDS=["sMed","sMat","sEsp","sMay","sEnc","sComp","sZoom","sInicio","sFin","sCrecF"];
 /* pantalla de inicio (v1.4.12) */
 function inicioCerrar(t){ $("inicio").classList.add("hidden"); if(t) irTab(t); if(t==="inter"){ const b=$("iBuscar"); if(b) setTimeout(()=>b.focus({preventScroll:true}),0); } }
 function inicioAbrir(){ $("inicio").classList.remove("hidden"); $("inicioNo").checked = $("sInicio").value==="no"; setTimeout(()=>{ const b=document.querySelector('#inicio button[data-ini="control"]'); if(b) b.focus(); },0); }
