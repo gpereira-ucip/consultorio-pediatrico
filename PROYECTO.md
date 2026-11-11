@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.4.45 (11/11/2026)
+- Versión actual: 1.4.46 (11/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -62,6 +62,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - **Velocidad de crecimiento** (v1.4.43): `velCrec()` → {v, dif, corto, d, txt}; toma de `prevMediciones()` la talla previa más reciente con ≥ 180 días de intervalo (≥ 90 días si < 24 meses); si no hay, la más antigua con ≥ 30 días y marca `corto`. Sale en `antropo` y en `velTxt` (pestaña Percentilos, debajo de la tabla).
 - **Percentilo de presión arterial** (v1.4.44): `BP_T` (AAP 2017, tablas 4 y 5: P50/P90/P95 de PAS y PAD por sexo, edad 1-17 años cumplidos y 7 percentilos de talla) y `taPc()` → {bs, bd (0 = < P50, 1 = P50-P90, 2 = P90-P95, 3 = ≥ P95), col, p90, p95, txt, corto}. Columna de talla = percentilo de talla OMS más cercano entre 5-10-25-50-75-90-95 (sin talla: P50, aclarado en el texto). Reemplaza el «(Pc )» de la TA en `antropo`; se muestra en `pcTxt`; `crecAlertas` agrega alerta si PAS o PAD ≥ P90. Menores de 1 año y ≥ 18 años: queda «(Pc )» para completar a mano.
 - **Lector tolerante de mediciones previas** (v1.4.45): `parseMedLinea(l, fc)` (fecha dd/mm[/aa[aa]], dd-mm-aaaa, dd.mm.aaaa o aaaa-mm-dd; sin año = la más reciente que no pase la fecha del turno; valores por etiqueta/unidad —peso|p, talla|t|longitud|altura, pc, kg, g, cm, m— o posicionales peso-talla-PC con «-» si falta; gramos si ≥ 500 o «g»; metros si < 3 o «m») y `prevMediciones()` (cuenta líneas no entendidas en `_err`). `prevInfo()` escribe en `gPrevInfo` lo leído.
+- **Hoja A4 de curvas** (v1.4.46): `svgA4()` compone un SVG de 794 × 1123 (encabezado, tabla de `pcResumen` + peso/talla, `velCrec`, `blanco`, `taPc`, las curvas de `chartsVisibles()` anidadas en grilla de 1 o 2 columnas y pie con `firma()`); `a4Canvas()` lo rasteriza a 1654 × 2339; `a4Accion('copiar'|'bajar'|'ver')` (botones `data-a4`, vista previa en `a4Prev`). `xe()` escapa texto para SVG (nombre con «&» o «<», etiquetas «< P1»).
 - **Apto físico** con constancia modelo. **Ajustes** (médico, matrícula, mayúsculas, títulos) en localStorage.
 
 ## Identidad visual
@@ -152,6 +153,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.44 Presión arterial: valores de las tablas 4 y 5 de Flynn JT y col., «Clinical Practice Guideline for Screening and Management of High Blood Pressure in Children and Adolescents», Pediatrics 2017;140(3):e20171904, tomados de la transcripción del paquete R «pedbp» (https://github.com/dewittpe/pedbp/tree/main/data-raw, archivos flynn2017_bp_boys.dat y flynn2017_bp_girls.dat); no pude abrir la guía original (sin acceso web): conviene cotejar algunas filas contra la tabla impresa. Revisar: (a) la AAP define las columnas con percentilos de talla CDC y la app usa el percentilo de talla OMS (aproximación); (b) se usa la edad en años cumplidos y la columna de talla más cercana, sin interpolar; (c) la app NO clasifica (TA elevada, HTA estadio 1 y 2, ni los cortes fijos 120/80-130/80 de ≥ 13 años): solo dice P50-P90, P90-P95 o ≥ P95 y sugiere repetir la medición; si Gonzalo quiere la clasificación, se agrega con la guía a la vista.
 
 ## Historial
+- 1.4.46 (11/11/2026): ítem 56 — hoja A4 con todas las curvas (copiar, descargar, ver). Sin contenido clínico nuevo. Probado con Playwright (niña de 3 años con 5 curvas y nombre con caracteres especiales, lactante prematuro con 4, adolescente con 2; imágenes revisadas; las curvas sueltas siguen copiándose; regresión completa).
 - 1.4.45 (11/11/2026): ítem 55 — lector tolerante de mediciones previas. Ítem 53 pasa a [!] (decisión y licencia) y 54 queda [~] sin empezar (sin acceso web). Sin contenido clínico nuevo. Probado con Playwright (22 formatos de línea, líneas inválidas, resumen en pantalla, curvas y velocidad con mediciones mixtas; regresión completa).
 - 1.4.44 (11/11/2026): ítem 51 — percentilo de presión arterial con tablas AAP 2017 (sin clasificación de estadios). Contenido clínico → pendiente de revisión. Probado con Playwright (1, 6, 10 y 13 años, ambos sexos, tallas en P5/P10/P90/P95, sin talla, < 1 año y 18 años sin percentilo, alerta ≥ P90 y ≥ P95; valores cotejados con el archivo fuente; regresión completa).
 - 1.4.43 (11/11/2026): ítem 50 — velocidad de crecimiento en cm/año. Criterio de intervalo → pendiente de revisión. Probado con Playwright (sin previas, 1 año, varias previas, intervalo corto, < 30 días, previa sin talla, fecha futura, lactante; regresión completa).

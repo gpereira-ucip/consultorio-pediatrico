@@ -66,7 +66,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 53. [!] Curvas de prematuros (Intergrowth-21st o Fenton), si se consiguen los datos oficiales con licencia de uso. Bloqueado 11/11: necesita decisión de Gonzalo — (a) cuál usar (Fenton 2013 o INTERGROWTH-21st posnatal de prematuros); (b) los datos existen en paquetes de terceros (p. ej. «gigs» para INTERGROWTH-21st), pero no pude confirmar la licencia de uso de las tablas originales (sin acceso web a los sitios oficiales el 11/11).
 54. [~] Curvas para síndrome de Down (SAP), si se consiguen los datos oficiales. No empezado: sin acceso web a sap.org.ar el 11/11 (ver ítem 46). Reintentar; si la SAP no publica tablas numéricas (LMS o percentilos), pasar a [!].
 55. [x] (v1.4.45, 11/11) Lector de mediciones previas más tolerante (pegar «12/3 7,2kg 66cm» o el texto de la HC).
-56. [ ] Imagen única con las curvas en formato A4 para pegar o imprimir.
+56. [x] (v1.4.46, 11/11) Imagen única con las curvas en formato A4 para pegar o imprimir.
 57. [ ] Blanco genético dibujado en la curva de talla.
 58. [ ] Frase automática de crecimiento («crece en el canal del Pc 50, sin cruces de líneas»).
 

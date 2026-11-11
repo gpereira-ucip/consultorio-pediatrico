@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.45 (2026-11-11)
+  VERSION: 1.4.46 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.46 — Hoja A4 con todas las curvas (pestaña Percentilos): botones Copiar, Descargar PNG y Ver. Arma una sola imagen A4 (1654 × 2339 px) con título, datos del paciente (nombre y DNI solo si está tildado «nombre y fecha en la imagen»), tabla de percentilos y puntaje z, velocidad de crecimiento, blanco genético, TA, todas las curvas visibles en grilla y el pie con la firma. Arreglo: las curvas con percentilo «< P1» no se podían copiar como imagen. Sin contenido clínico nuevo.
   1.4.45 — Lector de mediciones previas más tolerante (pestaña Percentilos): acepta fechas sin año o con año corto, guiones, puntos o formato 2026-03-12; valores con unidades o etiquetas en cualquier orden («12/3 7,2kg 66cm», «Peso: 7200 g Talla 0,66 m PC 42»), gramos y metros, separadores con punto y coma, coma o tabulación, y renglones copiados de la HC. Debajo del campo muestra lo que entendió («3 mediciones leídas: …») y cuántas líneas no pudo leer. Sin contenido clínico nuevo.
   1.4.44 — Percentilo de presión arterial (1 a 17 años): con TA, sexo, edad y talla ubica la sistólica y la diastólica respecto de P50, P90 y P95 de las tablas de la guía AAP 2017; sale en el encabezado («TA S P50-P90 · D < P50», con P90 y P95 al pasar el mouse), en la antropometría del texto («TA 100/60 mmHg (PAS P50-P90, PAD < P50)») y, si alguna es ≥ P90, como alerta con frase para datos positivos. Sin talla asume P50 y lo aclara. No clasifica estadios.
   1.4.43 — Velocidad de crecimiento: con la talla actual y una medición previa cargada en Percentilos calcula los cm/año («Velocidad de crecimiento 6 cm/año (+6 cm en 12 meses, desde el 11/11/2025)»); usa la previa más reciente con al menos 6 meses de intervalo (3 meses en menores de 2 años) y, si no hay, avisa «intervalo corto, valor orientativo». Sale en la antropometría del texto y en un recuadro de la pestaña Percentilos. Sin percentilos de velocidad.
@@ -788,6 +789,8 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     <label class="f" style="margin-top:10px">Mediciones previas (una por línea: fecha peso talla PC — “-” si falta; también «12/3 7,2kg 66cm» o el renglón de la HC)
       <textarea id="gPrev" class="sm" placeholder="15/03/2026 6,2 62 41&#10;20/5 7,1kg 66cm&#10;10/08/26 peso 8300 g talla 70 cm PC 44"></textarea></label>
       <div id="gPrevInfo" class="hint" style="margin-top:4px"></div>
+      <div class="btns" style="margin-top:12px;align-items:center"><b style="font:600 13px var(--font)">📄 Hoja A4 con todas las curvas</b><button type="button" class="btn sec sm" data-a4="copiar">Copiar</button><button type="button" class="btn sec sm" data-a4="bajar">Descargar PNG</button><button type="button" class="btn sec sm" data-a4="ver">Ver</button><span class="hint">encabezado, tabla de percentilos y curvas en una sola hoja para pegar o imprimir</span></div>
+      <div id="a4Prev"></div>
   </section>
   <div id="gCharts"></div>
 </div>
@@ -979,7 +982,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.45";
+const VERSION = "1.4.46";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1366,11 +1369,11 @@ function svgChartPT(){
   pts.forEach(p=>{ g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="${p[2]?5:3.5}" fill="${p[2]?"#111":"#fff"}" stroke="#111" stroke-width="1.5"/>`; });
   const cur=pts.find(p=>p[2]);
   if(cur){ const pr=pesoTalla(e); const lbl=`${fmtN(cur[1],2)} kg / ${fmtN(cur[0],1)} cm${pr?" · "+pr.pc:""}`;
-    const tx=Math.min(X(cur[0])+8, ml+pw-190); g+=`<rect x="${tx-3}" y="${Y(cur[1])-24}" width="${lbl.length*6.6+8}" height="17" rx="4" fill="#fff" stroke="#111" stroke-width=".6"/><text x="${tx+1}" y="${Y(cur[1])-12}" font-size="12" font-weight="bold">${lbl}</text>`; }
+    const tx=Math.min(X(cur[0])+8, ml+pw-190); g+=`<rect x="${tx-3}" y="${Y(cur[1])-24}" width="${lbl.length*6.6+8}" height="17" rx="4" fill="#fff" stroke="#111" stroke-width=".6"/><text x="${tx+1}" y="${Y(cur[1])-12}" font-size="12" font-weight="bold">${xe(lbl)}</text>`; }
   g+=`<text x="${ml}" y="20" font-size="15" font-weight="bold" fill="${col.ln}">Peso para la ${tipo==="l"?"longitud":"talla"} — ${sx==="m"?"Niñas":"Niños"} ${tipo==="l"?"0 a 2 años":"2 a 5 años"}</text>`;
   const src="Patrones de crecimiento OMS 2006"; let sub=src;
   if($("gNombre").checked){ sub=[$("nombre").value, e? "FN "+dmy(e.fn)+" · consulta "+dmy(e.fc)+" ("+edadTxt(e)+")" : "", src].filter(Boolean).join(" · "); }
-  g+=`<text x="${ml}" y="37" font-size="11" fill="#555">${sub}</text>`;
+  g+=`<text x="${ml}" y="37" font-size="11" fill="#555">${xe(sub)}</text>`;
   g+=`<text x="${ml+pw/2}" y="${H-8}" font-size="11" text-anchor="middle" fill="#444">${tipo==="l"?"Longitud (acostado)":"Talla (de pie)"} en cm</text>`;
   g+=`<text transform="translate(14 ${mt+ph/2}) rotate(-90)" font-size="11" text-anchor="middle" fill="#444">kg</text>`;
   if(!S.sexo) g+=`<text x="${ml+pw/2}" y="${mt+ph/2}" font-size="16" text-anchor="middle" fill="#b4531a">Elegí el sexo</text>`;
@@ -1479,13 +1482,13 @@ function svgChart(k){
   pts.forEach(p=>{ g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="${p[2]?5:3.5}" fill="${p[2]?"#111":"#fff"}" stroke="#111" stroke-width="1.5"/>`; });
   const cur=pts.find(p=>p[2]);
   if(cur){ const pr=percentil(k,cur[1],e); const lbl=`${fmtN(cur[1],IND[k].d)} ${IND[k].u}${pr?" · "+pr.pc:""}`;
-    const tx=Math.min(X(cur[0])+8, ml+pw-150); g+=`<rect x="${tx-3}" y="${Y(cur[1])-24}" width="${lbl.length*6.6+8}" height="17" rx="4" fill="#fff" stroke="#111" stroke-width=".6"/><text x="${tx+1}" y="${Y(cur[1])-12}" font-size="12" font-weight="bold">${lbl}</text>`; }
+    const tx=Math.min(X(cur[0])+8, ml+pw-150); g+=`<rect x="${tx-3}" y="${Y(cur[1])-24}" width="${lbl.length*6.6+8}" height="17" rx="4" fill="#fff" stroke="#111" stroke-width=".6"/><text x="${tx+1}" y="${Y(cur[1])-12}" font-size="12" font-weight="bold">${xe(lbl)}</text>`; }
   // títulos
   const sxT = sx==="m"? "Niñas":"Niños", rT = b<=24? "0 a 2 años" : a>=60? "5 a "+(b/12)+" años" : (a/12)+" a "+(b/12)+" años";
   g+=`<text x="${ml}" y="20" font-size="15" font-weight="bold" fill="${col.ln}">${IND[k].n} — ${sxT} ${rT}</text>`;
   const src = a>=60? "Referencia OMS 2007" : "Patrones de crecimiento OMS 2006";
   let sub = src; if($("gNombre").checked){ const nm=$("nombre").value; sub = [nm, e? (e.corr? "RNPT "+egTxt(e.eg)+" sem · FPP "+dmy(e.fn)+" · consulta "+dmy(e.fc)+" (edad corregida "+ecTxt(e)+")" : "FN "+dmy(e.fn)+" · consulta "+dmy(e.fc)+" ("+edadTxt(e)+")") : "", src].filter(Boolean).join(" · "); }
-  g+=`<text x="${ml}" y="37" font-size="11" fill="#555">${sub}</text>`;
+  g+=`<text x="${ml}" y="37" font-size="11" fill="#555">${xe(sub)}</text>`;
   g+=`<text x="${ml+pw/2}" y="${H-8}" font-size="11" text-anchor="middle" fill="#444">Edad (${span<=24?"meses":"años"})</text>`;
   g+=`<text transform="translate(14 ${mt+ph/2}) rotate(-90)" font-size="11" text-anchor="middle" fill="#444">${IND[k].u}</text>`;
   if(!S.sexo) g+=`<text x="${ml+pw/2}" y="${mt+ph/2}" font-size="16" text-anchor="middle" fill="#b4531a">Elegí el sexo</text>`;
@@ -1501,6 +1504,49 @@ function renderCharts(){
   const vc=velCrec(), vb=$("velTxt"); vb.classList.toggle("hidden", !vc);
   if(vc) vb.innerHTML = "<b>📏 "+vc.txt.replace(/ \(/, "</b> (")+(vc.txt.includes("</b>")?"":"")+(vc.corto? "" : "")+'<div class="hint" style="margin-top:2px">Se calcula con las mediciones previas de abajo'+(vc.corto? "; para un valor confiable hace falta una talla previa de al menos "+(edad().months<24?"3":"6")+" meses atrás" : "")+". Sale en la antropometría del texto.</div>";
   $("gCharts").innerHTML = chartsVisibles().map(k=>`<div style="margin-top:10px"><div class="btns"><button class="btn sec sm" data-gc="${k}">📋 Copiar imagen</button><button class="btn sec sm" data-gd="${k}">⬇ Descargar PNG</button></div><div class="gsvg" data-k="${k}" style="max-width:100%;overflow:auto">${svgChart(k)}</div></div>`).join("");
+}
+const xe = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+/* hoja A4 con todas las curvas (v1.4.46, ítem 56): un solo SVG de 794 × 1123 (A4 a 96 ppp) con encabezado, tabla de percentilos y las curvas
+   visibles en grilla; se rasteriza a 1654 × 2339 px (200 ppp) para copiar, descargar o imprimir. Nombre y DNI solo si está tildado «nombre y fecha en la imagen». */
+function svgA4(){
+  const e=edad(), ec=edadC(), ks=chartsVisibles(), W=794, H=1123, mx=38, conNombre=$("gNombre").checked;
+  let g=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="Arial,sans-serif"><rect width="${W}" height="${H}" fill="#fff"/>`;
+  g+=`<text x="${mx}" y="50" font-family="Georgia,serif" font-size="22" font-weight="bold" fill="#2f6f6d">Curvas de crecimiento</text>`;
+  g+=`<text x="${W-mx}" y="50" font-size="11" text-anchor="end" fill="#555">${xe(dmy(parseD($("fc").value)))}</text>`;
+  g+=`<line x1="${mx}" x2="${W-mx}" y1="60" y2="60" stroke="#2f6f6d" stroke-width="1.5"/>`;
+  const sx=S.sexo==="v"?"Varón":S.sexo==="m"?"Mujer":"", nom=conNombre? [$("nombre").value.trim(), $("dni").value.trim()? "DNI "+$("dni").value.trim() : ""].filter(Boolean).join(" · ") : "";
+  let y=80; if(nom){ g+=`<text x="${mx}" y="${y}" font-size="14" font-weight="bold" fill="#222">${xe(nom)}</text>`; y+=18; }
+  const datos=[sx, e? "FN "+dmy(e.fn) : "", e? "Edad "+edadTxt(e) : "", ec? "Edad corregida "+ecTxt(ec)+" (RNPT "+egTxt(ec.eg)+" sem)" : ""].filter(Boolean).join("   ·   ");
+  g+=`<text x="${mx}" y="${y}" font-size="12" fill="#333">${xe(datos)}</text>`; y+=14;
+  // tabla de mediciones
+  const res=pcResumen(), rows=Object.keys(res).map(k=>{ const x=medida(k), r=res[k]; return x===null? null : [IND[k].n, fmtN(x,IND[k].d)+" "+IND[k].u, r? r.pc : "—", r? (r.z>=0?"+":"")+fmtN(r.z,2) : ""]; }).filter(Boolean);
+  const pt=pesoTalla(e); if(pt) rows.push(["Peso para la "+(pt.tipo==="l"?"longitud":"talla"), fmtN(num("peso"),2)+" kg / "+fmtN(num("talla"),1)+" cm", pt.pc, (pt.z>=0?"+":"")+fmtN(pt.z,2)]);
+  if(rows.length){ const cx=[mx+6, mx+250, mx+420, mx+540]; y+=4;
+    g+=`<rect x="${mx}" y="${y}" width="${W-2*mx}" height="18" fill="#eef4f3"/>`+["Indicador","Valor","Percentilo","Puntaje z"].map((t,i)=>`<text x="${cx[i]}" y="${y+13}" font-size="10.5" font-weight="bold" fill="#2f6f6d">${t}</text>`).join(""); y+=18;
+    rows.forEach(r=>{ g+=r.map((t,i)=>`<text x="${cx[i]}" y="${y+12}" font-size="11" ${i===2?'font-weight="bold"':""} fill="#222">${xe(t)}</text>`).join("")+`<line x1="${mx}" x2="${W-mx}" y1="${y+17}" y2="${y+17}" stroke="#e3ddd3" stroke-width=".7"/>`; y+=17; }); }
+  const extra=[(velCrec()||{}).txt, e && e.months>=24? blanco() : "", (tp=>tp? "TA "+$("ta").value.trim()+" mmHg ("+tp.txt+")" : "")(taPc())].filter(Boolean);
+  extra.forEach(t=>{ y+=14; g+=`<text x="${mx}" y="${y}" font-size="10.5" fill="#444">${xe(t)}</text>`; });
+  // curvas
+  y+=14; const pie=H-46, n=ks.length, cols = n<=2? 1 : 2, filas=Math.ceil(n/cols), gap=8;
+  let tw=(W-2*mx-(cols-1)*gap)/cols, th=tw*430/640; const maxH=(pie-y-(filas-1)*gap)/filas; if(th>maxH){ th=maxH; tw=th*640/430; }
+  const x0=(W-(cols*tw+(cols-1)*gap))/2;
+  ks.forEach((k,i)=>{ const sv=svgChart(k); if(!sv) return; const cx=x0+(i%cols)*(tw+gap), cy=y+Math.floor(i/cols)*(th+gap);
+    g+=sv.replace(/^<svg [^>]*>/, `<svg x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" width="${tw.toFixed(1)}" height="${th.toFixed(1)}" viewBox="0 0 640 430" font-family="Arial,sans-serif">`)+`<rect x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" width="${tw.toFixed(1)}" height="${th.toFixed(1)}" fill="none" stroke="#e3ddd3" stroke-width=".7"/>`; });
+  g+=`<line x1="${mx}" x2="${W-mx}" y1="${H-36}" y2="${H-36}" stroke="#ccc" stroke-width=".7"/>`;
+  g+=`<text x="${mx}" y="${H-22}" font-size="9.5" fill="#666">Patrones de crecimiento OMS 2006 (0-5 años) y referencia OMS 2007 (5-19 años). Líneas: P3, P15, P50, P85 y P97.</text>`;
+  g+=`<text x="${W-mx}" y="${H-22}" font-size="10" text-anchor="end" fill="#333">${xe(firma())}</text>`;
+  return g+"</svg>";
+}
+function a4Canvas(){ return new Promise((res,rej)=>{ const cv=document.createElement("canvas"); cv.width=1654; cv.height=2339; const cx=cv.getContext("2d"); cx.fillStyle="#fff"; cx.fillRect(0,0,cv.width,cv.height);
+  const im=new Image(); im.onload=()=>{ cx.drawImage(im,0,0,cv.width,cv.height); res(cv); }; im.onerror=()=>rej(new Error("svg")); im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svgA4()); }); }
+async function a4Accion(modo){
+  if(!edad() || !S.sexo){ toast("Cargá fecha de nacimiento y sexo para armar la hoja"); return; }
+  let cv; try{ cv=await a4Canvas(); }catch(err){ toast("No se pudo armar la hoja A4"); return; }
+  const blob=await new Promise(r=>cv.toBlob(r,"image/png"));
+  if(modo==="bajar"){ descargar(blob,"curvas_A4.png"); toast("Hoja A4 descargada (PNG)"); return; }
+  if(modo==="ver"){ const v=$("a4Prev"); v.innerHTML=""; const im=new Image(); im.src=URL.createObjectURL(blob); im.alt="Hoja A4 con las curvas"; im.style.cssText="width:100%;max-width:560px;border:1px solid var(--line);border-radius:6px;display:block;margin-top:8px"; v.appendChild(im); v.scrollIntoView({block:"nearest"}); return; }
+  try{ await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]); toast("Hoja A4 copiada: pegala con Ctrl+V"); }
+  catch(err){ descargar(blob,"curvas_A4.png"); toast("El navegador no permitió copiar: se descargó la hoja"); }
 }
 function svgToCanvas(svgs, cols){
   return new Promise(res=>{
@@ -2900,6 +2946,7 @@ document.addEventListener("change", ev=>{
 document.querySelectorAll("#vFmt button").forEach(b=>b.onclick=()=>{ S.vFmt=b.dataset.f; document.querySelectorAll("#vFmt button").forEach(x=>x.classList.toggle("on",x===b)); update(); });
 document.querySelectorAll("input,select").forEach(el=>{ if(!el.dataset.vk) el.addEventListener("input", ()=>{ if(el.id==="peso"&&iCur) renderInterDoses(); update(); }); });
 $("vZona").addEventListener("change", ()=>{ vacKey=""; update(); });
+document.querySelectorAll("[data-a4]").forEach(b=>b.onclick=()=>a4Accion(b.dataset.a4));
 $("gCopiarTodo").onclick = ()=>{ const ks=chartsVisibles(); copiarImagen(ks.map(svgChart), ks.length>1?2:1, "curvas_crecimiento.png"); };
 $("gPrev").addEventListener("input", update);
 ["cPos","iPos","aPos","cPend","iPend","aPend"].forEach(id=>$(id).addEventListener("input", update));
