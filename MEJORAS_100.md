@@ -59,7 +59,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 48. [x] (v1.4.41, 11/11) Revisar y unificar el estilo de todas las plantillas de intercurrencia (abreviaturas, tildes, orden).
 
 ## D. Crecimiento y percentilos
-49. [ ] Peso para la talla (OMS, 0-5 años).
+49. [x] (v1.4.42, 11/11) Peso para la talla (OMS, 0-5 años). Tablas LMS oficiales (repo «anthro» de la OMS); Pc y z en encabezado, texto, tabla, curva y alertas.
 50. [ ] Velocidad de crecimiento (cm/año) a partir de las mediciones previas.
 51. [ ] Percentilo de presión arterial (tablas AAP 2017) por edad, sexo y talla.
 52. [!] Tablas SAP (Lejarraga) 5-19 años como alternativa a OMS 2007 (solo con valores oficiales).
