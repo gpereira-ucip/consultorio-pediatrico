@@ -71,10 +71,10 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 58. [x] (v1.4.48, 11/11) Frase automática de crecimiento («crece en el canal del Pc 50, sin cruces de líneas»).
 
 ## E. Vacunas
-59. [ ] Esquemas atrasados: plan de recupero con intervalos mínimos (Lineamientos MSAL).
-60. [ ] Vacunas para grupos de riesgo como recordatorio (antigripal, neumococo, meningococo B, etc.).
-61. [ ] Vacuna contra el dengue según zona y edad (MSAL vigente).
-62. [ ] Tildar dosis recibidas en la tabla y calcular la próxima fecha exacta.
+59. [~] Esquemas atrasados: plan de recupero con intervalos mínimos (Lineamientos MSAL). No empezado: sin acceso web a las fuentes oficiales el 11/11 (red del entorno limitada; ver «Problemas conocidos» en PROYECTO.md). Reintentar. La v1.4.49 ya lista las dosis atrasadas según el carnet tildado, sin intervalos.
+60. [~] Vacunas para grupos de riesgo como recordatorio (antigripal, neumococo, meningococo B, etc.). No empezado: sin acceso web a las fuentes oficiales el 11/11 (red del entorno limitada; ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+61. [~] Vacuna contra el dengue según zona y edad (MSAL vigente). No empezado: sin acceso web a las fuentes oficiales el 11/11 (red del entorno limitada; ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+62. [x] (v1.4.49, 11/11) Tildar dosis recibidas en la tabla y calcular la próxima fecha exacta.
 63. [ ] Aviso de campaña antigripal según el mes del año.
 64. [ ] Texto para la familia: «Próximas vacunas: … a partir del …» (para WhatsApp).
 65. [ ] Vacunas de convivientes y embarazadas (dTpa, antigripal, VSR) como consejo en los controles del RN.

@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.48 (2026-11-11)
+  VERSION: 1.4.49 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.49 — Vacunas: columna «Ya recibida» para tildar las dosis del carnet (botón «Carnet al día» tilda todas las previas; se destildan las que falten). Las previas sin tildar pasan a «atrasada», se listan en un aviso con botón para sumarlas a la receta y salen en el texto del control («carnet incompleto… Dosis atrasadas: …»); una dosis de hoy tildada como recibida deja de indicarse. «Próxima vacunación» ahora dice las vacunas, la fecha exacta y los días que faltan. Los tildes no se guardan. No calcula intervalos mínimos de recupero.
   1.4.48 — Frase automática de crecimiento en el control y en Percentilos: «Crecimiento: Peso y talla en el canal P15-P50 para la edad, sin cruces de líneas de percentil respecto de la medición previa (11/08/2026)»; avisa ascensos o descensos de 2 o más líneas y usa edad corregida si corresponde. Se desactiva en Ajustes. Redacción propia, sin contenido clínico nuevo.
   1.4.47 — Blanco genético en la curva de talla: con las tallas de la madre y del padre cargadas, la curva de talla dibuja en violeta el canal que llega al blanco genético a los 19 años (línea punteada), la banda de su rango (± 8,5 cm) y, en la curva de 5 a 19 años, la marca del blanco y su rango a la edad adulta; la leyenda dice el valor y el percentilo adulto. También sale en la hoja A4. Sin contenido clínico nuevo (misma fórmula que ya usaba la app).
   1.4.46 — Hoja A4 con todas las curvas (pestaña Percentilos): botones Copiar, Descargar PNG y Ver. Arma una sola imagen A4 (1654 × 2339 px) con título, datos del paciente (nombre y DNI solo si está tildado «nombre y fecha en la imagen»), tabla de percentilos y puntaje z, velocidad de crecimiento, blanco genético, TA, todas las curvas visibles en grilla y el pie con la firma. Arreglo: las curvas con percentilo «< P1» no se podían copiar como imagen. Sin contenido clínico nuevo.
@@ -196,6 +197,7 @@ h3 .hint{text-transform:none;letter-spacing:0}
 .fiebox .fieT{font:600 13.5px var(--font);color:#9b3a2f;align-self:center}
 .fiebox .fg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
 .fiebox .fg>small{min-width:84px;color:var(--muted);font-size:12px}
+.st.rec{background:var(--okbg);color:#24603b}
 .chip.on{background:var(--okbg);border-color:#a9d4b7;color:#24603b}
 .chip.p{background:var(--okbg);border-color:#a9d4b7;color:#24603b}
 .chip.p::before{content:"+ ";font-weight:700}
@@ -413,7 +415,8 @@ body.compact{font-size:13.5px;padding-bottom:66px}
   .seg{display:flex;max-width:100%} .seg button{flex:1 1 auto;padding:6px 8px}
   #iSel{min-width:0!important;width:100%} label.f:has(#iSel){flex-basis:100%}
   input.m{max-width:100%}
-  table.vac{font-size:12px} table.vac th,table.vac td{padding:5px 3px} .st{white-space:normal}
+  table.vac{font-size:12px} table.vac th,table.vac td{padding:5px 2px} .st{white-space:normal}
+  table.vac th.thRec{font-size:0;letter-spacing:0} table.vac th.thRec::after{content:"Rec.";font-size:10px} table.vac td{overflow-wrap:anywhere}
   .actionbar .wrap{padding:8px 10px;gap:6px}
   .actionbar .info{display:none} .dsk{display:none} .mob{display:inline}
   .actionbar .btn.sec{white-space:nowrap;padding:9px 10px;font-size:12.5px}
@@ -805,8 +808,9 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <label class="chk"><input type="checkbox" id="vZona"> Reside en zona de riesgo (fiebre amarilla / FHA)</label>
       <label class="chk"><input type="checkbox" id="vPrevias"> Mostrar dosis previas (verificar carnet)</label>
     </div>
+    <div class="row" style="margin-top:6px;gap:8px;align-items:center"><button type="button" class="btn sec sm" id="vRecPrev">✓ Carnet al día: tildar todas las previas como recibidas</button><button type="button" class="linkbtn" id="vRecClear">borrar tildes</button><span class="hint" id="vRecInfo"></span></div>
     <div id="vMsg"></div>
-    <table class="vac"><thead><tr><th></th><th>Vacuna</th><th>Dosis</th><th>Edad</th><th>Estado</th></tr></thead><tbody id="vTabla"></tbody></table>
+    <table class="vac"><thead><tr><th></th><th>Vacuna</th><th>Dosis</th><th>Edad</th><th>Estado</th><th class="thRec" title="Tildá las dosis que figuran en el carnet">Ya recibida</th></tr></thead><tbody id="vTabla"></tbody></table>
   </section>
   <section class="card">
     <h3 style="margin-top:0">Formato de la receta</h3>
@@ -985,7 +989,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.48";
+const VERSION = "1.4.49";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1666,6 +1670,13 @@ function vacEstado(e){
   return out;
 }
 let vacSel = new Set(); let vacKey="";
+/* dosis recibidas (v1.4.49, ítem 62): tildes del carnet, solo en memoria (dato del paciente: no se guarda). Con al menos una tilde, las dosis
+   previas sin tildar se consideran atrasadas. No calcula intervalos mínimos de recupero (ítem 59). */
+let vacRec = new Set();
+function vacAtrasadas(e){ return vacRec.size? vacEstado(e).filter(x=>x.st==="prev" && !x.info && !vacRec.has(x.v+"|"+x.d)) : []; }
+function vacProx(e){ const fut=vacEstado(e).filter(x=>x.st==="fut"); if(!fut.length) return null; const n=fut[0], same=fut.filter(x=>x.hito===n.hito);
+  const f=n.coh? null : addMonths(e.fn,n.m), dias=f? Math.round((f-e.fc)/864e5) : null;
+  return {hito:n.hito, lista:same.map(x=>x.corto+" "+x.d), coh:n.coh? e.fn.getFullYear()+n.coh : null, f, dias}; }
 function vacHoy(e){ return vacEstado(e).filter(x=>x.st==="hoy"); }
 
 /* ================================================================
@@ -2381,6 +2392,7 @@ function vacFrase(e, contexto){
   if(!e) return "";
   const est=$("cVacEstado").value;
   const rnTxt = e.months<1? ". Verificar aplicación de BCG y hepatitis B en maternidad" : "";
+  if(est==="completo" && vacAtrasadas(e).length) return vacFrase._inc(e);
   let base = est==="completo"? "carnet completo para la edad" : est==="incompleto"? "carnet incompleto" : "no trae carnet, refiere vacunas completas para la edad";
   const sel = vacSeleccionadas(e);
   if(sel.length){
@@ -2393,8 +2405,10 @@ function vacFrase(e, contexto){
     if(fut.length){ const n=fut[0]; const same=fut.filter(x=>x.hito===n.hito).map(x=>x.corto+" "+x.d);
       base += `. Próximas vacunas: ${n.hito} (${same.join(", ")})` + (n.coh? ` durante el año ${e.fn.getFullYear()+n.coh}` : ` a partir del ${dmy(addMonths(e.fn,n.m))}`); }
   }
+  const atr=vacAtrasadas(e).filter(x=>!vacSel.has(x.v+"|"+x.d)); if(atr.length) base += ". Dosis atrasadas: "+atr.map(x=>x.corto+" "+x.d).join(", ");
   return base;
 }
+vacFrase._inc=function(e){ const s=$("cVacEstado"), v=s.value; s.value="incompleto"; try{ return vacFrase(e); } finally{ s.value=v; } };
 function gruposVac(sel){
   const g={}; sel.forEach(x=>{ (g[x.hito]=g[x.hito]||[]).push(`${x.corto} ${x.d}`+(x.nota?` (${x.nota})`:"")); });
   return joinY(Object.entries(g).map(([h,l])=> /^\d|recién/.test(h)? `vacunas de ${h} (${l.join(", ")})` : `${h}: ${l.join(", ")}`));
@@ -2403,7 +2417,7 @@ function vacSeleccionadas(e){
   const all = vacEstado(e);
   const key = $("fn").value+"|"+$("fc").value+"|"+$("vZona").checked;
   if(key!==vacKey){ vacKey=key; vacSel = new Set(all.filter(x=>x.st==="hoy" && x.m!==0).map(x=>x.v+"|"+x.d)); }
-  return all.filter(x=>vacSel.has(x.v+"|"+x.d)).sort((a,b)=>(a.gripe?1:0)-(b.gripe?1:0));
+  return all.filter(x=>vacSel.has(x.v+"|"+x.d) && !vacRec.has(x.v+"|"+x.d)).sort((a,b)=>(a.gripe?1:0)-(b.gripe?1:0));
 }
 
 function genControl(){
@@ -2850,20 +2864,22 @@ function renderVac(){
   const e=edad();
   if(!e){ $("vMsg").innerHTML='<div class="alert">Cargá la fecha de nacimiento.</div>'; $("vTabla").innerHTML=""; $("cVacResumen").textContent=""; return; }
   const all=vacEstado(e); vacSeleccionadas(e);
-  const hoy = all.filter(x=>x.st==="hoy");
+  const hoy = all.filter(x=>x.st==="hoy" && !vacRec.has(x.v+"|"+x.d));
   const grupos=[...new Set(hoy.map(x=>x.hito))];
-  const fut = all.filter(x=>x.st==="fut"); const nx = fut[0];
+  const fut = all.filter(x=>x.st==="fut"); const nx = fut[0], px=vacProx(e), atr=vacAtrasadas(e);
   let msg = hoy.length ? `<div class="okbox"><b>En la cita del ${dmy(e.fc)} (${edadTxt(e)})</b> corresponde: <b>${gruposVac(hoy)}</b>.</div>`
                        : `<div class="hint">En la cita del ${dmy(e.fc)} no corresponden vacunas de calendario.</div>`;
-  if(nx) msg += `<div class="hint">Próximas: <b>${nx.hito}</b> — ${nx.coh? "durante el año "+(e.fn.getFullYear()+nx.coh) : "a partir del "+dmy(addMonths(e.fn,nx.m))}.</div>`;
+  if(atr.length) msg += `<div class="alert"><b>Dosis atrasadas según el carnet tildado:</b> ${atr.map(x=>x.corto+" "+x.d).join(", ")}. <button type="button" class="btn sec sm" id="vAtrSel">Tildarlas para aplicar hoy / recetar</button><div class="hint">Verificar los intervalos mínimos entre dosis (Lineamientos del MSAL) antes de indicar.</div></div>`;
+  if(px) msg += `<div class="hint">Próxima vacunación: <b>${px.hito}</b> (${px.lista.join(", ")}) — ${px.coh? "durante el año "+px.coh : "a partir del <b>"+dmy(px.f)+"</b>"+(px.dias>0? " (faltan "+px.dias+" días)" : "")}.</div>`;
   const venc = all.filter(x=>x.st==="venc"); if(venc.length && ($("vPrevias").checked || $("cVacEstado").value==="incompleto")) msg += `<div class="alert">${venc.map(x=>"Si no recibió "+x.corto+" "+x.d+": "+x.limTxt).join("<br>")}</div>`;
   $("vMsg").innerHTML = msg;
   const showPrev=$("vPrevias").checked;
   const lab={hoy:"corresponde hoy",prev:"previa: verificar",fut:"próxima",venc:"fuera de edad",info:"iniciar/completar"};
   $("vTabla").innerHTML = all.filter(x=>showPrev || x.st!=="prev").map(x=>{
-    const k=x.v+"|"+x.d, can = x.st!=="fut" && x.st!=="venc";
-    return `<tr><td>${can?`<input type="checkbox" data-vk="${k}" ${vacSel.has(k)?"checked":""}>`:""}</td><td>${x.corto}</td><td>${x.d}${x.nota?'<div class="hint">'+x.nota+'</div>':""}</td><td>${x.cuando}</td><td><span class="st ${x.st}">${lab[x.st]}</span></td></tr>`;
+    const k=x.v+"|"+x.d, rec=vacRec.has(k), can = x.st!=="fut" && x.st!=="venc" && !rec, atra = !rec && vacRec.size && x.st==="prev" && !x.info;
+    return `<tr><td>${can?`<input type="checkbox" data-vk="${k}" aria-label="Aplicar hoy / recetar" ${vacSel.has(k)?"checked":""}>`:""}</td><td>${x.corto}</td><td>${x.d}${x.nota?'<div class="hint">'+x.nota+'</div>':""}</td><td>${x.cuando}</td><td><span class="st ${rec?"rec":atra?"venc":x.st}">${rec?"recibida ✓":atra?"atrasada":lab[x.st]}</span></td><td style="text-align:center">${x.st!=="fut"?`<input type="checkbox" data-vr="${k}" aria-label="Ya recibida" ${rec?"checked":""}>`:""}</td></tr>`;
   }).join("");
+  $("vRecInfo").textContent = vacRec.size? vacRec.size+" dosis tildadas como recibidas (no se guardan)." : "";
   $("cVacResumen").innerHTML = hoy.length? `Corresponde hoy: <b>${gruposVac(hoy)}</b> (receta en pestaña Vacunas).` : (nx? `Sin vacunas hoy. Próximas: ${nx.hito}.`:"");
 }
 
@@ -2974,12 +2990,16 @@ document.addEventListener("change", ev=>{
   else if(d.ce!==undefined) cEstState[+d.ce][1]=ev.target.checked;
   else if(d.ie!==undefined) iEstState[+d.ie][1]=ev.target.checked;
   else if(d.ic!==undefined) iCondState[+d.ic][1]=ev.target.checked;
+  else if(d.vr){ if(ev.target.checked){ vacRec.add(d.vr); vacSel.delete(d.vr); } else vacRec.delete(d.vr); }
   else if(d.vk){ ev.target.checked? vacSel.add(d.vk) : vacSel.delete(d.vk); }
   update();
 });
 document.querySelectorAll("#vFmt button").forEach(b=>b.onclick=()=>{ S.vFmt=b.dataset.f; document.querySelectorAll("#vFmt button").forEach(x=>x.classList.toggle("on",x===b)); update(); });
 document.querySelectorAll("input,select").forEach(el=>{ if(!el.dataset.vk) el.addEventListener("input", ()=>{ if(el.id==="peso"&&iCur) renderInterDoses(); update(); }); });
 $("vZona").addEventListener("change", ()=>{ vacKey=""; update(); });
+$("vRecPrev").onclick=()=>{ const e=edad(); if(!e){ toast("Cargá la fecha de nacimiento"); return; } vacEstado(e).filter(x=>(x.st==="prev" || x.st==="venc") && !x.info).forEach(x=>vacRec.add(x.v+"|"+x.d)); $("vPrevias").checked=true; update(); toast("Previas tildadas: destildá las que falten en el carnet"); };
+$("vRecClear").onclick=()=>{ vacRec=new Set(); update(); };
+document.addEventListener("click", ev=>{ if(ev.target.id!=="vAtrSel") return; vacAtrasadas(edad()).forEach(x=>vacSel.add(x.v+"|"+x.d)); update(); toast("Dosis atrasadas tildadas para la receta"); });
 document.querySelectorAll("[data-a4]").forEach(b=>b.onclick=()=>a4Accion(b.dataset.a4));
 $("gCopiarTodo").onclick = ()=>{ const ks=chartsVisibles(); copiarImagen(ks.map(svgChart), ks.length>1?2:1, "curvas_crecimiento.png"); };
 $("gPrev").addEventListener("input", update);
@@ -3112,7 +3132,7 @@ function undoGuardar(){
   UNDO={ t:Date.now(), vals, supl, sexo:S.sexo, iModo:S.iModo, cB:cB&&cB.id, iSel:$("iSel").value,
     cHitosState:cl(cHitosState), cRecState:cl(cRecState), cEstState:cl(cEstState),
     iSintState:cl(iSintState), iEstState:cl(iEstState), iCondState:cl(iCondState), talS:cl(talS), efDirty:cl(efDirty),
-    vacSel:[...vacSel], vacKey, uso:[...usoContados], cDxDirty, pesqS:cl(pesqS), sdS:cl(sdS), fieS:cl(fieS), evoS:cl(evoS) };
+    vacSel:[...vacSel], vacKey, uso:[...usoContados], cDxDirty, pesqS:cl(pesqS), sdS:cl(sdS), fieS:cl(fieS), evoS:cl(evoS), vacRec:[...vacRec] };
 }
 function undoAplicarVals(vals){ Object.keys(vals).forEach(id=>{ const el=$(id); if(!el) return; if("c" in vals[id]) el.checked=vals[id].c; else el.value=vals[id].v; }); }
 function undoRestaurar(){
@@ -3125,7 +3145,7 @@ function undoRestaurar(){
   iSintState=u.iSintState; iEstState=u.iEstState; iCondState=u.iCondState; talS=u.talS;
   Object.assign(efDirty, u.efDirty);
   S.iModo=u.iModo; document.querySelectorAll("#iModo button").forEach(x=>x.classList.toggle("on", x.dataset.m===S.iModo)); $("iCtrlBox").classList.toggle("hidden", S.iModo==="ini");
-  vacSel=new Set(u.vacSel); vacKey=u.vacKey; cDxDirty=u.cDxDirty; pesqS=u.pesqS||{}; sdS=u.sdS||{}; fieS=u.fieS||{}; evoS=u.evoS||{ev:0}; usoContados.clear(); u.uso.forEach(x=>usoContados.add(x));
+  vacSel=new Set(u.vacSel); vacKey=u.vacKey; cDxDirty=u.cDxDirty; pesqS=u.pesqS||{}; sdS=u.sdS||{}; fieS=u.fieS||{}; evoS=u.evoS||{ev:0}; vacRec=new Set(u.vacRec||[]); usoContados.clear(); u.uso.forEach(x=>usoContados.add(x));
   renderControl();
   document.querySelectorAll("#cSupl input").forEach(i=>{ if(i.dataset.s in u.supl) i.checked=u.supl[i.dataset.s]; });
   renderInter(); if(typeof plBotones==="function") plBotones();
@@ -3147,7 +3167,7 @@ document.addEventListener("keydown", e=>{
 $("nuevo").onclick = ()=>{
   undoGuardar();
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
-   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; $("eIncl").checked=false;
+   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
   $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();
