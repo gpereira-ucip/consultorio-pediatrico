@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.44 (2026-11-11)
+  VERSION: 1.4.45 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.45 — Lector de mediciones previas más tolerante (pestaña Percentilos): acepta fechas sin año o con año corto, guiones, puntos o formato 2026-03-12; valores con unidades o etiquetas en cualquier orden («12/3 7,2kg 66cm», «Peso: 7200 g Talla 0,66 m PC 42»), gramos y metros, separadores con punto y coma, coma o tabulación, y renglones copiados de la HC. Debajo del campo muestra lo que entendió («3 mediciones leídas: …») y cuántas líneas no pudo leer. Sin contenido clínico nuevo.
   1.4.44 — Percentilo de presión arterial (1 a 17 años): con TA, sexo, edad y talla ubica la sistólica y la diastólica respecto de P50, P90 y P95 de las tablas de la guía AAP 2017; sale en el encabezado («TA S P50-P90 · D < P50», con P90 y P95 al pasar el mouse), en la antropometría del texto («TA 100/60 mmHg (PAS P50-P90, PAD < P50)») y, si alguna es ≥ P90, como alerta con frase para datos positivos. Sin talla asume P50 y lo aclara. No clasifica estadios.
   1.4.43 — Velocidad de crecimiento: con la talla actual y una medición previa cargada en Percentilos calcula los cm/año («Velocidad de crecimiento 6 cm/año (+6 cm en 12 meses, desde el 11/11/2025)»); usa la previa más reciente con al menos 6 meses de intervalo (3 meses en menores de 2 años) y, si no hay, avisa «intervalo corto, valor orientativo». Sale en la antropometría del texto y en un recuadro de la pestaña Percentilos. Sin percentilos de velocidad.
   1.4.42 — Peso para la talla (OMS 2006, 0-5 años): percentilo y puntaje z en el encabezado («P/T Pc 71»), en la antropometría del texto («Peso/talla (Pc 71, z +0,6)»), en la tabla de Percentilos y en una curva nueva (peso según longitud < 2 años o talla 2-5 años, con mediciones previas). Las alertas de sobrepeso, obesidad y emaciación en menores de 5 años pasan a usar peso/talla (antes IMC/edad). Tablas LMS oficiales de la OMS (paquete anthro). Arreglo: los percentilos extremos se muestran «< P1» y «> P99» (antes no se veían en el encabezado).
@@ -784,8 +785,9 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <label class="chk"><input type="checkbox" id="gNombre" checked> nombre y fecha en la imagen</label>
       <button class="btn" id="gCopiarTodo" style="margin-left:auto">🖼️ Copiar todas las curvas</button>
     </div>
-    <label class="f" style="margin-top:10px">Mediciones previas (una por línea: fecha peso talla PC — “-” si falta)
-      <textarea id="gPrev" class="sm" placeholder="15/03/2026 6,2 62 41&#10;20/05/2026 7,1 66 42,5"></textarea></label>
+    <label class="f" style="margin-top:10px">Mediciones previas (una por línea: fecha peso talla PC — “-” si falta; también «12/3 7,2kg 66cm» o el renglón de la HC)
+      <textarea id="gPrev" class="sm" placeholder="15/03/2026 6,2 62 41&#10;20/5 7,1kg 66cm&#10;10/08/26 peso 8300 g talla 70 cm PC 44"></textarea></label>
+      <div id="gPrevInfo" class="hint" style="margin-top:4px"></div>
   </section>
   <div id="gCharts"></div>
 </div>
@@ -977,7 +979,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.44";
+const VERSION = "1.4.45";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1401,15 +1403,46 @@ function rangoGraf(k, e){
   if(k==="w" && a>=60) b=120;
   return [a,b];
 }
-function prevMediciones(){
-  const out=[]; ($("gPrev").value||"").split("\n").forEach(l=>{
-    const m=l.trim().split(/[\s;]+/); if(m.length<2) return;
-    const dm=m[0].match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/); if(!dm) return;
-    const y=+dm[3]<100? 2000+(+dm[3]) : +dm[3]; const d=new Date(y,+dm[2]-1,+dm[1]);
-    const n=i=>{ const v=parseFloat((m[i]||"").replace(",",".")); return isNaN(v)?null:v; };
-    out.push({d, w:n(1), h:n(2), pc:n(3)});
-  }); return out;
+/* lector tolerante de mediciones previas (v1.4.45, ítem 55). Por línea: una fecha (12/3, 12/03/26, 12-03-2026, 2026-03-12; sin año = la más
+   reciente que no pase la fecha del turno) y después peso, talla y PC en ese orden («-» si falta), o con unidades/etiquetas en cualquier orden
+   («7,2kg 66cm», «Peso: 7200 g Talla 0,66 m PC 42»). Gramos (≥ 500 o «g») → kg; metros (< 3 o «m») → cm. */
+function parseMedLinea(l, fc){
+  let s=" "+l.trim()+" "; if(!s.trim()) return null;
+  let d=null, m=s.match(/(^|[^\d])(\d{4})-(\d{1,2})-(\d{1,2})(?!\d)/);
+  if(m){ d=new Date(+m[2],+m[3]-1,+m[4]); s=s.replace(m[0]," "); }
+  else { m=s.match(/(^|[^\d,.])(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.](\d{4}|\d{2}))?(?![\d,.]*\d)/) || s.match(/(^|[^\d,.])(\d{1,2})\/(\d{1,2})(?:\/(\d{4}|\d{2}))?(?!\d)/);
+    if(!m || +m[2]<1 || +m[2]>31 || +m[3]<1 || +m[3]>12) return {err:true};
+    const ref=fc||new Date(); let y = m[4]? (+m[4]<100? 2000+(+m[4]) : +m[4]) : ref.getFullYear();
+    d=new Date(y,+m[3]-1,+m[2]); if(!m[4] && d>ref) d=new Date(y-1,+m[3]-1,+m[2]);
+    s=s.replace(m[0]," "); }
+  const N="(\\d{1,3}(?:\\.\\d{3})+|\\d+(?:[.,]\\d+)?)", val=t=>{ if(/^\d{1,3}(\.\d{3})+$/.test(t)) t=t.replace(/\./g,""); return parseFloat(t.replace(",",".")); };
+  const r={d, w:null, h:null, pc:null}; let hubo=false;
+  const tomar=(re, f)=>{ const x=s.match(re); if(x){ f(x); s=s.replace(x[0]," "); hubo=true; } };
+  tomar(new RegExp("(?:per[ií]metro\\s*cef[aá]lico|\\bpc)\\s*[:=]?\\s*"+N+"\\s*(?:cm)?","i"), x=>{ r.pc=val(x[1]); });
+  tomar(new RegExp("(?:\\bpeso|\\bp)\\s*[:=]?\\s*"+N+"\\s*(kg|kilos?|gr?s?|gramos)?(?![a-z])","i"), x=>{ let v=val(x[1]); if((x[2] && /^g/i.test(x[2])) || v>=500) v/=1000; r.w=v; });
+  tomar(new RegExp("(?:\\btalla|\\blongitud|\\baltura|\\bt)\\s*[:=]?\\s*"+N+"\\s*(cm|m|mts?)?(?![a-z])","i"), x=>{ let v=val(x[1]); if((x[2] && /^m/i.test(x[2])) || v<3) v*=100; r.h=v; });
+  tomar(new RegExp(N+"\\s*(kg|kilos?)(?![a-z])","i"), x=>{ if(r.w===null) r.w=val(x[1]); });
+  tomar(new RegExp(N+"\\s*(grs?|g|gramos)(?![a-z])","i"), x=>{ if(r.w===null) r.w=val(x[1])/1000; });
+  tomar(new RegExp(N+"\\s*(mts?|m)(?![a-z])","i"), x=>{ if(r.h===null) r.h=val(x[1])*100; });
+  tomar(new RegExp(N+"\\s*cm(?![a-z])","i"), x=>{ if(r.h===null) r.h=val(x[1]); else if(r.pc===null) r.pc=val(x[1]); });
+  tomar(new RegExp(N+"\\s*cm(?![a-z])","i"), x=>{ if(r.pc===null) r.pc=val(x[1]); });
+  if(!hubo){ const tk=s.replace(/,\s+/g," ").split(/[\s;|]+/).filter(Boolean).filter(t=>/^-+$/.test(t) || /^\d/.test(t)).slice(0,3);
+    const n=i=>{ const t=tk[i]; if(!t || /^-+$/.test(t)) return null; const v=val(t.replace(/[^\d.,]/g,"")); return isNaN(v)? null : v; };
+    r.w=n(0); r.h=n(1); r.pc=n(2); if(r.w!==null && r.w>=500) r.w/=1000; if(r.h!==null && r.h<3) r.h*=100; }
+  ["w","h","pc"].forEach(k=>{ if(r[k]!==null && (isNaN(r[k]) || r[k]<=0)) r[k]=null; else if(r[k]!==null) r[k]=Math.round(r[k]*1000)/1000; });
+  if(r.w===null && r.h===null && r.pc===null) return {err:true};
+  return r;
 }
+function prevMediciones(){
+  const out=[], fc=parseD($("fc").value); let err=0;
+  ($("gPrev").value||"").split("\n").forEach(l=>{ const r=parseMedLinea(l, fc); if(!r) return; if(r.err){ err++; return; } out.push(r); });
+  prevMediciones._err=err; return out;
+}
+function prevInfo(){ const b=$("gPrevInfo"); if(!b) return; const a=prevMediciones(), err=prevMediciones._err;
+  if(!a.length && !err){ b.textContent="Formatos aceptados: «15/03/2026 6,2 62 41», «15/3 6,2kg 62cm», «15/03/26 peso 6200 g talla 62 cm PC 41»."; b.className="hint"; return; }
+  b.className="hint"+(err? " warn":"");
+  b.innerHTML = (a.length? `<b>${a.length} ${a.length===1?"medición leída":"mediciones leídas"}:</b> `+a.slice().sort((x,y)=>x.d-y.d).map(m=>dmy(m.d)+" → "+[m.w!==null? fmtN(m.w,3)+" kg":"", m.h!==null? fmtN(m.h,1)+" cm":"", m.pc!==null? "PC "+fmtN(m.pc,1):""].filter(Boolean).join(", ")).join(" · ") : "")+
+    (err? ` <b style="color:#b4531a">${err} ${err===1?"línea no entendida":"líneas no entendidas"}</b> (falta la fecha o los valores).` : ""); }
 function svgChart(k){
   if(k==="pt") return svgChartPT();
   const e=edadCrec(); const sx=S.sexo||"v"; const [a,b]=rangoGraf(k,e);
@@ -1464,6 +1497,7 @@ function renderCharts(){
   $("pcTabla").innerHTML = !e? '<div class="alert">Cargá fecha de nacimiento.</div>' : !S.sexo? '<div class="alert">Elegí el sexo.</div>' :
     `<table class="vac"><tr><th>Indicador</th><th>Valor</th><th>Percentilo</th><th>Puntaje z</th></tr>${Object.keys(res).map(k=>{const x=medida(k), r=res[k];
       return `<tr><td>${IND[k].n}</td><td>${x!==null?fmtN(x,IND[k].d)+" "+IND[k].u:"—"}</td><td><b>${r?r.pc:"—"}</b></td><td>${r?(r.z>=0?"+":"")+fmtN(r.z,2):""}</td></tr>`;}).join("")}${(()=>{ const r=pesoTalla(edad()); return r? `<tr><td>Peso para la ${r.tipo==="l"?"longitud":"talla"} (OMS, sin edad)</td><td>${fmtN(num("peso"),2)} kg / ${fmtN(num("talla"),1)} cm</td><td><b>${r.pc}</b></td><td>${(r.z>=0?"+":"")+fmtN(r.z,2)}</td></tr>` : ""; })()}</table>`;
+  prevInfo();
   const vc=velCrec(), vb=$("velTxt"); vb.classList.toggle("hidden", !vc);
   if(vc) vb.innerHTML = "<b>📏 "+vc.txt.replace(/ \(/, "</b> (")+(vc.txt.includes("</b>")?"":"")+(vc.corto? "" : "")+'<div class="hint" style="margin-top:2px">Se calcula con las mediciones previas de abajo'+(vc.corto? "; para un valor confiable hace falta una talla previa de al menos "+(edad().months<24?"3":"6")+" meses atrás" : "")+". Sale en la antropometría del texto.</div>";
   $("gCharts").innerHTML = chartsVisibles().map(k=>`<div style="margin-top:10px"><div class="btns"><button class="btn sec sm" data-gc="${k}">📋 Copiar imagen</button><button class="btn sec sm" data-gd="${k}">⬇ Descargar PNG</button></div><div class="gsvg" data-k="${k}" style="max-width:100%;overflow:auto">${svgChart(k)}</div></div>`).join("");

@@ -63,9 +63,9 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 50. [x] (v1.4.43, 11/11) Velocidad de crecimiento (cm/año) a partir de las mediciones previas. Solo el cálculo (sin percentilos de velocidad: no hay tablas cargadas).
 51. [x] (v1.4.44, 11/11) Percentilo de presión arterial (tablas AAP 2017) por edad, sexo y talla. Ubica PAS y PAD respecto de P50/P90/P95 (1-17 años); no clasifica estadios de hipertensión (falta verificar los criterios en la guía original).
 52. [!] Tablas SAP (Lejarraga) 5-19 años como alternativa a OMS 2007 (solo con valores oficiales).
-53. [ ] Curvas de prematuros (Intergrowth-21st o Fenton), si se consiguen los datos oficiales con licencia de uso.
-54. [ ] Curvas para síndrome de Down (SAP), si se consiguen los datos oficiales.
-55. [ ] Lector de mediciones previas más tolerante (pegar «12/3 7,2kg 66cm» o el texto de la HC).
+53. [!] Curvas de prematuros (Intergrowth-21st o Fenton), si se consiguen los datos oficiales con licencia de uso. Bloqueado 11/11: necesita decisión de Gonzalo — (a) cuál usar (Fenton 2013 o INTERGROWTH-21st posnatal de prematuros); (b) los datos existen en paquetes de terceros (p. ej. «gigs» para INTERGROWTH-21st), pero no pude confirmar la licencia de uso de las tablas originales (sin acceso web a los sitios oficiales el 11/11).
+54. [~] Curvas para síndrome de Down (SAP), si se consiguen los datos oficiales. No empezado: sin acceso web a sap.org.ar el 11/11 (ver ítem 46). Reintentar; si la SAP no publica tablas numéricas (LMS o percentilos), pasar a [!].
+55. [x] (v1.4.45, 11/11) Lector de mediciones previas más tolerante (pegar «12/3 7,2kg 66cm» o el texto de la HC).
 56. [ ] Imagen única con las curvas en formato A4 para pegar o imprimir.
 57. [ ] Blanco genético dibujado en la curva de talla.
 58. [ ] Frase automática de crecimiento («crece en el canal del Pc 50, sin cruces de líneas»).
