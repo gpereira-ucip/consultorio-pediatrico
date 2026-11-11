@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.40 (2026-11-11)
+  VERSION: 1.4.41 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.41 — Estilo unificado de las plantillas de intercurrencia: «Se dan pautas de alarma» siempre al final de la conducta; «Control en 48-72 hs» (antes «a las» en 6 cuadros); porcentajes con espacio («mupirocina 2 %»); «por 3 dosis» en lugar de «x 3 dosis»; «Puñopercusión»; «> 6 años»; «RHA» en gastroenteritis. Sin cambios de contenido clínico ni de dosis.
   1.4.40 — Control evolutivo con chips: en los modos «Control evolutivo» y «Alta» de Intercurrencia, recuadro «↻ Evolución» con una opción por fila (evolución: mejoría / mejoría parcial / sin cambios / empeoramiento; fiebre: afebril desde hace 24-48-72 hs / desde el inicio / persiste febril; tratamiento: cumple / completó / irregular / no inició / sin tratamiento; tolerancia; alimentación). Arma las frases de la evolución; «Refiere mejoría clínica» sigue saliendo por defecto. Sin contenido clínico nuevo.
   1.4.39 — Fecha de fin del tratamiento: en modo Consulta, cada indicación con «por N días» o «por N semanas» agrega la fecha calculada desde la fecha del turno («por 10 días, hasta el 21/11»; rangos: «por 7-10 días, hasta el 18/11 o el 21/11»), en pantalla y en el texto; también en «Agregar indicación». Se desactiva en Ajustes. Sin contenido clínico nuevo.
   1.4.38 — Dosis de adulto y topes visibles: en la conducta de Intercurrencia, cada dosis calculada cuyo tope (dosis máxima) está actuando muestra la marca «tope: dosis máxima» (solo en pantalla) y, con peso ≥ 40 kg o ≥ 12 años, aparece el aviso «verificar que ninguna dosis supere la de adulto» con cuántas dosis están topeadas. Sin contenido clínico nuevo (usa los topes ya cargados).
@@ -972,7 +973,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.40";
+const VERSION = "1.4.41";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1509,7 +1510,7 @@ const DOSIS = {
     return `Cefalexina ${r0(d)} mg cada 6 hs (50 mg/kg/día = ${ml(d,50)} ml de susp. 250 mg/5 ml) por 5-7 días`;},
   tms:()=>{const w=P(); if(!w) return "TMS 8-10 mg/kg/día de TMP cada 12 hs por 7 días"; const d=Math.min(320,10*w)/2;
     return `Trimetoprima-sulfametoxazol ${r0(d)} mg de TMP cada 12 hs (10 mg/kg/día = ${ml(d,8)} ml de susp. 40 mg/5 ml) por 7 días`;},
-  salbSerie:()=>"Salbutamol 2 puff (200 mcg) con aerocámara cada 20 minutos x 3 dosis, luego reevaluación",
+  salbSerie:()=>"Salbutamol 2 puff (200 mcg) con aerocámara cada 20 minutos por 3 dosis, luego reevaluación",
   salbDom:()=>"Salbutamol 2 puff (200 mcg) con aerocámara cada 4 hs, luego espaciar según evolución",
   betam:()=>{const w=P(); return w? `Betametasona gotas ${r0(Math.min(w,40))} gotas (1 gota/kg/dosis) cada 8 hs por 3 días` : "Betametasona gotas 1 gota/kg/dosis cada 8 hs por 3 días";},
   mepred:()=>{const w=P(); if(!w) return "Meprednisona 1-2 mg/kg/día (máx. 40 mg) por 3-5 días"; const mg=Math.min(40,2*w);
@@ -1522,7 +1523,7 @@ const DOSIS = {
     return `Sales de rehidratación oral: ${r0(10*w)} ml por cada deposición líquida y ${r0(2*w)} ml por cada vómito, en pequeños sorbos`;},
   zinc:()=>{const e=edad(); const mg = e && e.months<6 ? 10 : 20; return `Zinc ${mg} mg/día por 10-14 días`;},
   cetiri:()=>{const e=edad(); const m=e?e.months:null;
-    if(m===null) return "Cetirizina (2-6 años: 2,5 mg = 5 gotas cada 12 hs; >6 años: 10 mg/día)";
+    if(m===null) return "Cetirizina (2-6 años: 2,5 mg = 5 gotas cada 12 hs; > 6 años: 10 mg/día)";
     if(m<24){ const w=P(); return w? `Cetirizina ${r1(0.25*w)} mg (${r0(0.5*w)} gotas) cada 12 hs (0,25 mg/kg/dosis)` : "Cetirizina 0,25 mg/kg/dosis cada 12 hs"; }
     if(m<72) return "Cetirizina 2,5 mg (5 gotas) cada 12 hs";
     return "Cetirizina 10 mg/día (20 gotas o 1 comprimido)";},
@@ -1584,7 +1585,7 @@ const INTER = [
   s:[["registros febriles",1],["odinofagia",1],["dolor abdominal",0],["vómitos",0],["tos",-1],["rinorrea",-1]],
   ef:[BG,HID,RESP_OK,CV,"Fauces congestivas, amígdalas hipertróficas con exudado, petequias en paladar blando. Adenopatías cervicales anteriores dolorosas.",OTO0,ABD,DC,RESTO],
   est:[["Test rápido para estreptococo: POSITIVO",1]],
-  c:[["amoxFar",1],["penV",0],["penBz",0],["azi",0],["ibu",1],["Dieta blanda y fría",1],[PA_,1],[MHD,1]], ctrl:"a las 48-72 hs o antes si pautas de alarma"},
+  c:[["amoxFar",1],["penV",0],["penBz",0],["azi",0],["ibu",1],["Dieta blanda y fría",1],[PA_,1],[MHD,1]], ctrl:"en 48-72 hs o antes si pautas de alarma"},
  {id:"herpang",n:"Herpangina",dx:"Herpangina",
   s:[["registros febriles",1],["odinofagia",1],["rechazo del alimento",1],["tos",-1],["rinorrea",-1],["vómitos",0]],
   ef:[BG,HID,RESP_OK,CV,"Fauces eritematosas con vesículas y úlceras en paladar blando y pilares amigdalinos.",OTO0,ABD,DC,RESTO],
@@ -1599,7 +1600,7 @@ const INTER = [
   s:[["otalgia",1],["registros febriles",1],["rinorrea",1],["irritabilidad",0],["otorrea",-1],["vómitos",0]],
   ef:[BG,HID,RESP_VAS,CV,FAU0,"Otoscopia: membrana timpánica derecha eritematosa, abombada y opaca, con pérdida del triángulo luminoso. Oído izquierdo sin particularidades.",ABD,DC,RESTO],
   est:[],
-  c:[["amoxOMA",1],["amoxClav",0],["ibu",1],["para",0],["Lavados nasales con solución fisiológica",1],[PA_,1],[MHD,1]], ctrl:"a las 48-72 hs"},
+  c:[["amoxOMA",1],["amoxClav",0],["ibu",1],["para",0],["Lavados nasales con solución fisiológica",1],[PA_,1],[MHD,1]], ctrl:"en 48-72 hs"},
  {id:"ote",n:"Otitis externa",dx:"Otitis externa",
   s:[["otalgia",1],["natación / pileta",1],["registros febriles",-1],["otorrea",0],["hipoacusia",0]],
   ef:[BG,RESP_OK,"Otoscopia: conducto auditivo externo derecho eritematoso y edematoso, con dolor a la presión del trago y a la tracción del pabellón auricular. Membrana timpánica visible sin alteraciones.",FAU0,RESTO],
@@ -1609,7 +1610,7 @@ const INTER = [
   s:[["tos perruna",1],["disfonía",1],["estridor",0],["registros febriles",0],["rinorrea",1],["dificultad respiratoria",-1]],
   ef:[BG,HID,"Sin estridor en reposo, sin tiraje. Buena mecánica ventilatoria, buena entrada de aire bilateral, sin ruidos agregados. Score de Westley: 0-2 (leve).",CV,"Fauces levemente eritematosas.",ABD,RESTO],
   est:[],
-  c:[["dexa",1],["Nebulización con adrenalina (estridor en reposo)",0],["Vapor de ducha, ambiente tranquilo",1],["ibu",0],[PA_+" (estridor en reposo, dificultad respiratoria, rechazo del alimento)",1]], ctrl:"a las 24-48 hs"},
+  c:[["dexa",1],["Nebulización con adrenalina (estridor en reposo)",0],["Vapor de ducha, ambiente tranquilo",1],["ibu",0],[PA_+" (estridor en reposo, dificultad respiratoria, rechazo del alimento)",1]], ctrl:"en 24-48 hs"},
  {id:"bronco",n:"Broncoespasmo / SBO",dx:"Síndrome bronquial obstructivo",
   s:[["tos",1],["dificultad respiratoria",1],["silbidos",1],["rinorrea",1],["registros febriles",-1]],
   ef:[BG,"Tiraje subcostal leve, regular entrada de aire bilateral, sibilancias espiratorias y rales subcrepitantes bibasales. Score de Tal: _/12.",CV,"Fauces levemente eritematosas.",ABD,DC,RESTO],
@@ -1627,12 +1628,12 @@ const INTER = [
   c:[["amoxNAC",1],["ibu",1],["Abundante hidratación",1],[PA_,1]], ctrl:"en 48 hs"},
  {id:"gea",n:"Gastroenteritis / diarrea aguda",dx:"Gastroenteritis aguda",
   s:[["deposiciones desligadas",1],["vómitos",1],["registros febriles",0],["dolor abdominal",0],["sangre en materia fecal",-1],["moco",-1]],
-  ef:[BG,"Normohidratad{o}, mucosas húmedas, normoperfundid{o}, relleno capilar menor a 2 segundos, pulsos periféricos presentes y simétricos.",RESP_OK,CV,FAU0,"Abdomen blando, depresible, no doloroso, ruidos hidroaéreos aumentados, sin signos de irritación peritoneal.","Diuresis conservada.",RESTO],
+  ef:[BG,"Normohidratad{o}, mucosas húmedas, normoperfundid{o}, relleno capilar menor a 2 segundos, pulsos periféricos presentes y simétricos.",RESP_OK,CV,FAU0,"Abdomen blando, depresible, indoloro, RHA aumentados, sin signos de irritación peritoneal.","Diuresis conservada.",RESTO],
   est:[],
   c:[["sro",1],["Dieta habitual, liviana e hipofermentativa",1],["Prueba de tolerancia oral con agua fría: buena tolerancia",0],["ondan",0],["zinc",0],["ibu",0],["Lavado de manos",1],[PA_+" (vómitos incoercibles, sangre en materia fecal, decaimiento, signos de deshidratación)",1]]},
  {id:"abd",n:"Dolor abdominal / vómitos",dx:"Dolor abdominal agudo",
   s:[["dolor abdominal",1],["vómitos",1],["registros febriles",-1],["deposiciones desligadas",0],["disuria",-1],["constipación",0]],
-  ef:[BG,HID,RESP_OK,CV,FAU0,"Abdomen blando, depresible, levemente doloroso a la palpación en mesogastrio, sin defensa ni signos de irritación peritoneal (Blumberg negativo). RHA conservados. Puño percusión negativa bilateral.",DC,RESTO],
+  ef:[BG,HID,RESP_OK,CV,FAU0,"Abdomen blando, depresible, levemente doloroso a la palpación en mesogastrio, sin defensa ni signos de irritación peritoneal (Blumberg negativo). RHA conservados. Puñopercusión negativa bilateral.",DC,RESTO],
   est:[["Orina completa",0],["Ecografía abdominal",0],["Hemograma y PCR",0]],
   c:[["Prueba de tolerancia oral",1],["Dieta liviana",1],["para",1],["ondan",0],[PA_+" (dolor que se intensifica o localiza en fosa ilíaca derecha, vómitos persistentes, fiebre)",1]], ctrl:"en 24 hs"},
  {id:"const",n:"Constipación",dx:"Constipación funcional",
@@ -1642,7 +1643,7 @@ const INTER = [
   c:[["Hidratación con agua",1],["Dieta rica en fibra: frutas y verduras con cáscara, legumbres, cereales integrales",1],["Hábito evacuatorio: sentarse en el inodoro 5-10 minutos después de las comidas, con apoyo de pies",1],["peg",0],["Vaselina líquida (mayores de 1 año)",0],[PA_,1]], ctrl:"en 2-3 semanas"},
  {id:"itu",n:"ITU / cistitis",dx:"Infección urinaria",
   s:[["registros febriles",1],["disuria",1],["polaquiuria",1],["dolor abdominal",0],["vómitos",0],["orina fétida",0]],
-  ef:[BG,HID,RESP_OK,CV,FAU0,"Abdomen blando, depresible, indoloro. Puño percusión negativa bilateral. Genitales sin lesiones.",RESTO],
+  ef:[BG,HID,RESP_OK,CV,FAU0,"Abdomen blando, depresible, indoloro. Puñopercusión negativa bilateral. Genitales sin lesiones.",RESTO],
   est:[["Orina completa: leucocitos __ por campo, nitritos __",1],["Urocultivo (antes de iniciar antibiótico)",1],["Ecografía renal y vesical",0]],
   c:[["cefa100",1],["cefa50",0],["Abundante hidratación, micciones frecuentes, higiene perineal adelante-atrás",1],["ibu",1],["Control con resultado de urocultivo",1],[PA_,1]], ctrl:"en 48-72 hs"},
  {id:"conj",n:"Conjuntivitis",dx:"Conjuntivitis aguda",
@@ -1664,7 +1665,7 @@ const INTER = [
   s:[["prurito de predominio nocturno",1],["convivientes con prurito",1],["lesiones sobreinfectadas",-1]],
   ef:[BG,"Pápulas eritematosas excoriadas y surcos en pliegues interdigitales, muñecas, axilas y cintura, sin signos de sobreinfección.",RESP_OK,RESTO],
   est:[],
-  c:[["Permetrina 5% loción de cuello a pies por la noche, enjuagar a las 8-12 hs; repetir a los 7 días",1],["ivermec",0],["Tratamiento simultáneo de todos los convivientes",1],["Lavado de ropa de cama y vestimenta con agua caliente, lo no lavable en bolsa cerrada 72 hs",1],["cetiri",1],["Uñas cortas",1]], ctrl:"en 2 semanas"},
+  c:[["Permetrina 5 % loción de cuello a pies por la noche, enjuagar a las 8-12 hs; repetir a los 7 días",1],["ivermec",0],["Tratamiento simultáneo de todos los convivientes",1],["Lavado de ropa de cama y vestimenta con agua caliente, lo no lavable en bolsa cerrada 72 hs",1],["cetiri",1],["Uñas cortas",1]], ctrl:"en 2 semanas"},
  {id:"oxiur",n:"Oxiuriasis",dx:"Oxiuriasis",
   s:[["prurito anal / vulvar nocturno",1],["visualización de parásitos",0],["dolor abdominal",0]],
   ef:[BG,RESP_OK,ABD,RESTO],
@@ -1674,7 +1675,7 @@ const INTER = [
   s:[["lesiones costrosas",1],["prurito",0],["registros febriles",-1]],
   ef:[BG,"Lesiones eritematosas con costras melicéricas en región perioral, sin signos de celulitis.",RESP_OK,RESTO],
   est:[],
-  c:[["Higiene de lesiones con agua y jabón, retirar costras",1],["Mupirocina 2% tópica cada 8 hs por 5-7 días",1],["cefa50",0],["tms",0],["Uñas cortas, toallas individuales",1]], ctrl:"en 48-72 hs"},
+  c:[["Higiene de lesiones con agua y jabón, retirar costras",1],["Mupirocina 2 % tópica cada 8 hs por 5-7 días",1],["cefa50",0],["tms",0],["Uñas cortas, toallas individuales",1]], ctrl:"en 48-72 hs"},
  {id:"celul",n:"Celulitis",dx:"Celulitis",
   s:[["eritema y edema local",1],["dolor",1],["registros febriles",0],["picadura previa",0]],
   ef:[BG,HID,"Placa eritematosa, edematosa, caliente y dolorosa, de bordes mal definidos, sin colección. Movilidad conservada.",RESP_OK,CV,RESTO],
@@ -1749,12 +1750,12 @@ const INTER = [
   s:[["rinorrea purulenta",1],["tos diurna persistente (más de 10 días sin mejoría)",1],["congestión nasal",1],["registros febriles",0],["cefalea o dolor facial",0],["edema o enrojecimiento de párpados",-1]],
   ef:[BG,HID,RESP_VAS,CV,"Rinorrea mucopurulenta, descarga posterior en fauces. Sin edema ni eritema periorbitario.",OTO0,ABD,RESTO],
   est:[],
-  c:[["amoxSin",1],["amoxClav",0],["Alergia a amoxicilina (no grave): cefalosporina de 2.ª generación (no cefaclor); macrólido solo en alergia grave",0],["Lavados nasales con solución fisiológica o hipertónica",1],["No se indican antihistamínicos, descongestivos, mucolíticos ni nebulizaciones",1],["para",1],[PA_+" (edema o enrojecimiento de párpados, dolor ocular o alteración de la visión, cefalea intensa, decaimiento)",1]], ctrl:"a las 48-72 hs (si no mejora: amoxicilina-clavulánico)"},
+  c:[["amoxSin",1],["amoxClav",0],["Alergia a amoxicilina (no grave): cefalosporina de 2.ª generación (no cefaclor); macrólido solo en alergia grave",0],["Lavados nasales con solución fisiológica o hipertónica",1],["No se indican antihistamínicos, descongestivos, mucolíticos ni nebulizaciones",1],["para",1],[PA_+" (edema o enrojecimiento de párpados, dolor ocular o alteración de la visión, cefalea intensa, decaimiento)",1]], ctrl:"en 48-72 hs (si no mejora: amoxicilina-clavulánico)"},
  {id:"adenitis",n:"Adenitis cervical aguda",dx:"Adenitis cervical aguda bacteriana",
   s:[["tumefacción dolorosa en el cuello",1],["registros febriles",1],["odinofagia",0],["dolor dental",0],["fiebre de 5 días o más con exantema, conjuntivitis o labios rojos",-1]],
   ef:[BG,HID,RESP_OK,CV,FAU0,"Adenopatía submaxilar derecha de 3 cm, eritematosa, caliente, dolorosa y móvil, sin fluctuación. Sin otras adenomegalias.",OTO0,ABD,RESTO],
   est:[["Ecografía de partes blandas de cuello",0]],
-  c:[["cefadrox",1],["cefa100",0],["amoxClavAd",0],["Calor local",1],["ibu",1],[PA_+" (aumento del tamaño, fluctuación, decaimiento, dificultad para tragar o respirar, fiebre persistente)",1]], ctrl:"a las 48-72 hs (sin respuesta: evaluar internación)"},
+  c:[["cefadrox",1],["cefa100",0],["amoxClavAd",0],["Calor local",1],["ibu",1],[PA_+" (aumento del tamaño, fluctuación, decaimiento, dificultad para tragar o respirar, fiebre persistente)",1]], ctrl:"en 48-72 hs (sin respuesta: evaluar internación)"},
  {id:"epist",n:"Epistaxis",dx:"Epistaxis anterior",
   s:[["sangrado nasal",1],["episodios previos",0],["traumatismo",-1],["sangrado en otros sitios o hematomas",-1],["medicación que altera la coagulación",-1]],
   ef:[BG,HID,RESP_OK,CV,"Rinoscopia anterior: vasos prominentes en el área de Kiesselbach, sin sangrado activo.",FAU0,"Sin petequias ni hematomas.",RESTO],
@@ -1789,7 +1790,7 @@ const INTER = [
   s:[["placas de alopecia con descamación",1],["prurito",0],["convivientes o mascotas con lesiones",0],["supuración o placa inflamatoria",-1]],
   ef:[BG,"Cuero cabelludo: placa alopécica redondeada con descamación y pelos cortados, sin supuración. Adenopatías occipitales pequeñas.",RESTO],
   est:[["Examen micológico (directo y cultivo) de escamas y pelos",1]],
-  c:[["El tratamiento debe ser por vía oral (el tópico solo no alcanza)",1],["grise",1],["terbi",0],["Champú con ketoconazol 2% como complemento (disminuye el contagio)",1],["Control de convivientes y del entorno escolar; tratar a los familiares afectados; no compartir peines, gorros ni toallas",1]], rep:"", ctrl:"en 2-4 semanas, con resultado del cultivo"},
+  c:[["El tratamiento debe ser por vía oral (el tópico solo no alcanza)",1],["grise",1],["terbi",0],["Champú con ketoconazol 2 % como complemento (disminuye el contagio)",1],["Control de convivientes y del entorno escolar; tratar a los familiares afectados; no compartir peines, gorros ni toallas",1]], rep:"", ctrl:"en 2-4 semanas, con resultado del cultivo"},
  {id:"vv",n:"Vulvovaginitis inespecífica",dx:"Vulvovaginitis inespecífica",
   s:[["flujo vaginal",1],["prurito vulvar",1],["ardor miccional",0],["sangrado genital",-1],["prurito anal nocturno",0]],
   ef:[BG,HID,ABD,"Genitales externos: eritema vulvar con escaso flujo blanquecino, sin lesiones ni sangrado.",RESTO],
@@ -1813,7 +1814,7 @@ const INTER = [
   s:[["registros febriles",1],["odinofagia",1],["exantema",1],["vómitos",0],["dolor abdominal",0],["tos",-1]],
   ef:[BG,HID,RESP_OK,CV,"Fauces congestivas con exudado amigdalino, petequias en paladar, lengua aframbuesada. Exantema micropapular áspero, a predominio de pliegues (signo de Pastia), con palidez peribucal. Adenopatías cervicales anteriores dolorosas.",OTO0,ABD,RESTO],
   est:[["Test rápido para estreptococo",0]],
-  c:[["amoxFar",1],["penV",0],["penBz",0],["azi",0],["Completar los 10 días de tratamiento aunque mejore antes",1],["ibu",1],[PA_,1]], rep:"24", ctrl:"a las 48-72 hs o antes si pautas de alarma"},
+  c:[["amoxFar",1],["penV",0],["penBz",0],["azi",0],["Completar los 10 días de tratamiento aunque mejore antes",1],["ibu",1],[PA_,1]], rep:"24", ctrl:"en 48-72 hs o antes si pautas de alarma"},
  {id:"mono",n:"Mononucleosis infecciosa",dx:"Síndrome mononucleósico",
   s:[["registros febriles",1],["odinofagia",1],["decaimiento",1],["adenopatías en el cuello",1],["exantema (con o sin amoxicilina)",0],["dificultad respiratoria o para tragar",-1],["dolor abdominal",0]],
   ef:[BG,HID,RESP_OK,CV,"Fauces congestivas, amígdalas hipertróficas con exudado. Adenomegalias cervicales bilaterales.",ABD,"Polo de bazo palpable.",RESTO],
@@ -1831,7 +1832,7 @@ const INTER = [
   s:[["mordedura de perro",1],["perro conocido, con vacunación antirrábica al día",0],["mordedura en cabeza, cuello, manos, pies, mucosas o genitales",-1],["herida extensa o profunda",-1],["registros febriles",-1]],
   ef:[BG,"Herida punzante superficial en pierna derecha, sin signos de infección ni compromiso de estructuras profundas.",RESTO],
   est:[],
-  c:[["Lavado abundante de la herida con agua y jabón neutro; antisepsia con iodopovidona, clorhexidina 2% o alcohol 70%",1],["Evitar la sutura si es posible (si hace falta, la menor cantidad de puntos)",1],["Observación del perro durante 10 días con certificación veterinaria; coordinar con zoonosis local",1],["Vacuna antirrábica (3 dosis; continuar según la observación del animal): perro de riesgo, herida grave o en cabeza, cuello, manos, pies, mucosas o genitales",0],["Antitetánica si el último refuerzo fue hace más de 5 años",1],["Profilaxis antibiótica con amoxicilina-clavulánico (heridas de riesgo)",0],[PA_+" (enrojecimiento, calor, secreción, fiebre)",1]], rep:"", ctrl:"en 48 hs y al terminar la observación del perro (10 días)"},
+  c:[["Lavado abundante de la herida con agua y jabón neutro; antisepsia con iodopovidona, clorhexidina 2 % o alcohol 70 %",1],["Evitar la sutura si es posible (si hace falta, la menor cantidad de puntos)",1],["Observación del perro durante 10 días con certificación veterinaria; coordinar con zoonosis local",1],["Vacuna antirrábica (3 dosis; continuar según la observación del animal): perro de riesgo, herida grave o en cabeza, cuello, manos, pies, mucosas o genitales",0],["Antitetánica si el último refuerzo fue hace más de 5 años",1],["Profilaxis antibiótica con amoxicilina-clavulánico (heridas de riesgo)",0],[PA_+" (enrojecimiento, calor, secreción, fiebre)",1]], rep:"", ctrl:"en 48 hs y al terminar la observación del perro (10 días)"},
  {id:"sincope",n:"Síncope",dx:"Síncope vasovagal (probable)",
   s:[["pérdida transitoria de la conciencia",1],["pródromos (mareo, visión borrosa, palidez, sudoración)",1],["desencadenante (mucho tiempo de pie, calor, dolor, lugares concurridos)",1],["durante el ejercicio",-1],["estando acostad{o}",-1],["palpitaciones",-1],["antecedentes familiares de muerte súbita",-1],["movimientos convulsivos",-1]],
   ef:[BG,HID,"TA y FC acostad{o}, sentad{o} y de pie, sin hipotensión ortostática.",RESP_OK,"R1 R2 normofonéticos, sin soplos. Pulsos periféricos presentes y simétricos.",ABD,"Examen neurológico sin foco.",RESTO],
@@ -1841,7 +1842,7 @@ const INTER = [
   s:[["prurito",1],["lesiones eccematosas",1],["trastornos del sueño por prurito",0],["registros febriles",-1],["lesiones con secreción o costras",-1]],
   ef:[BG,"Piel xerótica. Placas eritematosas, descamativas y excoriadas en pliegues de flexión de codos y huecos poplíteos, sin signos de sobreinfección.",RESP_OK,RESTO],
   est:[],
-  c:[["Baño breve (5 minutos) con agua templada (27-30 °C) y jabón suave sin perfume",1],["Emolientes 1 a 3 veces por día sobre la piel sana, dentro de los 3 minutos de terminado el baño",1],["Corticoide tópico de potencia baja o moderada (p. ej., desonida, budesonida o fluticasona) en crema, 1-2 veces por día sobre las lesiones por 5-10 días; cuidado en párpados, cara, pliegues y zona del pañal",1],["Ropa de algodón suave, holgada y clara; lavar con jabón neutro y sin suavizante; evitar lana, sintéticos y transpiración",1],["Mupirocina 2% tópica cada 8 hs por 5-7 días en lesiones impetiginizadas pequeñas",0],[PA_+" (fiebre con vesículas o erosiones agrupadas, lesiones con pus)",1]], rep:"", ctrl:"al terminar el corticoide tópico (7-10 días)"},
+  c:[["Baño breve (5 minutos) con agua templada (27-30 °C) y jabón suave sin perfume",1],["Emolientes 1 a 3 veces por día sobre la piel sana, dentro de los 3 minutos de terminado el baño",1],["Corticoide tópico de potencia baja o moderada (p. ej., desonida, budesonida o fluticasona) en crema, 1-2 veces por día sobre las lesiones por 5-10 días; cuidado en párpados, cara, pliegues y zona del pañal",1],["Ropa de algodón suave, holgada y clara; lavar con jabón neutro y sin suavizante; evitar lana, sintéticos y transpiración",1],["Mupirocina 2 % tópica cada 8 hs por 5-7 días en lesiones impetiginizadas pequeñas",0],[PA_+" (fiebre con vesículas o erosiones agrupadas, lesiones con pus)",1]], rep:"", ctrl:"al terminar el corticoide tópico (7-10 días)"},
  {id:"colico",n:"Cólicos del lactante",dx:"Cólicos del lactante",
   s:[["llanto paroxístico inconsolable, a predominio vespertino",1],["vómitos",-1],["regurgitaciones frecuentes",-1],["registros febriles",-1],["sangre en materia fecal",-1],["rechazo del alimento",-1]],
   ef:[BG,HID,RESP_OK,CV,ABD,"Región perianal sin lesiones. Buena progresión de peso.",RESTO],
@@ -1860,6 +1861,8 @@ const INTER = [
 ];
 
 /* ---------- estado de intercurrencia ---------- */
+/* v1.4.41 (ítem 48): orden unificado de la conducta — «Se dan pautas de alarma» siempre al final (después de las medidas higiénico-dietéticas). */
+INTER.forEach(x=>{ const i=x.c.findIndex(c=>typeof c[0]==="string" && c[0].startsWith(PA_)); if(i>=0 && i<x.c.length-1) x.c.push(x.c.splice(i,1)[0]); });
 let iCur=null, iSintState=[], iEstState=[], iCondState=[];
 /* Puntaje de TAL — MSAL, «Abordaje integral de las infecciones respiratorias agudas», Guía para el equipo de salud N° 6, 2.ª ed., 2011, p. 41.
    Gravedad: 0-4 leve, 5-8 moderado, 9-12 grave. (Pendiente de revisión médica.) */

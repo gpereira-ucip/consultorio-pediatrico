@@ -54,9 +54,9 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 43. [x] (v1.4.38, 10/11) Peso ≥40 kg o adolescente: aviso de dosis de adulto y topes visibles.
 44. [x] (v1.4.39, 11/11) Fecha de fin del tratamiento calculada («por 10 días, hasta el 19/11»).
 45. [x] (v1.4.40, 11/11) Control evolutivo con chips (mejoró / igual / peor, afebril desde…, completa tratamiento).
-46. [ ] Hidratación: plan A/B/C de la OMS con volúmenes calculados por peso.
-47. [ ] Presentaciones comerciales frecuentes en Argentina por fármaco y redondeo práctico a ml o gotas (revisión médica).
-48. [ ] Revisar y unificar el estilo de todas las plantillas de intercurrencia (abreviaturas, tildes, orden).
+46. [~] Hidratación: plan A/B/C de la OMS con volúmenes calculados por peso. No empezado: el 11/11 la sesión no tuvo acceso web a las fuentes (red del entorno limitada: sap.org.ar, argentina.gob.ar, who.int, etc. no resolvían). Fuente a usar: MSAL, «Plan de abordaje integral de la enfermedad diarreica aguda», Guía para el equipo de salud N.º 8 (planes A, B y C). Reintentar cuando haya acceso.
+47. [~] Presentaciones comerciales frecuentes en Argentina por fármaco y redondeo práctico a ml o gotas (revisión médica). No empezado: sin acceso web el 11/11 (ver ítem 46); además conviene que Gonzalo pase la lista de presentaciones que receta. Reintentar.
+48. [x] (v1.4.41, 11/11) Revisar y unificar el estilo de todas las plantillas de intercurrencia (abreviaturas, tildes, orden).
 
 ## D. Crecimiento y percentilos
 49. [ ] Peso para la talla (OMS, 0-5 años).

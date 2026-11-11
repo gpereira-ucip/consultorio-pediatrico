@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.4.40 (11/11/2026)
+- Versión actual: 1.4.41 (11/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -57,6 +57,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - **Dosis de adulto y topes** (v1.4.38): `dosisTope(k)` ejecuta la función de `DOSIS` interceptando `Math.min` y detecta si el tope ganó (excluye `betam`, que limita gotas); la etiqueta de la conducta muestra «tope: dosis máxima» (`.tope`; el texto del ítem va en `.ct`). `renderAdulto` muestra `iAdultWarn` con peso ≥ 40 kg o edad ≥ 12 años. No cambia el texto copiado.
 - **Fecha de fin del tratamiento** (v1.4.39): `finTto(t)` / `condOut(k)` agregan «, hasta el dd/mm» después del primer «por|durante N[-M] días|semanas» de cada ítem de conducta (y de «Agregar indicación»), en pantalla y en el texto. Fecha = fecha del turno + N días (como el ejemplo de Gonzalo: 09/11 + 10 días = 19/11). Solo en modo Consulta. Ajustes → «Fecha de fin del tratamiento» (`sFin`: si/no).
 - **Control evolutivo con chips** (v1.4.40): recuadro «↻ Evolución» (`iEvoBox`, `EVO_G`, estado `evoS`, por defecto `{ev:0}` = «Refiere mejoría clínica») dentro de `iCtrlBox` (modos control y alta). Una opción por fila (otro clic la quita): evolución, fiebre, tratamiento, tolerancia y alimentación. `evoFrase(k)` arma las oraciones en `genInter` (orden: evolución, fiebre, «Último registro febril», tratamiento, tolerancia, alimentación, «Persiste con…»). «Nuevo paciente» lo reinicia; deshacer lo recupera; no se guarda en plantillas.
+- **Estilo unificado de intercurrencias** (v1.4.41, ítem 48): revisión automática de los 54 cuadros (mayúsculas, punto final, tildes, abreviaturas). Normalización al cargar: después de definir `INTER`, el ítem que empieza con `PA_` se mueve al final de `c`. Convenciones para cuadros nuevos: síntomas en minúscula y sin punto; EF en oraciones con punto final; conducta con mayúscula inicial y sin punto final; «hs», «cada» (no «c/»), «por» (no «x»), «N %» con espacio, «> 6», `ctrl` con «en N hs» / «evolutivo».
 - **Apto físico** con constancia modelo. **Ajustes** (médico, matrícula, mayúsculas, títulos) en localStorage.
 
 ## Identidad visual
@@ -143,6 +144,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.39 Fecha de fin: se calcula como fecha del turno + N días (ejemplo de la lista: «por 10 días, hasta el 19/11» escrito el 09/11). Si Gonzalo prefiere contar el día de inicio (último día = fecha + N − 1), es un cambio de una línea. También le pone fecha a «Observación del perro durante 10 días» y a los rangos (dos fechas).
 
 ## Historial
+- 1.4.41 (11/11/2026): ítem 48 — estilo unificado de las plantillas (solo redacción y orden; sin contenido clínico nuevo). Ítems 46 y 47 quedan [~] sin empezar: la sesión no tuvo acceso web a las fuentes oficiales. Probado con Playwright (análisis de los 54 cuadros: pautas de alarma al final en todos; regresión completa).
 - 1.4.40 (11/11/2026): ítem 45 — chips del control evolutivo. Sin contenido clínico nuevo (frases del interrogatorio). Probado con Playwright (por defecto, todas las filas, quitar, empeoramiento, nuevo paciente + deshacer, 1440/390 px; regresión completa).
 - 1.4.39 (11/11/2026): ítem 44 — fecha de fin del tratamiento. Sin contenido clínico nuevo. Probado con Playwright (OMA, sinusitis, tiña en semanas, impétigo, mordedura, cambio de año, modo control sin fecha, opción desactivada; regresión completa).
 - 1.4.38 (10/11/2026): ítem 43 — topes visibles y aviso de dosis de adulto. Sin contenido clínico nuevo. Probado con Playwright (OMA con 20 y 45 kg: 3 topes; 13 años sin peso; Math.min restaurado; regresión completa).
