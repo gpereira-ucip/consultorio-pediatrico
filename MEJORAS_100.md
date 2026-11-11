@@ -82,7 +82,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 
 ## F. Recetas, certificados e indicaciones
 67. [x] (v1.4.51, 11/11) Receta de medicamentos: fármaco, presentación, dosis, frecuencia, días y cantidad de envases. En la pestaña nueva «Recetas» (Alt+7).
-68. [ ] Certificado de reposo o evicción con fechas desde/hasta.
+68. [x] (v1.4.52, 11/11) Certificado de reposo o evicción con fechas desde/hasta.
 69. [ ] Certificado de apto escolar / educación física.
 70. [ ] Certificado de apto para natación (piel, uñas, pies).
 71. [ ] Indicaciones para la familia en lenguaje simple, para copiar a WhatsApp.

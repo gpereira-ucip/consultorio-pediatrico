@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.51 (2026-11-11)
+  VERSION: 1.4.52 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.52 — Certificado de reposo / evicción (pestaña Recetas): tipo (reposo domiciliario, evicción escolar, sin educación física o solo constancia de atención), desde, días y hasta (se calculan entre sí; «hasta» es inclusive y agrega la fecha de reintegro), diagnóstico opcional, cuidador que acompaña y observaciones; botón para traer el diagnóstico y el reposo de Intercurrencia. Texto administrativo, sin contenido clínico.
   1.4.51 — Pestaña nueva «Recetas» (recetas y certificados; Alt+7) con la receta de medicamentos: renglones con fármaco (genérico), presentación, dosis, frecuencia, duración y envases; «Traer de la conducta de Intercurrencia» crea un renglón por cada medicamento con dosis tildado; diagnóstico, datos del paciente, peso opcional, una receta por medicamento o todas juntas, firma. Botones Copiar y Ver; COPIAR de la barra inferior copia el documento activo. No calcula dosis ni guarda nada. Encabezado ajustado para 7 pestañas.
   1.4.50 — Vacunas: tarjeta «Mensaje para la familia» con un texto simple para WhatsApp (vacunas que le corresponden ahora, pendientes de antes si se tildó el carnet, próximas vacunas con fecha, y el recordatorio de que no requieren orden médica y de llevar el carnet) y botón «Copiar mensaje». Usa solo el primer nombre si está cargado. Sin contenido clínico nuevo (las notas son las que ya traía el calendario de la app).
   1.4.49 — Vacunas: columna «Ya recibida» para tildar las dosis del carnet (botón «Carnet al día» tilda todas las previas; se destildan las que falten). Las previas sin tildar pasan a «atrasada», se listan en un aviso con botón para sumarlas a la receta y salen en el texto del control («carnet incompleto… Dosis atrasadas: …»); una dosis de hoy tildada como recibida deja de indicarse. «Próxima vacunación» ahora dice las vacunas, la fecha exacta y los días que faltan. Los tildes no se guardan. No calcula intervalos mínimos de recupero.
@@ -890,7 +891,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 <!-- ================= RECETAS Y CERTIFICADOS (v1.4.51) ================= -->
 <div id="t-docs" class="hidden">
   <div class="sechead"><div style="flex:1"><h2>Recetas y certificados</h2><div class="sub">Textos listos para copiar · usan los datos del paciente del encabezado · no se guardan</div></div></div>
-  <details class="card" id="rpCard" open>
+  <details class="card" id="rpCard" data-doc="rp" open>
     <summary><span class="ic">💊</span>Receta de medicamentos<span class="sum" id="sumRp"></span></summary>
     <div class="inner">
       <div id="rpList"></div>
@@ -903,6 +904,23 @@ body.compact{font-size:13.5px;padding-bottom:66px}
         <label class="chk"><input type="checkbox" id="rpFirma" checked> firma</label>
       </div>
       <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="rp">Copiar receta</button><button type="button" class="btn sec sm" data-doc-ver="rp">Ver</button><span class="hint">Recetá por nombre genérico. Las dosis las escribís vos: la app no las calcula acá.</span></div>
+    </div>
+  </details>
+  <details class="card" id="crCard" data-doc="cr">
+    <summary><span class="ic">🛌</span>Certificado de reposo / evicción<span class="sum" id="sumCr"></span></summary>
+    <div class="inner">
+      <div class="row">
+        <label class="f">Tipo<select id="crTipo"><option value="reposo">Reposo domiciliario</option><option value="evic">Evicción escolar</option><option value="ef">Sin educación física / deporte</option><option value="const">Solo constancia de atención</option></select></label>
+        <label class="f">Desde<input type="date" id="crDesde"></label>
+        <label class="f">Días<input id="crDias" class="n" inputmode="numeric" value="2"></label>
+        <label class="f">Hasta (inclusive)<input type="date" id="crHasta"></label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <label class="f" style="flex:1;min-width:220px">Diagnóstico (opcional; vacío = no se menciona)<input id="crDx" placeholder="ej. cuadro febril agudo"></label>
+        <label class="f" style="flex:1;min-width:220px">Cuidador que lo acompaña (opcional)<input id="crCuid" placeholder="ej. su madre, María López, DNI 30.111.222"></label>
+      </div>
+      <input id="crObs" placeholder="Observaciones (opcional)" style="width:100%;margin-top:8px">
+      <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="cr">Copiar certificado</button><button type="button" class="btn sec sm" data-doc-ver="cr">Ver</button><button type="button" class="btn sec sm" id="crInter">↧ Traer diagnóstico y reposo de Intercurrencia</button></div>
     </div>
   </details>
 </div>
@@ -1018,7 +1036,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.51";
+const VERSION = "1.4.52";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -2919,7 +2937,32 @@ function genRp(){ const its=rpItems.filter(it=>(it.f||"").trim()); if(!its.lengt
   const uno=(it,n)=>{ const l=rpLinea(it); return (n? n+") " : "Rp/ ")+l.cab+(l.ind? "\n"+(n?"   ":"")+"Indicación: "+l.ind : ""); };
   if($("rpSep").checked || its.length===1) return its.map(it=>cabz+uno(it,0)+dx+f).join("\n\n----------\n\n");
   return cabz+"Rp/\n"+its.map((it,i)=>uno(it,i+1)).join("\n")+dx+f; }
-function genDoc(k){ return k==="rp"? genRp() : ""; }
+/* certificados (ítems 68-70): redacción administrativa propia; el diagnóstico es opcional (confidencialidad). */
+function certQuien(){ const e=edad(); return ($("nombre").value.trim()||"……………………")+", DNI "+($("dni").value.trim()||"……………")+(e? ", de "+edadTxt(e)+"," : ","); }
+function certPie(){ return "Se extiende el presente a pedido de la familia, para ser presentado ante quien corresponda.\nFecha: "+dmy(parseD($("fc").value))+"\n"+firma(); }
+const sumar=(d,n)=>new Date(d.getFullYear(), d.getMonth(), d.getDate()+n);
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+/* certificado de reposo / evicción (ítem 68): desde + N días → hasta (inclusive) = desde + N − 1; reintegro = hasta + 1. */
+const dxMin=t=>{ t=t.trim().replace(/\.$/,""); return /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]/.test(t)? t[0].toLowerCase()+t.slice(1) : t; };
+function crFechas(){ const d=parseD($("crDesde").value)||parseD($("fc").value), n=parseInt($("crDias").value,10), h=parseD($("crHasta").value);
+  if(!d) return null; const hasta = h && h>=d? h : (n>0? sumar(d,n-1) : null); if(!hasta) return {d};
+  return {d, h:hasta, n:Math.round((hasta-d)/864e5)+1, re:sumar(hasta,1)}; }
+function genCr(){ const f=crFechas(); if(!f) return ""; const tipo=$("crTipo").value, dx=$("crDx").value.trim(), cu=$("crCuid").value.trim(), obs=$("crObs").value.trim();
+  const T={reposo:["CERTIFICADO DE REPOSO","debe guardar reposo domiciliario"], evic:["CERTIFICADO DE EVICCIÓN ESCOLAR","no debe concurrir a la escuela ni a actividades grupales (evicción escolar)"], ef:["CERTIFICADO MÉDICO","no debe realizar educación física ni actividad deportiva"], const:["CONSTANCIA DE ATENCIÓN",""]}[tipo];
+  const L=[T[0]]; let t=`Certifico que ${certQuien()} fue atendid{o} en el día de la fecha`+(dx? " por "+dxMin(dx) : "");
+  if(tipo==="const") t+=".";
+  else { t+=" y "+T[1]; if(f.h) t+=(f.n===1? ` por 1 día (${dmy(f.d)}).` : ` por ${f.n} días, desde el ${dmy(f.d)} hasta el ${dmy(f.h)} inclusive.`)+` Podrá reintegrarse a sus actividades el ${dmy(f.re)}, si la evolución es favorable.`; else t+=" desde el "+dmy(f.d)+" hasta nuevo control."; }
+  L.push(G(t));
+  if(cu) L.push(G(tipo==="const"? `Concurrió acompañad{o} por ${cu}.` : `Durante ese período requiere el cuidado de ${cu}.`));
+  if(obs) L.push("Observaciones: "+obs.replace(/\.$/,"")+".");
+  L.push(certPie()); return L.join("\n"); }
+function crSync(src){ const d=parseD($("crDesde").value)||parseD($("fc").value); if(!d) return;
+  if(src==="hasta"){ const h=parseD($("crHasta").value); if(h && h>=d) $("crDias").value=Math.round((h-d)/864e5)+1; }
+  else { const n=parseInt($("crDias").value,10); $("crHasta").value = n>0? iso(sumar(d,n-1)) : ""; } }
+["crDias","crDesde"].forEach(id=>$(id).addEventListener("input", ()=>{ crSync("dias"); update(); })); $("crHasta").addEventListener("input", ()=>{ crSync("hasta"); update(); });
+$("crInter").onclick=()=>{ if(!iCur) return; $("crDx").value=$("iDx").value; const r=parseInt($("iRep").value,10); if(r>0){ $("crDias").value=Math.round(r/24); $("crTipo").value=$("iRepTipo").value==="evic"? "evic" : $("iRepTipo").value==="const"? "const" : "reposo"; } crSync("dias"); S.doc="cr"; update(); toast("Datos traídos de Intercurrencia"); };
+const DOCS={rp:genRp, cr:genCr};
+function genDoc(k){ return DOCS[k]? DOCS[k]() : ""; }
 function docMay(t){ return $("sMay").value==="mayus"? t.toUpperCase() : t; }
 $("rpList").addEventListener("input", ev=>{ const d=ev.target.dataset.rp; if(!d) return; const [i,k]=d.split(":"); rpItems[+i][k]=ev.target.value; S.doc="rp"; update(); });
 $("rpAdd").onclick=()=>{ rpItems.push({}); renderRp(); update(); const el=document.querySelector(`[data-rp="${rpItems.length-1}:f"]`); if(el) el.focus(); };
@@ -2931,7 +2974,7 @@ document.addEventListener("click", ev=>{ const x=ev.target.closest("[data-rpdel]
   const c=ev.target.closest("[data-doc-copy]"), v=ev.target.closest("[data-doc-ver]"); if(!c && !v) return; const k=(c||v).dataset.docCopy||(c||v).dataset.docVer; S.doc=k; update(); const t=genDoc(k);
   if(!t){ toast(k==="rp"? "Cargá al menos un medicamento" : "Faltan datos para armar el texto"); return; }
   if(c) copy(docMay(t), "Copiado: pegalo con Ctrl+V"); else { $("preview").classList.remove("hidden"); $("out").scrollTop=0; } });
-$("t-docs").addEventListener("focusin", ev=>{ const d=ev.target.closest("details[id]"); const k=d && {rpCard:"rp"}[d.id]; if(k && S.doc!==k){ S.doc=k; update(); } });
+$("t-docs").addEventListener("focusin", ev=>{ const d=ev.target.closest("details[id]"); const k=d && d.dataset.doc; if(k && S.doc!==k){ S.doc=k; update(); } });
 
 /* ---------- render vacunas ---------- */
 function renderVac(){
@@ -2997,6 +3040,7 @@ function updateSums(e, pr){
     $("sumPlan").textContent = cnt("#cRec")+" indicaciones"+(e && e.months<12? " + suplementos":"");
   }
   if($("sumRp")){ const n=rpItems.filter(it=>(it.f||"").trim()).length; $("sumRp").textContent = n? n+(n===1?" medicamento":" medicamentos") : "sin medicamentos"; }
+  if($("sumCr")){ const f=crFechas(); $("sumCr").textContent = $("crTipo").value==="const"? "constancia" : f && f.h? f.n+(f.n===1?" día":" días")+" · hasta el "+dmy(f.h) : ""; }
   if(iCur){ const ne=cnt("#iEst"); $("sumIEst").textContent = ne? ne+" seleccionado(s)" : "ninguno"; }
   const sexo = S.sexo==="v"?"Varón":S.sexo==="m"?"Mujer":"elegí sexo";
   const ctx = {control:"Control de salud", inter:"Intercurrencia: "+(iCur?iCur.n:""), perc:"Percentilos", vac:"Vacunas", apto:"Apto físico", docs:"Recetas y certificados", ajustes:"Ajustes"}[S.tab]||"";
@@ -3244,7 +3288,7 @@ document.addEventListener("keydown", e=>{
 $("nuevo").onclick = ()=>{
   undoGuardar();
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
-   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); $("eIncl").checked=false;
+   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta"].forEach(id=>$(id).value=""); $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
   $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();
