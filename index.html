@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.39 (2026-11-11)
+  VERSION: 1.4.40 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.40 — Control evolutivo con chips: en los modos «Control evolutivo» y «Alta» de Intercurrencia, recuadro «↻ Evolución» con una opción por fila (evolución: mejoría / mejoría parcial / sin cambios / empeoramiento; fiebre: afebril desde hace 24-48-72 hs / desde el inicio / persiste febril; tratamiento: cumple / completó / irregular / no inició / sin tratamiento; tolerancia; alimentación). Arma las frases de la evolución; «Refiere mejoría clínica» sigue saliendo por defecto. Sin contenido clínico nuevo.
   1.4.39 — Fecha de fin del tratamiento: en modo Consulta, cada indicación con «por N días» o «por N semanas» agrega la fecha calculada desde la fecha del turno («por 10 días, hasta el 21/11»; rangos: «por 7-10 días, hasta el 18/11 o el 21/11»), en pantalla y en el texto; también en «Agregar indicación». Se desactiva en Ajustes. Sin contenido clínico nuevo.
   1.4.38 — Dosis de adulto y topes visibles: en la conducta de Intercurrencia, cada dosis calculada cuyo tope (dosis máxima) está actuando muestra la marca «tope: dosis máxima» (solo en pantalla) y, con peso ≥ 40 kg o ≥ 12 años, aparece el aviso «verificar que ninguna dosis supere la de adulto» con cuántas dosis están topeadas. Sin contenido clínico nuevo (usa los topes ya cargados).
   1.4.37 — Alergia a penicilina: si «Alergias» dice penicilina, amoxicilina o betalactámicos, la conducta marca cada betalactámico con «⚠ betalactámico» y aparece un aviso con la alternativa que trae el cuadro (azitromicina, TMS, etc.) y el botón «Usar la alternativa» (destilda los betalactámicos y tilda la alternativa); si el cuadro no trae alternativa, lo avisa. Chip «Alergia: penicilina» junto a los antecedentes. Solo en pantalla; sin contenido clínico nuevo.
@@ -183,6 +184,7 @@ h3 .hint{text-transform:none;letter-spacing:0}
 .apchips button.on{background:var(--okbg);border-color:#a9d4b7;color:#24603b}
 .apchips .qt{font-size:12px;color:var(--muted);margin-right:2px}
 .fiebox{margin-top:10px;padding:10px 12px;border:1px dashed #efb9b0;border-radius:12px;background:#fffaf8}
+.fiebox.evobox{border-color:#b9d6d3;background:#f7fbfa}.fiebox.evobox .fieT{color:var(--accent,#2f6f6d)}
 .fiebox .fieT{font:600 13.5px var(--font);color:#9b3a2f;align-self:center}
 .fiebox .fg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
 .fiebox .fg>small{min-width:84px;color:var(--muted);font-size:12px}
@@ -682,6 +684,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <div id="iCtrlBox" class="row hidden" style="margin-top:8px">
         <label class="f">Tratamiento en curso<input id="iTto" style="width:260px" placeholder="amoxicilina cada 12 hs"></label>
         <label class="f">Último registro febril<input id="iUltFiebre" class="s" placeholder="hace 48 hs"></label>
+        <div id="iEvoBox" class="fiebox evobox" style="flex-basis:100%;margin-top:2px"><b class="fieT">↻ Evolución</b> <span class="hint">un clic por fila; otro clic lo quita</span><div id="iEvoChips"></div></div>
       </div>
       <h3>Síntomas <span class="hint">clic: presente → niega → sin mencionar</span></h3>
       <div id="iSint" class="chips"></div>
@@ -969,7 +972,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.39";
+const VERSION = "1.4.40";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1950,6 +1953,20 @@ const FIE_G = [
   {k:"e", t:"Entre picos", c:["con buen estado general entre picos","con decaimiento entre picos"]}
 ];
 let fieS={};
+/* control evolutivo con chips (v1.4.40, ítem 45): datos del interrogatorio del control; una opción por fila. */
+const EVO_G = [
+  {k:"ev", t:"Evolución", c:["Refiere mejoría clínica","Refiere mejoría parcial","Sin cambios respecto de la consulta previa","Refiere empeoramiento clínico"]},
+  {k:"af", t:"Fiebre", c:["Afebril desde hace 24 hs","Afebril desde hace 48 hs","Afebril desde hace 72 hs","Afebril desde el inicio del cuadro","Persiste febril"]},
+  {k:"tt", t:"Tratamiento", c:["Cumple el tratamiento indicado","Completó el tratamiento indicado","Cumplimiento irregular del tratamiento","No inició el tratamiento indicado","Sin tratamiento farmacológico"]},
+  {k:"to", t:"Tolerancia", c:["Buena tolerancia a la medicación","Mala tolerancia a la medicación"]},
+  {k:"al", t:"Alimentación", c:["Buena actitud alimentaria","Actitud alimentaria disminuida","Buena tolerancia oral"]}
+];
+let evoS={ev:0};
+function renderEvo(){ const b=$("iEvoChips"); if(!b) return;
+  b.innerHTML = EVO_G.map(g=>`<div class="fg"><small>${g.t}</small>`+g.c.map((c,i)=>`<span class="chip ${evoS[g.k]===i?"on":""}" data-evo="${g.k}" data-v="${i}">${c.replace(/^Refiere /,"").replace(/ a la medicación| el tratamiento indicado| del tratamiento/,"").toLowerCase()}</span>`).join("")+`</div>`).join(""); }
+function evoFrase(k){ const g=EVO_G.find(x=>x.k===k); return evoS[k]!==undefined && g.c[evoS[k]]? " "+g.c[evoS[k]]+"." : ""; }
+document.addEventListener("click", ev=>{ const c=ev.target.closest(".chip[data-evo]"); if(!c) return; const k=c.dataset.evo, v=+c.dataset.v;
+  if(evoS[k]===v) delete evoS[k]; else evoS[k]=v; renderEvo(); update(); });
 function fiebreOn(){ return iSintState.some(s=>s[1]===1 && /febri|fiebre/i.test(s[0])); }
 function renderFiebre(){ const b=$("iFiebreBox"); if(!b) return; const on=fiebreOn(); b.classList.toggle("hidden", !on); if(!on) return;
   $("iFChips").innerHTML = FIE_G.map(g=>`<div class="fg"><small>${g.t}</small>`+g.c.map((c,i)=>`<span class="chip ${fieS[g.k]===i?"on":""}" data-fie="${g.k}" data-v="${i}">${c.replace(/^que /,"")}</span>`).join("")+`</div>`).join(""); }
@@ -2048,7 +2065,7 @@ function condOut(k){ return finTto(condText(k)); }
 function renderInter(){
   $("iSint").innerHTML = iSintState.map((s,i)=>`<span class="chip ${s[1]===1?"p":s[1]===-1?"n":""}" data-i="${i}">${G(s[0])}</span>`).join("")+
     `<input id="iNuevoSint" placeholder="otro síntoma" style="width:150px;padding:2px 8px;border-radius:20px"><span class="chip" id="iAddSint">＋ agregar</span>`;
-  renderFiebre(); renderAlerta(); renderApChips();
+  renderFiebre(); renderEvo(); renderAlerta(); renderApChips();
   $("iEst").innerHTML = iEstState.map((s,i)=>`<label class="chk"><input type="checkbox" data-ie="${i}" ${s[1]?"checked":""}>${G(s[0])}</label>`).join("") || '<span class="hint">—</span>';
   $("iCond").innerHTML = iCondState.map((s,i)=>`<label class="chk"><input type="checkbox" data-ic="${i}" ${s[1]?"checked":""}><span class="ct">${condOut(s[0])}</span>${DOSIS[s[0]]? `<span class="tope${dosisTope(s[0])?"":" hidden"}">tope: dosis máxima</span>`:""}</label>`).join("");
   renderAdulto();
@@ -2508,8 +2525,8 @@ function genInter(){
     ea = `{El} paciente${ed}, cursando cuadro de ${($("iDx").value||"").toLowerCase()}`+
          ($("iTto").value? ` en tratamiento con ${$("iTto").value}` : "")+
          ($("iTiempo").value? ` desde hace ${$("iTiempo").value}`:"")+`, ${concurre()} para control clínico.`+
-         ($("iUltFiebre").value? ` Último registro febril ${$("iUltFiebre").value}.`:"")+
-         ` Refiere mejoría clínica.`+(pos.length? ` Persiste con ${joinY(pos)}.`:"");
+         evoFrase("ev")+evoFrase("af")+($("iUltFiebre").value? ` Último registro febril ${$("iUltFiebre").value}.`:"")+
+         evoFrase("tt")+evoFrase("to")+evoFrase("al")+(pos.length? ` Persiste con ${joinY(pos)}.`:"");
   }
   ea += fiebreFrase();
   if(neg.length) ea += ` Niega ${joinNi(neg)}.`;
@@ -2886,7 +2903,7 @@ function undoGuardar(){
   UNDO={ t:Date.now(), vals, supl, sexo:S.sexo, iModo:S.iModo, cB:cB&&cB.id, iSel:$("iSel").value,
     cHitosState:cl(cHitosState), cRecState:cl(cRecState), cEstState:cl(cEstState),
     iSintState:cl(iSintState), iEstState:cl(iEstState), iCondState:cl(iCondState), talS:cl(talS), efDirty:cl(efDirty),
-    vacSel:[...vacSel], vacKey, uso:[...usoContados], cDxDirty, pesqS:cl(pesqS), sdS:cl(sdS), fieS:cl(fieS) };
+    vacSel:[...vacSel], vacKey, uso:[...usoContados], cDxDirty, pesqS:cl(pesqS), sdS:cl(sdS), fieS:cl(fieS), evoS:cl(evoS) };
 }
 function undoAplicarVals(vals){ Object.keys(vals).forEach(id=>{ const el=$(id); if(!el) return; if("c" in vals[id]) el.checked=vals[id].c; else el.value=vals[id].v; }); }
 function undoRestaurar(){
@@ -2899,7 +2916,7 @@ function undoRestaurar(){
   iSintState=u.iSintState; iEstState=u.iEstState; iCondState=u.iCondState; talS=u.talS;
   Object.assign(efDirty, u.efDirty);
   S.iModo=u.iModo; document.querySelectorAll("#iModo button").forEach(x=>x.classList.toggle("on", x.dataset.m===S.iModo)); $("iCtrlBox").classList.toggle("hidden", S.iModo==="ini");
-  vacSel=new Set(u.vacSel); vacKey=u.vacKey; cDxDirty=u.cDxDirty; pesqS=u.pesqS||{}; sdS=u.sdS||{}; fieS=u.fieS||{}; usoContados.clear(); u.uso.forEach(x=>usoContados.add(x));
+  vacSel=new Set(u.vacSel); vacKey=u.vacKey; cDxDirty=u.cDxDirty; pesqS=u.pesqS||{}; sdS=u.sdS||{}; fieS=u.fieS||{}; evoS=u.evoS||{ev:0}; usoContados.clear(); u.uso.forEach(x=>usoContados.add(x));
   renderControl();
   document.querySelectorAll("#cSupl input").forEach(i=>{ if(i.dataset.s in u.supl) i.checked=u.supl[i.dataset.s]; });
   renderInter(); if(typeof plBotones==="function") plBotones();
@@ -2921,7 +2938,7 @@ document.addEventListener("keydown", e=>{
 $("nuevo").onclick = ()=>{
   undoGuardar();
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
-   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; $("eIncl").checked=false;
+   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
   $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();
