@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.63 (2026-11-11)
+  VERSION: 1.4.64 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.64 — Autodiagnóstico en Ajustes: un botón recorre todos los controles por edad, las intercurrencias en los 3 modos (incluidas Mis plantillas), apto, vacunas, percentilos, certificados y mensajes para la familia en ambos sexos, y revisa cálculos de referencia (tablas OMS, peso/talla, presión arterial, dosis con varios pesos, fechas). Informa «todo en orden» o la lista de problemas; no guarda nada y deja el paciente como estaba.
   1.4.63 — Respaldo completo en Ajustes: «Descargar respaldo (.json)» guarda en un archivo los ajustes, Mis frases, Mis plantillas y el contador de cuadros más usados; «Importar respaldo» lo lee y deja elegir entre agregar a lo que hay (sin duplicar) o reemplazar todo. No incluye datos de pacientes. Los exportar/importar anteriores de frases y plantillas siguen funcionando.
   1.4.62 — Pantalla «Novedades» (enlace al pie y en Ajustes): lista lo que cambió en cada versión, marca «nuevo» lo agregado desde la última vez que se miró y, al abrir una versión más nueva, avisa con un punto en el enlace. Se arma sola con la lista de cambios del propio archivo. Sin contenido clínico.
   1.4.61 — Microanimaciones suaves (0,15-0,25 s): aparición de la pestaña y del contenido de las tarjetas al abrirlas, pulso del botón COPIAR al copiar, aviso (toast) que sube, ventanas que entran desde abajo, botones y chips con transición de color y leve efecto al presionar. Se desactivan solas si el sistema tiene «reducir movimiento». Sin cambios de contenido.
@@ -1052,6 +1053,12 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     <p class="hint">Versión <span id="ver"></span> · <button type="button" class="linkbtn" id="novBtn2">ver novedades</button> · Realizado por Dr. Gonzalo Gabriel Pereira.</p>
   </section>
   <section class="card">
+    <h2 style="font-size:17px">🩺 Autodiagnóstico de la app</h2>
+    <p class="hint" style="margin:4px 0 8px">Recorre todas las plantillas (controles por edad, intercurrencias en los 3 modos, Mis plantillas, apto, vacunas y percentilos, en ambos sexos) y revisa cálculos de referencia. Tarda alrededor de 20 segundos; al terminar deja el paciente como estaba.</p>
+    <div class="btns"><button type="button" class="btn sm" id="adRun">Ejecutar autodiagnóstico</button><span class="hint" id="adProg"></span></div>
+    <div id="adRes" class="hidden" style="margin-top:8px"></div>
+  </section>
+  <section class="card">
     <h2 style="font-size:17px">💾 Respaldo de toda la configuración</h2>
     <p class="hint" style="margin:4px 0 8px">Un solo archivo con los ajustes, Mis frases, Mis plantillas y el contador de cuadros más usados. Sirve para tener copia o pasar todo a otra computadora o navegador. No incluye datos de pacientes (la app no los guarda).</p>
     <div class="btns"><button type="button" class="btn sm" id="bkExport">⬇ Descargar respaldo (.json)</button><button type="button" class="btn sec sm" id="bkImportBtn">⬆ Importar respaldo…</button><input type="file" id="bkFile" accept=".json,application/json" class="hidden" aria-label="Archivo de respaldo"></div>
@@ -1202,7 +1209,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.63";
+const VERSION = "1.4.64";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3823,6 +3830,54 @@ function plBorrar(i){
   };
 })();
 update();
+/* ---------- autodiagnóstico (v1.4.64, ítem 96): genera todos los textos y revisa cálculos de referencia. No guarda nada; restaura el paciente. ---------- */
+async function autodiag(){
+  if(autodiag._on) return; autodiag._on=true; const t0=Date.now(), fallas=[], prog=$("adProg"), res=$("adRes"); let n=0, nTxt=0, nCalc=0;
+  const malo=/undefined|NaN|\{|\[object/, pausa=()=>new Promise(r=>setTimeout(r,0));
+  const ok=(c,msg)=>{ n++; if(!c && fallas.length<40) fallas.push(msg); };
+  const txt=(nombre,t)=>{ nTxt++; const m=t && t.match(/.{0,30}(undefined|NaN|\{|\[object).{0,30}/); ok(!!t && !m, nombre+": "+(t? "«"+(m?m[0]:"")+"»" : "texto vacío")); };
+  $("adRun").disabled=true; res.classList.add("hidden"); undoGuardar(); const snap=UNDO, tab0=S.tab; UNDO=null;
+  const realToast=toast._t; const fcISO=$("fc").value||isoHoy(), fc=parseD(fcISO);
+  const fnDe=d=>iso(new Date(fc.getFullYear(), fc.getMonth(), fc.getDate()-d));
+  try{
+    /* 1. cálculos de referencia */
+    ["w","h","pc","imc"].forEach(k=>["v","m"].forEach(sx=>{ const t=LMS[k][sx]; ok(Array.isArray(t)&&t.length>10, "LMS "+k+" "+sx+" sin datos"); [0,Math.floor(t.length/2),t.length-1].forEach(i=>{ const l=t[i].slice(1); nCalc++; ok(Math.abs(zOf(l[1],l))<1e-9, `z de la mediana ≠ 0 (${k} ${sx} fila ${i})`); ok(Math.abs(zOf(xOf(1.881,l),l)-1.881)<1e-6, `ida y vuelta P97 (${k} ${sx} fila ${i})`); }); }));
+    ["l","h"].forEach(tp=>["v","m"].forEach(sx=>{ const t=LMS_PT[tp][sx], l=ptLMS(sx,t[5][0],tp); nCalc++; ok(l && Math.abs(l[1]-t[5][2])<1e-9, "peso/talla "+tp+" "+sx); ok(ptLMS(sx,t[0][0]-1,tp)===null, "peso/talla fuera de tabla "+tp+" "+sx); }));
+    nCalc+=6; ok(Math.abs(zAdj(xOf(3,[1,10,0.1])+ (xOf(3,[1,10,0.1])-xOf(2,[1,10,0.1])),[1,10,0.1])-4)<1e-9, "z ajustado OMS (> 3)");
+    ok(Math.abs(Math.sqrt(170*70/3600)-1.818)<0.001, "Mosteller"); ok(Math.abs(Phi(0)-0.5)<1e-6 && Math.abs(Phi(1.881)-0.97)<0.001, "Phi");
+    ok(BP_T.v.length===17 && BP_T.m.length===17 && BP_T.v.every(r=>r.length===6 && r.every(c=>c.length===7)), "tabla de presión arterial incompleta");
+    ok(BP_T.v.every(r=>r[0].every((x,i)=>x<r[1][i] && r[1][i]<r[2][i])) && BP_T.m.every(r=>r[3].every((x,i)=>x<r[4][i] && r[4][i]<r[5][i])), "presión arterial: P50 < P90 < P95");
+    ok(dm(sumar(new Date(2026,11,28),10))==="07/01", "suma de fechas"); const rr=parseMedLinea("12/3 7,2kg 66cm", new Date(2026,10,11)); ok(rr && rr.w===7.2 && rr.h===66, "lector de mediciones");
+    const ids=INTER.map(x=>x.id); ok(new Set(ids).size===ids.length, "cuadros con id repetido");
+    INTER.forEach(x=>{ nCalc++; ok(x.n && x.dx!==undefined && Array.isArray(x.s) && Array.isArray(x.ef) && Array.isArray(x.est) && Array.isArray(x.c) && x.c.length>0, "cuadro incompleto: "+x.id);
+      x.c.forEach(c=>{ if(typeof c[0]==="string" && /^[a-z][A-Za-z0-9]*$/.test(c[0])) ok(!!DOSIS[c[0]], `dosis inexistente «${c[0]}» en ${x.id}`); }); });
+    Object.keys(ALERTA).forEach(k=>ok(ids.includes(k), "banderas rojas de un cuadro inexistente: "+k));
+    VAC.forEach(x=>ok(VN[x.v] && VS[x.v], "vacuna sin nombre: "+x.v));
+    const pesoReal=$("peso").value; [null,3.2,10,20,45,70].forEach(w=>{ $("peso").value=w===null? "" : String(w); Object.keys(DOSIS).forEach(k=>{ nCalc++; let t=""; try{ t=DOSIS[k](); }catch(e){ t="undefined ("+e.message+")"; } ok(typeof t==="string" && t && !malo.test(t), `dosis ${k} ${w===null?"sin peso":"con "+w+" kg"}: «${String(t).slice(0,50)}»`); }); }); $("peso").value=pesoReal;
+    /* 2. textos */
+    const EDADES=[[10,3.4,50],[183,7.5,67],[457,10.5,78],[1461,16,102],[1830,18.5,109],[4020,38,145],[5115,52,162]];
+    for(const sx of ["v","m"]){ setSexo(sx);
+      for(const b of CTRL){ const d=Math.round((b.min+0.2)*30.4375); $("fn").value=fnDe(d); $("peso").value=""; $("talla").value=""; onAge(); irTab("control"); update(); txt(`control ${b.id} ${sx}`, $("out").value); }
+      await pausa();
+      for(const [d,w,t] of EDADES){ $("fn").value=fnDe(d); $("peso").value=String(w); $("talla").value=String(t); $("ta").value=d>400? "100/60" : ""; onAge();
+        for(const tb of ["control","perc","vac","apto"]){ irTab(tb); update(); txt(`${tb} ${d} d ${sx}`, $("out").value); }
+        txt(`certificado escolar ${d} d ${sx}`, certEscolar()); txt(`mensaje de vacunas ${d} d ${sx}`, vacFamilia()); txt(`certificados ${d} d ${sx}`, [genCr(),genCe(),genCn()].join("\n")); ok(typeof svgA4()==="string" && svgA4().length>2000 && !/NaN|undefined/.test(svgA4()), `hoja A4 ${d} d ${sx}`); }
+      prog.textContent="controles "+(sx==="v"?"varón":"mujer")+" ✓ …"; await pausa();
+      const sel=[...$("iSel").options].map(o=>o.value).filter((v,i,a)=>a.indexOf(v)===i); irTab("inter"); let k=0;
+      for(const [d,w] of [[183,7.5],[4020,38]]){ $("fn").value=fnDe(d); $("peso").value=String(w); onAge();
+        for(const id of sel){ for(const m of ["ini","ctrl","alta"]){ loadInter(id); document.querySelector('#iModo button[data-m="ini"]').click(); if(m!=="ini") document.querySelector('#iModo button[data-m="'+m+'"]').click();
+            iCondState.forEach(s=>s[1]=1); iEstState.forEach(s=>s[1]=1); if(m==="ini") iSintState.forEach((s,i)=>s[1]=i%2?1:-1); renderInter(); update(); txt(`${id} ${m} ${d} d ${sx}`, $("out").value); if(m==="ini") txt(`mensaje familia ${id} ${sx}`, famInter(false)); }
+          if(++k%12===0){ prog.textContent=`intercurrencias ${sx==="v"?"varón":"mujer"}: ${k}/${sel.length*2} …`; await pausa(); } }
+        document.querySelector('#iModo button[data-m="ini"]').click(); } }
+  }catch(e){ ok(false, "error inesperado: "+e.message); }
+  UNDO=snap; undoRestaurar(); irTab(tab0==="ajustes"? "ajustes" : tab0); irTab("ajustes");
+  const seg=((Date.now()-t0)/1000).toFixed(1).replace(".",","); prog.textContent=""; res.classList.remove("hidden"); res.className = fallas.length? "alert" : "okbox";
+  res.innerHTML = fallas.length? `<b>⚠ ${fallas.length}${fallas.length>=40?"+":""} problema(s) en ${n} comprobaciones</b> (v${VERSION}, ${seg} s). Avisale a quien mantiene la app:<ul>`+fallas.map(f=>"<li>"+mfEsc(f)+"</li>").join("")+"</ul>"
+    : `<b>✓ Todo en orden.</b> ${n} comprobaciones sin errores: ${nTxt} textos generados (controles, intercurrencias × 3 modos, apto, vacunas, percentilos, certificados; ambos sexos) y ${nCalc} cálculos de referencia. Versión ${VERSION}, ${seg} s.`;
+  $("adRun").disabled=false; autodiag._on=false; toast(fallas.length? "Autodiagnóstico: hay problemas" : "Autodiagnóstico: todo en orden"); return {n, nTxt, nCalc, fallas};
+}
+$("adRun").onclick=()=>autodiag();
+
 /* ---------- respaldo completo (v1.4.63, ítem 97): ajustes + frases + plantillas + uso en un archivo JSON. Sin datos de pacientes. ---------- */
 let BK=null;
 function bkArmar(){ const aj={}; SET_IDS.forEach(id=>aj[id]=$(id).value); return {app:"consultorio-pediatrico", version:VERSION, fecha:isoHoy(), ajustes:aj, frases:MF, plantillas:PL, uso:USO}; }
