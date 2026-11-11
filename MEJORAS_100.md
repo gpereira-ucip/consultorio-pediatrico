@@ -90,7 +90,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 73. [~] Hoja de alimentación complementaria por edad para la familia (fuente: MSAL/SAP). No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
 74. [~] Hojas para la familia: sueño seguro, lactancia, prevención de accidentes por edad. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
 75. [x] (v1.4.56, 11/11) Interconsultas y derivaciones redactadas (cardiología, ORL, oftalmología, traumatología…).
-76. [ ] Pedido de estudios redactado (laboratorio, Rx, ecografía) con diagnóstico presuntivo.
+76. [x] (v1.4.57, 11/11) Pedido de estudios redactado (laboratorio, Rx, ecografía) con diagnóstico presuntivo.
 
 ## G. Scores y calculadoras
 77. [ ] Pulmonary Score (Guía SAP de asma; conseguir la tabla oficial).

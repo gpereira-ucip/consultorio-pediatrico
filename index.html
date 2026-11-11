@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.56 (2026-11-11)
+  VERSION: 1.4.57 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.57 — Pedido de estudios (pestaña Recetas): chips de laboratorio, imágenes y otros estudios (37 nombres frecuentes), campo de otros estudios, diagnóstico presuntivo, observaciones, datos del paciente y opción de un pedido por tipo; «Traer estudios tildados en Control e Intercurrencia». La lista es de nombres para tildar, no una recomendación de qué pedir.
   1.4.56 — Interconsulta / derivación (pestaña Recetas): tipo, especialidad (24 opciones u otra), prioridad, motivo, resumen, estudios realizados, diagnóstico presuntivo y lo que se solicita; arma la nota («Estimado/a colega: solicito interconsulta para la paciente de … por …») con datos del paciente, fecha y firma. Botón para traer los datos positivos, antecedentes y diagnóstico de la consulta. El contenido lo escribe el médico.
   1.4.55 — Mensaje para la familia en Intercurrencia (tarjeta al final): «Copiar indicaciones + alarma» arma un texto para WhatsApp con el diagnóstico, lo tildado en la conducta en lista (sin el cálculo en mg/kg, con los ml y la fecha de fin), el reposo, las pautas de alarma del cuadro una por renglón y el control; «Copiar solo pautas de alarma» manda solo esa parte. No agrega contenido clínico: reordena lo que ya está en la conducta.
   1.4.54 — Certificado de apto para natación (pestaña Recetas): examen de piel, uñas, pies y espacios interdigitales y cuero cabelludo (vacío = «sin lesiones»), resultado (apto / no apto transitoriamente con motivo), validez editable (30 días) y observaciones. Texto administrativo, sin contenido clínico.
@@ -983,6 +984,19 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="ic">Copiar</button><button type="button" class="btn sec sm" data-doc-ver="ic">Ver</button><button type="button" class="btn sec sm" id="icTraer">↧ Traer datos positivos y diagnóstico de la consulta</button></div>
     </div>
   </details>
+  <details class="card" id="peCard" data-doc="pe">
+    <summary><span class="ic">🧪</span>Pedido de estudios<span class="sum" id="sumPe"></span></summary>
+    <div class="inner">
+      <div id="peList" class="fiebox evobox" style="margin-top:0"></div>
+      <label class="f" style="margin-top:8px">Otros estudios (uno por línea)<textarea id="peOtros" class="sm" placeholder="ej. Radiografía de codo derecho frente y perfil"></textarea></label>
+      <div class="row" style="margin-top:8px">
+        <label class="f" style="flex:1;min-width:220px">Diagnóstico presuntivo<input id="peDx" placeholder="ej. anemia en estudio"></label>
+        <label class="f" style="flex:1;min-width:220px">Observaciones<input id="peObs" placeholder="ej. ayuno de 8 hs"></label>
+      </div>
+      <div class="row" style="margin-top:6px"><label class="chk"><input type="checkbox" id="peDatos" checked> datos del paciente</label><label class="chk"><input type="checkbox" id="peSep"> un pedido por tipo (laboratorio / imágenes / otros)</label></div>
+      <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="pe">Copiar pedido</button><button type="button" class="btn sec sm" data-doc-ver="pe">Ver</button><button type="button" class="btn sec sm" id="peTraer">↧ Traer estudios tildados en Control e Intercurrencia</button><button type="button" class="linkbtn" id="peClear">vaciar</button></div>
+    </div>
+  </details>
 </div>
 
 <!-- ================= AJUSTES ================= -->
@@ -1096,7 +1110,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.56";
+const VERSION = "1.4.57";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3068,7 +3082,21 @@ function genIc(){ const esp=($("icEsp").value==="otra"? $("icEspOtra").value.tri
   L.push("Solicito: "+(sol||"evaluación y conducta").replace(/\.?$/,"."));
   if(pri) L.push("Prioridad: "+pri+".");
   L.push("Agradezco su evaluación.", "Fecha: "+dmy(parseD($("fc").value)), firma()); return L.join("\n"); }
-const DOCS={rp:genRp, cr:genCr, ce:genCe, cn:genCn, ic:genIc};
+/* pedido de estudios (ítem 76): lista de nombres de estudios para tildar (no es una guía de qué pedir) + texto libre. */
+const PE_G=[["Laboratorio",["Hemograma","Eritrosedimentación","Proteína C reactiva","Glucemia","Urea","Creatinina","Ionograma","Hepatograma","Proteinograma","Perfil lipídico","Ferritina","TSH y T4 libre","IgA antitransglutaminasa e IgA total","Orina completa","Urocultivo","Coproparasitológico seriado","Test de Graham","Coprocultivo","Exudado de fauces"]],
+ ["Imágenes",["Radiografía de tórax frente","Radiografía de tórax frente y perfil","Radiografía de cavum","Radiografía de senos paranasales","Radiografía de mano y muñeca izquierda (edad ósea)","Radiografía de caderas","Ecografía de caderas","Ecografía abdominal","Ecografía renal y vesical","Ecografía cerebral","Ecografía de partes blandas"]],
+ ["Otros",["Electrocardiograma","Ecocardiograma","Audiometría","Otoemisiones acústicas","Espirometría","Electroencefalograma","Fondo de ojo"]]];
+let peSel=new Set();
+function renderPe(){ $("peList").innerHTML = PE_G.map(g=>`<div class="fg"><small>${g[0]}</small>`+g[1].map(n=>`<span class="chip ${peSel.has(n)?"on":""}" data-pe="${n}">${n}</span>`).join("")+`</div>`).join(""); }
+function genPe(){ const otros=$("peOtros").value.split(/\n|;/).map(x=>x.trim()).filter(Boolean), dx=$("peDx").value.trim(), obs=$("peObs").value.trim();
+  const grupos=PE_G.map(g=>[g[0], g[1].filter(n=>peSel.has(n))]); if(otros.length) grupos.push(["Otros estudios", otros]);
+  const con=grupos.filter(g=>g[1].length); if(!con.length) return "";
+  const cab="Fecha: "+dmy(parseD($("fc").value))+"\n"+($("peDatos").checked? pacLinea(false)+"\n" : ""), pie=(dx? "\nDiagnóstico presuntivo: "+dx.replace(/\.?$/,".") : "")+(obs? "\nObservaciones: "+obs.replace(/\.?$/,".") : "")+"\n"+firma();
+  const bloque=its=>"Solicito:\n"+its.map(n=>"- "+n).join("\n");
+  if($("peSep").checked){ const fus=[]; con.forEach(g=>{ const k=g[0]==="Otros estudios"||g[0]==="Otros"? "Otros" : g[0]; const f=fus.find(x=>x[0]===k); f? f[1].push(...g[1]) : fus.push([k,g[1].slice()]); }); return fus.map(g=>cab+bloque(g[1])+pie).join("\n\n----------\n\n"); }
+  return cab+bloque(con.flatMap(g=>g[1]))+pie; }
+document.addEventListener("click", ev=>{ const c=ev.target.closest(".chip[data-pe]"); if(!c) return; const n=c.dataset.pe; peSel.has(n)? peSel.delete(n) : peSel.add(n); S.doc="pe"; renderPe(); update(); });
+const DOCS={rp:genRp, cr:genCr, ce:genCe, cn:genCn, ic:genIc, pe:genPe};
 function genDoc(k){ return DOCS[k]? DOCS[k]() : ""; }
 function docMay(t){ return $("sMay").value==="mayus"? t.toUpperCase() : t; }
 $("rpList").addEventListener("input", ev=>{ const d=ev.target.dataset.rp; if(!d) return; const [i,k]=d.split(":"); rpItems[+i][k]=ev.target.value; S.doc="rp"; update(); });
@@ -3149,6 +3177,7 @@ function updateSums(e, pr){
   if($("sumRp")){ const n=rpItems.filter(it=>(it.f||"").trim()).length; $("sumRp").textContent = n? n+(n===1?" medicamento":" medicamentos") : "sin medicamentos"; }
   if($("sumCr")){ const f=crFechas(); $("sumCr").textContent = $("crTipo").value==="const"? "constancia" : f && f.h? f.n+(f.n===1?" día":" días")+" · hasta el "+dmy(f.h) : ""; }
   if($("sumIc")){ $("icEspOtraL").classList.toggle("hidden", $("icEsp").value!=="otra"); $("sumIc").textContent = ($("icMot").value.trim()||$("icRes").value.trim()||$("icDx").value.trim())? ($("icEsp").value==="otra"? $("icEspOtra").value : $("icEsp").value) : ""; }
+  if($("sumPe")){ const n=peSel.size+$("peOtros").value.split(/\n|;/).filter(x=>x.trim()).length; $("sumPe").textContent = n? n+(n===1?" estudio":" estudios") : ""; }
   if($("sumCn")) $("sumCn").textContent = $("cnRes").value==="apto"? "apto · "+$("cnVal").value.trim() : "no apto transitoriamente";
   if($("sumCe")){ $("ceActOtroL").classList.toggle("hidden", $("ceAct").value!=="otro"); $("sumCe").textContent = $("ceRes").selectedOptions[0].textContent.toLowerCase(); }
   if(iCur){ const ne=cnt("#iEst"); $("sumIEst").textContent = ne? ne+" seleccionado(s)" : "ninguno"; }
@@ -3365,7 +3394,7 @@ function undoGuardar(){
   UNDO={ t:Date.now(), vals, supl, sexo:S.sexo, iModo:S.iModo, cB:cB&&cB.id, iSel:$("iSel").value,
     cHitosState:cl(cHitosState), cRecState:cl(cRecState), cEstState:cl(cEstState),
     iSintState:cl(iSintState), iEstState:cl(iEstState), iCondState:cl(iCondState), talS:cl(talS), efDirty:cl(efDirty),
-    vacSel:[...vacSel], vacKey, uso:[...usoContados], cDxDirty, pesqS:cl(pesqS), sdS:cl(sdS), fieS:cl(fieS), evoS:cl(evoS), vacRec:[...vacRec], rpItems:cl(rpItems) };
+    vacSel:[...vacSel], vacKey, uso:[...usoContados], cDxDirty, pesqS:cl(pesqS), sdS:cl(sdS), fieS:cl(fieS), evoS:cl(evoS), vacRec:[...vacRec], rpItems:cl(rpItems), peSel:[...peSel] };
 }
 function undoAplicarVals(vals){ Object.keys(vals).forEach(id=>{ const el=$(id); if(!el) return; if("c" in vals[id]) el.checked=vals[id].c; else el.value=vals[id].v; }); }
 function undoRestaurar(){
@@ -3378,7 +3407,7 @@ function undoRestaurar(){
   iSintState=u.iSintState; iEstState=u.iEstState; iCondState=u.iCondState; talS=u.talS;
   Object.assign(efDirty, u.efDirty);
   S.iModo=u.iModo; document.querySelectorAll("#iModo button").forEach(x=>x.classList.toggle("on", x.dataset.m===S.iModo)); $("iCtrlBox").classList.toggle("hidden", S.iModo==="ini");
-  vacSel=new Set(u.vacSel); vacKey=u.vacKey; cDxDirty=u.cDxDirty; pesqS=u.pesqS||{}; sdS=u.sdS||{}; fieS=u.fieS||{}; evoS=u.evoS||{ev:0}; vacRec=new Set(u.vacRec||[]); rpItems=u.rpItems&&u.rpItems.length? u.rpItems : [{}]; renderRp(); usoContados.clear(); u.uso.forEach(x=>usoContados.add(x));
+  vacSel=new Set(u.vacSel); vacKey=u.vacKey; cDxDirty=u.cDxDirty; pesqS=u.pesqS||{}; sdS=u.sdS||{}; fieS=u.fieS||{}; evoS=u.evoS||{ev:0}; vacRec=new Set(u.vacRec||[]); rpItems=u.rpItems&&u.rpItems.length? u.rpItems : [{}]; renderRp(); peSel=new Set(u.peSel||[]); renderPe(); usoContados.clear(); u.uso.forEach(x=>usoContados.add(x));
   renderControl();
   document.querySelectorAll("#cSupl input").forEach(i=>{ if(i.dataset.s in u.supl) i.checked=u.supl[i.dataset.s]; });
   renderInter(); if(typeof plBotones==="function") plBotones();
@@ -3400,7 +3429,7 @@ document.addEventListener("keydown", e=>{
 $("nuevo").onclick = ()=>{
   undoGuardar();
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
-   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta","ceDet","ceObs","ceActOtro","cnPiel","cnUnas","cnPies","cnPelo","cnDet","cnObs","icMot","icRes","icEst","icDx","icSol","icEspOtra"].forEach(id=>$(id).value=""); $("ceRes").value="apto"; $("cnRes").value="apto"; $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
+   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; peSel=new Set(); renderPe(); $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta","ceDet","ceObs","ceActOtro","cnPiel","cnUnas","cnPies","cnPelo","cnDet","cnObs","icMot","icRes","icEst","icDx","icSol","icEspOtra","peOtros","peDx","peObs"].forEach(id=>$(id).value=""); $("ceRes").value="apto"; $("cnRes").value="apto"; $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
   $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();
@@ -3452,6 +3481,10 @@ $("icEsp").innerHTML = IC_ESP.map(x=>`<option>${x}</option>`).join("")+'<option 
 $("icTraer").onclick=()=>{ const pos=[$("iPos").value.trim(), $("cPos").value.trim(), $("aPos").value.trim()].filter(Boolean).join(". "), ap=$("iAP").value.trim();
   const usoInter = !!($("iPos").value.trim() || usoContados.size); if(pos || ap) $("icRes").value=[ap? "Antecedentes: "+ap : "", pos].filter(Boolean).join(". ");
   const dx = usoInter && iCur? $("iDx").value.trim() : ""; if(dx && !$("icDx").value.trim()) $("icDx").value=dx; S.doc="ic"; update(); toast(pos||ap||dx? "Datos traídos: revisalos" : "No hay datos positivos ni antecedentes cargados"); };
+renderPe();
+$("peClear").onclick=()=>{ peSel=new Set(); ["peOtros","peDx","peObs"].forEach(id=>$(id).value=""); renderPe(); update(); };
+$("peTraer").onclick=()=>{ const lim=t=>G(t).replace(/:.*$/,"").replace(/\s*\(.*$/,"").trim(); const its=[...cEstState.filter(s=>s[1]).map(s=>lim(s[0])), ...iEstState.filter(s=>s[1]).map(s=>lim(s[0])), $("cEstOtro").value.trim(), $("iEstOtro").value.trim()].filter(Boolean);
+  if(!its.length){ toast("No hay estudios tildados en Control ni en Intercurrencia"); return; } const ya=$("peOtros").value.split(/\n/).map(x=>x.trim()).filter(Boolean); const todos=PE_G.flatMap(g=>g[1]); its.forEach(t=>{ if(todos.includes(t)) peSel.add(t); else if(!ya.includes(t)) ya.push(t); }); $("peOtros").value=ya.join("\n"); S.doc="pe"; renderPe(); update(); toast("Estudios traídos: revisá los nombres"); };
 renderRp();
 loadControl("rn");
 loadInter("cvas");

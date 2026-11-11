@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.4.56 (11/11/2026)
+- Versión actual: 1.4.57 (11/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -73,6 +73,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - **Certificado de apto para natación** (v1.4.54): tarjeta `cnCard` (`data-doc="cn"`), `genCn()` con `CN_C` (piel, uñas, pies, cuero cabelludo), `cnRes`, `cnVal` (30 días), `cnDet`, `cnObs`.
 - **Mensaje para la familia (Intercurrencia)** (v1.4.55): tarjeta `famCard` con `iFam` (solo lectura, se actualiza en `update`), `iFamCopy` y `iFamCopyPA`. `famInter(soloPA)` usa `iCondState` tildado (menos el ítem de pautas y los ítems de uso médico: notificación, reevaluación, pruebas, serie de salbutamol), `famItem()` quita los paréntesis de mg/kg y deja los ml, `famAlarma()` separa `iPA` por comas (si está vacío: «Empeoramiento o cualquier síntoma que les preocupe»), reposo/evicción y control.
 - **Interconsulta / derivación** (v1.4.56): tarjeta `icCard` (`data-doc="ic"`), `IC_ESP`, `genIc()` (vacío si no hay motivo, resumen ni diagnóstico), `icTraer` (trae `iAP` + datos positivos de las tres pestañas y, si se usó Intercurrencia, `iDx`).
+- **Pedido de estudios** (v1.4.57): tarjeta `peCard` (`data-doc="pe"`), `PE_G` (grupos Laboratorio / Imágenes / Otros), `peSel` (Set en memoria; `UNDO` lo recupera), `renderPe`, `genPe()` («Solicito:» + lista + «Diagnóstico presuntivo» + firma; `peSep` separa por tipo), `peTraer` (pasa los estudios tildados de `cEstState`/`iEstState`, sin el resultado que sigue a «:»; si coinciden con un chip lo tilda), `peClear`.
 - **Apto físico** con constancia modelo. **Ajustes** (médico, matrícula, mayúsculas, títulos) en localStorage.
 
 ## Identidad visual
@@ -169,8 +170,10 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.53 Certificado de apto: redacción propia y validez por defecto de 1 año (editable); no reemplaza la evaluación de la pestaña Apto físico (antecedentes, ECG). Revisar la redacción y la validez que use Gonzalo.
 - v1.4.54 Apto para natación: redacción propia («no presenta lesiones cutáneas, micosis ni pediculosis que contraindiquen el ingreso a la pileta») y validez por defecto de 30 días (cada club o colonia pide la suya). Revisar.
 - v1.4.55 Mensaje para la familia: el texto es la misma conducta de la HC (no se reescribió en lenguaje llano) y la frase genérica «Consulten nuevamente o concurran a la guardia si presenta: …» es mía. Revisar cómo queda en los cuadros que más usa y qué ítems no deberían ir a la familia.
+- v1.4.57 Pedido de estudios: la lista de chips es una selección mía de nombres frecuentes (no indica cuándo pedirlos): que Gonzalo diga cuáles sobran o faltan y cómo los nombra su laboratorio.
 
 ## Historial
+- 1.4.57 (11/11/2026): ítem 76 — pedido de estudios. Probado con Playwright (chips, otros estudios, traer de ITU, un pedido por tipo, nuevo paciente + deshacer; regresión completa).
 - 1.4.56 (11/11/2026): ítem 75 — interconsultas y derivaciones redactadas. Ítems 73 y 74 quedan [~] sin empezar (sin acceso web). Probado con Playwright (interconsulta y derivación, especialidad «otra», traer datos, ambos sexos; regresión completa).
 - 1.4.55 (11/11/2026): ítems 71 (parcial) y 72 — mensaje para la familia con indicaciones y pautas de alarma. Sin contenido clínico nuevo. Probado con Playwright (OMA, GEA, bronquiolitis, dengue, CVAS, escabiosis; los 54 cuadros con toda la conducta tildada sin undefined/NaN/{ ni mg/kg; regresión completa).
 - 1.4.54 (11/11/2026): ítem 70 — certificado de apto para natación. Probado con Playwright (apto, no apto con motivo, 390 px con todas las tarjetas abiertas; regresión completa).
