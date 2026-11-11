@@ -52,7 +52,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 41. [x] (v1.4.36, 10/11) Antecedentes con chips (asma, alergias, prematurez, cardiopatía, internaciones).
 42. [x] (v1.4.37, 10/11) Alergia a penicilina tildada: ocultar o advertir los betalactámicos y sugerir la alternativa de la plantilla.
 43. [x] (v1.4.38, 10/11) Peso ≥40 kg o adolescente: aviso de dosis de adulto y topes visibles.
-44. [ ] Fecha de fin del tratamiento calculada («por 10 días, hasta el 19/11»).
+44. [x] (v1.4.39, 11/11) Fecha de fin del tratamiento calculada («por 10 días, hasta el 19/11»).
 45. [ ] Control evolutivo con chips (mejoró / igual / peor, afebril desde…, completa tratamiento).
 46. [ ] Hidratación: plan A/B/C de la OMS con volúmenes calculados por peso.
 47. [ ] Presentaciones comerciales frecuentes en Argentina por fármaco y redondeo práctico a ml o gotas (revisión médica).
