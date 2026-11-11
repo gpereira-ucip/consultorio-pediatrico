@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.4.49 (11/11/2026)
+- Versión actual: 1.4.50 (11/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -66,6 +66,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - **Blanco genético en la curva** (v1.4.47): `blancoVal()` → {bg, lo, hi}; en `svgChart('h')` se calcula el z del blanco y de su rango con el LMS de talla a los 6935 días (19 años) y se dibujan como canal (línea punteada + banda, recortados al área del gráfico con `clipPath`); marca vertical a los 19 años si el rango del gráfico llega a 18 años; leyenda abajo a la izquierda.
 - **Frase de crecimiento** (v1.4.48): `crecFrase()` agrupa peso, talla y PC (< 3 años) por franja (`zona`/`PCN`: < P3, P3-P15, P15-P50, P50-P85, P85-P97, > P97) y, si hay mediciones previas, agrega «sin cruces de líneas…» o el cruce (≥ 2 franjas) respecto de la última previa de cada indicador. Sale como sección «Crecimiento» después de «Antropometría» en `genControl`, `genPerc` y «Copiar parte → Antropometría» del control. Ajustes → `sCrecF` (si/no).
 - **Dosis recibidas** (v1.4.49): `vacRec` (Set de «vacuna|dosis», solo en memoria; `UNDO` lo recupera; «Nuevo paciente» lo borra). Columna «Ya recibida» (`data-vr`) en la tabla de Vacunas, botones `vRecPrev` (tilda previas y fuera de edad) y `vRecClear`. `vacAtrasadas(e)` = previas sin tildar cuando hay al menos una tilde; aviso con `vAtrSel` (las suma a `vacSel`). `vacProx(e)` → próxima cita con lista, fecha exacta y días. `vacFrase` pasa a «carnet incompleto» si hay atrasadas y agrega «Dosis atrasadas: …» (las no indicadas hoy).
+- **Mensaje de vacunas para la familia** (v1.4.50): `vacFamilia()` arma texto plano (título con primer nombre, fecha y edad; «Le corresponde aplicarse ahora» = `vacSeleccionadas`; «pendientes de antes» = `vacAtrasadas` no indicadas hoy; «Próximas vacunas» = `vacProx`; nota final; firma si `vFirma`). Tarjeta en Vacunas con `vFam` (solo lectura) y `vFamCopy`.
 - **Apto físico** con constancia modelo. **Ajustes** (médico, matrícula, mayúsculas, títulos) en localStorage.
 
 ## Identidad visual
@@ -159,6 +160,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.49 Dosis recibidas: «atrasada» = dosis de calendario con edad ya cumplida y no tildada como recibida; la app NO verifica intervalos mínimos ni edades máximas de recupero (p. ej., ofrece recetar el mismo día triple viral 1.ª y 2.ª dosis): por eso muestra «Verificar los intervalos mínimos entre dosis». Se completa con el ítem 59 (Lineamientos MSAL).
 
 ## Historial
+- 1.4.50 (11/11/2026): ítem 64 — mensaje de vacunas para la familia (WhatsApp). Ítems 63, 65 y 66 quedan [~] sin empezar (sin acceso web). Probado con Playwright (2 meses, 15 meses, 7 y 14 años, con pendientes, 390 px; regresión completa).
 - 1.4.49 (11/11/2026): ítem 62 — dosis recibidas tildables, atrasadas y próxima vacunación con fecha exacta. Ítems 59-61 quedan [~] sin empezar (sin acceso web). Sin contenido clínico nuevo. Probado con Playwright (15 meses: carnet al día, dos dosis destildadas → atrasadas, receta, texto del control, dosis de hoy ya recibida, nuevo paciente + deshacer, 1440/390 px sin scroll horizontal; regresión completa).
 - 1.4.48 (11/11/2026): ítem 58 — frase automática de crecimiento. Probado con Playwright (sin previas, con previas sin cruce, descenso y ascenso de 2 líneas, sin mediciones, prematuro con edad corregida, adolescente, opción desactivada, pestaña Percentilos; regresión completa).
 - 1.4.47 (11/11/2026): ítem 57 — blanco genético dibujado en la curva de talla (canal, banda y marca adulta). Probado con Playwright (varón de 13 años, niña de 3, lactante con padres altos, sin tallas parentales; imágenes revisadas; regresión completa).

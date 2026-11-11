@@ -75,10 +75,10 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 60. [~] Vacunas para grupos de riesgo como recordatorio (antigripal, neumococo, meningococo B, etc.). No empezado: sin acceso web a las fuentes oficiales el 11/11 (red del entorno limitada; ver «Problemas conocidos» en PROYECTO.md). Reintentar.
 61. [~] Vacuna contra el dengue según zona y edad (MSAL vigente). No empezado: sin acceso web a las fuentes oficiales el 11/11 (red del entorno limitada; ver «Problemas conocidos» en PROYECTO.md). Reintentar.
 62. [x] (v1.4.49, 11/11) Tildar dosis recibidas en la tabla y calcular la próxima fecha exacta.
-63. [ ] Aviso de campaña antigripal según el mes del año.
-64. [ ] Texto para la familia: «Próximas vacunas: … a partir del …» (para WhatsApp).
-65. [ ] Vacunas de convivientes y embarazadas (dTpa, antigripal, VSR) como consejo en los controles del RN.
-66. [ ] Contraindicaciones y precauciones frecuentes, en pantalla.
+63. [~] Aviso de campaña antigripal según el mes del año. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar. (Hace falta la fecha de inicio de la campaña que publica el MSAL cada año.)
+64. [x] (v1.4.50, 11/11) Texto para la familia: «Próximas vacunas: … a partir del …» (para WhatsApp).
+65. [~] Vacunas de convivientes y embarazadas (dTpa, antigripal, VSR) como consejo en los controles del RN. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
+66. [~] Contraindicaciones y precauciones frecuentes, en pantalla. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
 
 ## F. Recetas, certificados e indicaciones
 67. [ ] Receta de medicamentos: fármaco, presentación, dosis, frecuencia, días y cantidad de envases.

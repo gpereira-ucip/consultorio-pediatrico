@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.49 (2026-11-11)
+  VERSION: 1.4.50 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.50 — Vacunas: tarjeta «Mensaje para la familia» con un texto simple para WhatsApp (vacunas que le corresponden ahora, pendientes de antes si se tildó el carnet, próximas vacunas con fecha, y el recordatorio de que no requieren orden médica y de llevar el carnet) y botón «Copiar mensaje». Usa solo el primer nombre si está cargado. Sin contenido clínico nuevo (las notas son las que ya traía el calendario de la app).
   1.4.49 — Vacunas: columna «Ya recibida» para tildar las dosis del carnet (botón «Carnet al día» tilda todas las previas; se destildan las que falten). Las previas sin tildar pasan a «atrasada», se listan en un aviso con botón para sumarlas a la receta y salen en el texto del control («carnet incompleto… Dosis atrasadas: …»); una dosis de hoy tildada como recibida deja de indicarse. «Próxima vacunación» ahora dice las vacunas, la fecha exacta y los días que faltan. Los tildes no se guardan. No calcula intervalos mínimos de recupero.
   1.4.48 — Frase automática de crecimiento en el control y en Percentilos: «Crecimiento: Peso y talla en el canal P15-P50 para la edad, sin cruces de líneas de percentil respecto de la medición previa (11/08/2026)»; avisa ascensos o descensos de 2 o más líneas y usa edad corregida si corresponde. Se desactiva en Ajustes. Redacción propia, sin contenido clínico nuevo.
   1.4.47 — Blanco genético en la curva de talla: con las tallas de la madre y del padre cargadas, la curva de talla dibuja en violeta el canal que llega al blanco genético a los 19 años (línea punteada), la banda de su rango (± 8,5 cm) y, en la curva de 5 a 19 años, la marca del blanco y su rango a la edad adulta; la leyenda dice el valor y el percentilo adulto. También sale en la hoja A4. Sin contenido clínico nuevo (misma fórmula que ya usaba la app).
@@ -813,6 +814,11 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     <table class="vac"><thead><tr><th></th><th>Vacuna</th><th>Dosis</th><th>Edad</th><th>Estado</th><th class="thRec" title="Tildá las dosis que figuran en el carnet">Ya recibida</th></tr></thead><tbody id="vTabla"></tbody></table>
   </section>
   <section class="card">
+    <h3 style="margin-top:0">💬 Mensaje para la familia <span class="hint">para pegar en WhatsApp</span></h3>
+    <textarea id="vFam" class="sm" readonly style="width:100%;min-height:150px" aria-label="Mensaje de vacunas para la familia"></textarea>
+    <div class="btns" style="margin-top:8px"><button type="button" class="btn sm" id="vFamCopy">Copiar mensaje</button><span class="hint">Usa el primer nombre (si lo cargaste), las vacunas tildadas para hoy, las atrasadas y las próximas con fecha.</span></div>
+  </section>
+  <section class="card">
     <h3 style="margin-top:0">Formato de la receta</h3>
     <div class="row">
       <div class="seg" id="vFmt"><button data-f="junta" class="on">Una receta con todas</button><button data-f="sep">Una por vacuna</button></div>
@@ -989,7 +995,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.49";
+const VERSION = "1.4.50";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -2409,6 +2415,21 @@ function vacFrase(e, contexto){
   return base;
 }
 vacFrase._inc=function(e){ const s=$("cVacEstado"), v=s.value; s.value="incompleto"; try{ return vacFrase(e); } finally{ s.value=v; } };
+/* mensaje de vacunas para la familia (v1.4.50, ítem 64): texto simple para WhatsApp con lo de hoy, las atrasadas y las próximas con fecha. */
+function vacFamilia(){
+  const e=edad(); if(!e) return "";
+  const nom=($("nombre").value||"").trim().split(/\s+/)[0], L=[];
+  const sel=vacSeleccionadas(e), px=vacProx(e), atr=vacAtrasadas(e).filter(x=>!vacSel.has(x.v+"|"+x.d));
+  const item=x=>"• "+x.corto+" ("+x.d+")";
+  L.push("Vacunas"+(nom? " de "+nom : "")+" — "+dmy(e.fc)+" ("+edadTxt(e)+")");
+  if(sel.length){ L.push("", "Le corresponde aplicarse ahora:"); sel.forEach(x=>L.push(item(x)+(x.nota? " — "+x.nota : ""))); }
+  else L.push("", "Hoy no le corresponden vacunas del calendario.");
+  if(atr.length){ L.push("", "Tiene pendientes de antes (consultar en el vacunatorio):"); atr.forEach(x=>L.push(item(x))); }
+  if(px){ L.push("", "Próximas vacunas: "+px.hito+(px.coh? ", durante el año "+px.coh : ", a partir del "+dmy(px.f))+":"); px.lista.forEach(t=>L.push("• "+t)); }
+  L.push("", "Las vacunas del Calendario Nacional no requieren orden médica. Fiebre, tos, resfrío o diarrea no contraindican vacunar. Lleven el carnet de vacunación.");
+  if($("vFirma").checked) L.push("", $("sMed").value.trim()||"");
+  return L.join("\n").replace(/\n+$/,"");
+}
 function gruposVac(sel){
   const g={}; sel.forEach(x=>{ (g[x.hito]=g[x.hito]||[]).push(`${x.corto} ${x.d}`+(x.nota?` (${x.nota})`:"")); });
   return joinY(Object.entries(g).map(([h,l])=> /^\d|recién/.test(h)? `vacunas de ${h} (${l.join(", ")})` : `${h}: ${l.join(", ")}`));
@@ -2879,6 +2900,7 @@ function renderVac(){
     const k=x.v+"|"+x.d, rec=vacRec.has(k), can = x.st!=="fut" && x.st!=="venc" && !rec, atra = !rec && vacRec.size && x.st==="prev" && !x.info;
     return `<tr><td>${can?`<input type="checkbox" data-vk="${k}" aria-label="Aplicar hoy / recetar" ${vacSel.has(k)?"checked":""}>`:""}</td><td>${x.corto}</td><td>${x.d}${x.nota?'<div class="hint">'+x.nota+'</div>':""}</td><td>${x.cuando}</td><td><span class="st ${rec?"rec":atra?"venc":x.st}">${rec?"recibida ✓":atra?"atrasada":lab[x.st]}</span></td><td style="text-align:center">${x.st!=="fut"?`<input type="checkbox" data-vr="${k}" aria-label="Ya recibida" ${rec?"checked":""}>`:""}</td></tr>`;
   }).join("");
+  $("vFam").value = vacFamilia();
   $("vRecInfo").textContent = vacRec.size? vacRec.size+" dosis tildadas como recibidas (no se guardan)." : "";
   $("cVacResumen").innerHTML = hoy.length? `Corresponde hoy: <b>${gruposVac(hoy)}</b> (receta en pestaña Vacunas).` : (nx? `Sin vacunas hoy. Próximas: ${nx.hito}.`:"");
 }
@@ -2998,6 +3020,7 @@ document.querySelectorAll("#vFmt button").forEach(b=>b.onclick=()=>{ S.vFmt=b.da
 document.querySelectorAll("input,select").forEach(el=>{ if(!el.dataset.vk) el.addEventListener("input", ()=>{ if(el.id==="peso"&&iCur) renderInterDoses(); update(); }); });
 $("vZona").addEventListener("change", ()=>{ vacKey=""; update(); });
 $("vRecPrev").onclick=()=>{ const e=edad(); if(!e){ toast("Cargá la fecha de nacimiento"); return; } vacEstado(e).filter(x=>(x.st==="prev" || x.st==="venc") && !x.info).forEach(x=>vacRec.add(x.v+"|"+x.d)); $("vPrevias").checked=true; update(); toast("Previas tildadas: destildá las que falten en el carnet"); };
+$("vFamCopy").onclick=()=>{ const t=vacFamilia(); t? copy(t, "Mensaje copiado: pegalo en WhatsApp") : toast("Cargá la fecha de nacimiento"); };
 $("vRecClear").onclick=()=>{ vacRec=new Set(); update(); };
 document.addEventListener("click", ev=>{ if(ev.target.id!=="vAtrSel") return; vacAtrasadas(edad()).forEach(x=>vacSel.add(x.v+"|"+x.d)); update(); toast("Dosis atrasadas tildadas para la receta"); });
 document.querySelectorAll("[data-a4]").forEach(b=>b.onclick=()=>a4Accion(b.dataset.a4));
