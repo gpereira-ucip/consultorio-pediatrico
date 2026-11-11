@@ -60,7 +60,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 
 ## D. Crecimiento y percentilos
 49. [x] (v1.4.42, 11/11) Peso para la talla (OMS, 0-5 años). Tablas LMS oficiales (repo «anthro» de la OMS); Pc y z en encabezado, texto, tabla, curva y alertas.
-50. [ ] Velocidad de crecimiento (cm/año) a partir de las mediciones previas.
+50. [x] (v1.4.43, 11/11) Velocidad de crecimiento (cm/año) a partir de las mediciones previas. Solo el cálculo (sin percentilos de velocidad: no hay tablas cargadas).
 51. [ ] Percentilo de presión arterial (tablas AAP 2017) por edad, sexo y talla.
 52. [!] Tablas SAP (Lejarraga) 5-19 años como alternativa a OMS 2007 (solo con valores oficiales).
 53. [ ] Curvas de prematuros (Intergrowth-21st o Fenton), si se consiguen los datos oficiales con licencia de uso.

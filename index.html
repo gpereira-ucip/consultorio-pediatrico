@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.42 (2026-11-11)
+  VERSION: 1.4.43 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.43 — Velocidad de crecimiento: con la talla actual y una medición previa cargada en Percentilos calcula los cm/año («Velocidad de crecimiento 6 cm/año (+6 cm en 12 meses, desde el 11/11/2025)»); usa la previa más reciente con al menos 6 meses de intervalo (3 meses en menores de 2 años) y, si no hay, avisa «intervalo corto, valor orientativo». Sale en la antropometría del texto y en un recuadro de la pestaña Percentilos. Sin percentilos de velocidad.
   1.4.42 — Peso para la talla (OMS 2006, 0-5 años): percentilo y puntaje z en el encabezado («P/T Pc 71»), en la antropometría del texto («Peso/talla (Pc 71, z +0,6)»), en la tabla de Percentilos y en una curva nueva (peso según longitud < 2 años o talla 2-5 años, con mediciones previas). Las alertas de sobrepeso, obesidad y emaciación en menores de 5 años pasan a usar peso/talla (antes IMC/edad). Tablas LMS oficiales de la OMS (paquete anthro). Arreglo: los percentilos extremos se muestran «< P1» y «> P99» (antes no se veían en el encabezado).
   1.4.41 — Estilo unificado de las plantillas de intercurrencia: «Se dan pautas de alarma» siempre al final de la conducta; «Control en 48-72 hs» (antes «a las» en 6 cuadros); porcentajes con espacio («mupirocina 2 %»); «por 3 dosis» en lugar de «x 3 dosis»; «Puñopercusión»; «> 6 años»; «RHA» en gastroenteritis. Sin cambios de contenido clínico ni de dosis.
   1.4.40 — Control evolutivo con chips: en los modos «Control evolutivo» y «Alta» de Intercurrencia, recuadro «↻ Evolución» con una opción por fila (evolución: mejoría / mejoría parcial / sin cambios / empeoramiento; fiebre: afebril desde hace 24-48-72 hs / desde el inicio / persiste febril; tratamiento: cumple / completó / irregular / no inició / sin tratamiento; tolerancia; alimentación). Arma las frases de la evolución; «Refiere mejoría clínica» sigue saliendo por defecto. Sin contenido clínico nuevo.
@@ -774,6 +775,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
   <div class="sechead"><div style="flex:1"><h2>Percentilos y curvas de crecimiento</h2><div class="sub">OMS 2006 (0-5 años) y referencia OMS 2007 (5-19 años; peso hasta 10 años)</div></div></div>
   <section class="card">
     <div id="pcTabla"></div>
+    <div id="velTxt" class="okbox hidden" style="margin-top:8px"></div>
     <div class="row" style="margin-top:10px">
       <label class="f">Rango del gráfico<select id="gRango">
         <option value="auto">Automático por edad</option><option value="0-24">0 a 2 años</option><option value="24-60">2 a 5 años</option>
@@ -974,7 +976,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.42";
+const VERSION = "1.4.43";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1441,6 +1443,8 @@ function renderCharts(){
   $("pcTabla").innerHTML = !e? '<div class="alert">Cargá fecha de nacimiento.</div>' : !S.sexo? '<div class="alert">Elegí el sexo.</div>' :
     `<table class="vac"><tr><th>Indicador</th><th>Valor</th><th>Percentilo</th><th>Puntaje z</th></tr>${Object.keys(res).map(k=>{const x=medida(k), r=res[k];
       return `<tr><td>${IND[k].n}</td><td>${x!==null?fmtN(x,IND[k].d)+" "+IND[k].u:"—"}</td><td><b>${r?r.pc:"—"}</b></td><td>${r?(r.z>=0?"+":"")+fmtN(r.z,2):""}</td></tr>`;}).join("")}${(()=>{ const r=pesoTalla(edad()); return r? `<tr><td>Peso para la ${r.tipo==="l"?"longitud":"talla"} (OMS, sin edad)</td><td>${fmtN(num("peso"),2)} kg / ${fmtN(num("talla"),1)} cm</td><td><b>${r.pc}</b></td><td>${(r.z>=0?"+":"")+fmtN(r.z,2)}</td></tr>` : ""; })()}</table>`;
+  const vc=velCrec(), vb=$("velTxt"); vb.classList.toggle("hidden", !vc);
+  if(vc) vb.innerHTML = "<b>📏 "+vc.txt.replace(/ \(/, "</b> (")+(vc.txt.includes("</b>")?"":"")+(vc.corto? "" : "")+'<div class="hint" style="margin-top:2px">Se calcula con las mediciones previas de abajo'+(vc.corto? "; para un valor confiable hace falta una talla previa de al menos "+(edad().months<24?"3":"6")+" meses atrás" : "")+". Sale en la antropometría del texto.</div>";
   $("gCharts").innerHTML = chartsVisibles().map(k=>`<div style="margin-top:10px"><div class="btns"><button class="btn sec sm" data-gc="${k}">📋 Copiar imagen</button><button class="btn sec sm" data-gd="${k}">⬇ Descargar PNG</button></div><div class="gsvg" data-k="${k}" style="max-width:100%;overflow:auto">${svgChart(k)}</div></div>`).join("");
 }
 function svgToCanvas(svgs, cols){
@@ -2207,6 +2211,7 @@ function antropo(e){
   if(p && t && e && e.months>=24) parts.push(`IMC ${fmtN(p/((t/100)**2))} kg/m²`+q("imc"));
   const pt=pesoTalla(e); if(pt) parts.push(`Peso/talla (${pt.txt})`);
   const g = ganancia(); if(g) parts.push(g);
+  const vc = velCrec(); if(vc) parts.push(vc.txt);
   const dp = descensoRN(); if(dp) parts.push(dp.txt);
   if($("ta").value.trim()) parts.push(`TA ${$("ta").value.trim()} mmHg (Pc )`);
   const b = blanco(); if(b && e && e.months>=24) parts.push(b);
@@ -2219,6 +2224,18 @@ function ganancia(){
   const e=edad(), pn=num("pnPeso");
   if(p && pn && e && e.days>0 && e.months<3){ const g=(p*1000-pn)/e.days; return `Ganancia desde el nacimiento ${fmtN(g,0)} g/día`; }
   return "";
+}
+/* velocidad de crecimiento (v1.4.43, ítem 50): cm/año entre la talla actual y una medición previa cargada en Percentilos.
+   Usa la medición previa más reciente con al menos 6 meses de intervalo (3 meses en menores de 2 años); si no hay, la más antigua
+   disponible (mínimo 30 días) y avisa que el intervalo es corto. Solo cálculo: sin percentilos de velocidad (no hay tablas cargadas). */
+function velCrec(){
+  const t=num("talla"), e=edad(); if(!t || !e) return null;
+  const prev=prevMediciones().filter(m=>m.h && m.d<e.fc && m.d>=e.fn).map(m=>({h:m.h, d:m.d, dias:Math.round((e.fc-m.d)/864e5)})).filter(m=>m.dias>=30).sort((a,b)=>a.dias-b.dias);
+  if(!prev.length) return null;
+  const min = e.months<24? 90 : 180, ok=prev.find(m=>m.dias>=min), m=ok||prev[prev.length-1];
+  const dif=t-m.h, v=dif/(m.dias/365.25), meses=m.dias/30.4375;
+  const lapso = meses>=23.5? fmtN(m.dias/365.25,1)+" años" : Math.round(meses)<=1? m.dias+" días" : Math.round(meses)+" meses";
+  return {v, dif, corto:!ok, d:m.d, txt:`Velocidad de crecimiento ${fmtN(v,1)} cm/año (${dif>=0?"+":""}${fmtN(dif,1)} cm en ${lapso}, desde el ${dmy(m.d)})`+(ok? "" : " — intervalo corto, valor orientativo")};
 }
 function blanco(){
   const m=num("tMadre"), p=num("tPadre"); if(!m||!p) return "";
