@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.54 (2026-11-11)
+  VERSION: 1.4.55 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.55 — Mensaje para la familia en Intercurrencia (tarjeta al final): «Copiar indicaciones + alarma» arma un texto para WhatsApp con el diagnóstico, lo tildado en la conducta en lista (sin el cálculo en mg/kg, con los ml y la fecha de fin), el reposo, las pautas de alarma del cuadro una por renglón y el control; «Copiar solo pautas de alarma» manda solo esa parte. No agrega contenido clínico: reordena lo que ya está en la conducta.
   1.4.54 — Certificado de apto para natación (pestaña Recetas): examen de piel, uñas, pies y espacios interdigitales y cuero cabelludo (vacío = «sin lesiones»), resultado (apto / no apto transitoriamente con motivo), validez editable (30 días) y observaciones. Texto administrativo, sin contenido clínico.
   1.4.53 — Certificado de apto escolar / educación física (pestaña Recetas): actividad (educación física escolar, concurrir a la escuela, actividad recreativa, colonia, campamento u otra), resultado (apto, apto con restricciones, no apto transitoriamente), restricciones o motivo, validez editable (1 año) y observaciones. Texto administrativo, sin contenido clínico.
   1.4.52 — Certificado de reposo / evicción (pestaña Recetas): tipo (reposo domiciliario, evicción escolar, sin educación física o solo constancia de atención), desde, días y hasta (se calculan entre sí; «hasta» es inclusive y agrega la fecha de reintegro), diagnóstico opcional, cuidador que acompaña y observaciones; botón para traer el diagnóstico y el reposo de Intercurrencia. Texto administrativo, sin contenido clínico.
@@ -783,6 +784,13 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <label class="f" style="margin-top:10px">Pendientes<textarea class="sm" id="iPend" placeholder="ej. resultado de cultivo de fauces"></textarea></label>
     </div>
   </details>
+  <details class="card" id="famCard">
+    <summary><span class="ic">💬</span>Mensaje para la familia<span class="sum">indicaciones y pautas de alarma para WhatsApp</span></summary>
+    <div class="inner">
+      <textarea id="iFam" class="sm" readonly style="width:100%;min-height:170px" aria-label="Mensaje para la familia"></textarea>
+      <div class="btns" style="margin-top:8px"><button type="button" class="btn sm" id="iFamCopy">Copiar indicaciones + alarma</button><button type="button" class="btn sec sm" id="iFamCopyPA">Copiar solo pautas de alarma</button><span class="hint">Se arma con la conducta tildada, las pautas de alarma del cuadro, el reposo y el control. Revisalo antes de enviarlo.</span></div>
+    </div>
+  </details>
 </div>
 
 <!-- ================= PERCENTILOS ================= -->
@@ -1068,7 +1076,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.54";
+const VERSION = "1.4.55";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -2815,6 +2823,24 @@ function planControl(m){
   if($("cPrev").value.trim()) plan.push("- Prevención de lesiones: "+$("cPrev").value.trim());
   return plan;
 }
+/* mensaje para la familia (v1.4.55, ítems 71-72): mismas indicaciones y pautas de alarma del cuadro, en lista, sin el cálculo en mg/kg.
+   No agrega contenido clínico: reordena lo tildado en la conducta. */
+function famItem(t){ return t.replace(/\(\s*[^()=]*mg\/kg[^()=]*=\s*/g,"(").replace(/\s*\([^()]*(?:mg|mcg)\/kg[^()]*\)/g,"").replace(/\s+/g," ").trim(); }
+function famAlarma(){ const i=paIdx(); if(i<0 || !iCondState[i][1]) return []; const v=$("iPA").value.trim(); return v? v.split(/\s*[,;]\s*(?![^()]*\))/).map(x=>x.trim()).filter(Boolean) : []; }
+function famInter(soloPA){
+  if(!iCur) return ""; const nom=($("nombre").value||"").trim().split(/\s+/)[0], L=[], al=famAlarma(), i=paIdx();
+  if(!soloPA){
+    L.push("Indicaciones"+(nom? " para "+nom : "")+" — "+dmy(parseD($("fc").value)));
+    if($("iDx").value.trim()) L.push("Diagnóstico"+($("iDxPres").checked && S.iModo==="ini"? " presuntivo" : "")+": "+$("iDx").value.trim());
+    const its=iCondState.filter((s,j)=>s[1] && j!==i).map(s=>famItem(condOut(s[0]))).filter(t=>!/^(Notificación|Se marcan|Reevaluación|Prueba de tolerancia|Prueba terapéutica|Salbutamol 2 puff \(200 mcg\) con aerocámara cada 20 minutos)/.test(t)); if($("iCondOtro").value.trim()) its.push(famItem(finTto($("iCondOtro").value.trim())));
+    if(its.length){ L.push("", "Qué hacer en casa:"); its.forEach(t=>L.push("• "+t)); }
+    const rep=$("iRep").value, tipo=$("iRepTipo").value; if(rep && tipo!=="const") L.push("• "+(tipo==="evic"? "No concurrir a la escuela" : "Reposo")+" por "+rep+" hs");
+  } else L.push("Pautas de alarma"+(nom? " para "+nom : "")+" — "+$("iDx").value.trim());
+  L.push("", "Consulten nuevamente o concurran a la guardia si presenta:");
+  if(al.length) al.forEach(t=>L.push("• "+cap(t))); else L.push("• Empeoramiento o cualquier síntoma que les preocupe");
+  if(!soloPA && $("iControl").value.trim()) L.push("", "Control "+(/^(en|a |evolutivo|si |con |al |según )/.test($("iControl").value)? "" : "en ")+$("iControl").value.trim()+".");
+  const m=$("sMed").value.trim(); if(m) L.push("", m);
+  return G(L.join("\n")); }
 function conductaInter(){
   const c = iCondState.filter(s=>s[1]).map(s=>"- "+condOut(s[0]));
   if($("iCondOtro").value) c.push("- "+finTto($("iCondOtro").value));
@@ -3073,7 +3099,7 @@ function update(){
   $("pcTxt").innerHTML = Object.keys(pr).filter(k=>pr[k]).map(k=>`${nm[k]} <b>${pr[k].pc}</b>`).concat(ptH? [`P/T <b>${ptH.pc}</b>`] : []).concat((tp=>tp? [`<span title="Tablas AAP 2017 para ${edad().y} años y talla en P${tp.col}${tp.sinTalla?" (sin talla: se asume P50)":""}: P90 ${tp.p90} · P95 ${tp.p95} mmHg">TA <b>${tp.corto.replace(/</g,"&lt;")}</b></span>`] : [])(taPc())).join(" · ");
   if(S.tab==="perc") renderCharts();
   updateSums(e, pr);
-  if(iCur){ renderInterDoses(); renderTal(); }
+  if(iCur){ renderInterDoses(); renderTal(); if($("iFam")) $("iFam").value=famInter(false); }
   let txt = S.tab==="control"? genControl() : S.tab==="inter"? genInter() : S.tab==="apto"? genApto() : S.tab==="vac"? (genReceta()||"No hay vacunas seleccionadas para recetar.") : S.tab==="perc"? genPerc() : S.tab==="docs"? genDoc(S.doc) : "";
   if($("sMay").value==="mayus") txt = txt.toUpperCase();
   $("out").value = txt;
@@ -3168,6 +3194,8 @@ document.querySelectorAll("#vFmt button").forEach(b=>b.onclick=()=>{ S.vFmt=b.da
 document.querySelectorAll("input,select").forEach(el=>{ if(!el.dataset.vk) el.addEventListener("input", ()=>{ if(el.id==="peso"&&iCur) renderInterDoses(); update(); }); });
 $("vZona").addEventListener("change", ()=>{ vacKey=""; update(); });
 $("vRecPrev").onclick=()=>{ const e=edad(); if(!e){ toast("Cargá la fecha de nacimiento"); return; } vacEstado(e).filter(x=>(x.st==="prev" || x.st==="venc") && !x.info).forEach(x=>vacRec.add(x.v+"|"+x.d)); $("vPrevias").checked=true; update(); toast("Previas tildadas: destildá las que falten en el carnet"); };
+$("iFamCopy").onclick=()=>copy(famInter(false), "Mensaje copiado: pegalo en WhatsApp");
+$("iFamCopyPA").onclick=()=>copy(famInter(true), "Pautas de alarma copiadas: pegalas en WhatsApp");
 $("vFamCopy").onclick=()=>{ const t=vacFamilia(); t? copy(t, "Mensaje copiado: pegalo en WhatsApp") : toast("Cargá la fecha de nacimiento"); };
 $("vRecClear").onclick=()=>{ vacRec=new Set(); update(); };
 document.addEventListener("click", ev=>{ if(ev.target.id!=="vAtrSel") return; vacAtrasadas(edad()).forEach(x=>vacSel.add(x.v+"|"+x.d)); update(); toast("Dosis atrasadas tildadas para la receta"); });

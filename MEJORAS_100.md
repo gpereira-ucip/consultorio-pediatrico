@@ -85,8 +85,8 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 68. [x] (v1.4.52, 11/11) Certificado de reposo o evicción con fechas desde/hasta.
 69. [x] (v1.4.53, 11/11) Certificado de apto escolar / educación física (pestaña Recetas; el certificado de salud escolar completo sigue en Apto físico).
 70. [x] (v1.4.54, 11/11) Certificado de apto para natación (piel, uñas, pies).
-71. [ ] Indicaciones para la familia en lenguaje simple, para copiar a WhatsApp.
-72. [ ] Pautas de alarma para la familia por cuadro (WhatsApp).
+71. [~] (v1.4.55, 11/11) Indicaciones para la familia en lenguaje simple, para copiar a WhatsApp. Hecho: tarjeta «Mensaje para la familia» en Intercurrencia que arma el mensaje con la conducta tildada (sin el cálculo en mg/kg), reposo, pautas de alarma y control. Falta: reescribir en lenguaje llano las indicaciones de cada cuadro (hoy salen con la redacción de la HC, p. ej. «Medidas higiénico-dietéticas»); necesita redacción revisada por Gonzalo o fuente para familias (SAP/MSAL), sin acceso web el 11/11.
+72. [x] (v1.4.55, 11/11) Pautas de alarma para la familia por cuadro (WhatsApp). Usa las pautas de alarma del cuadro (editables); los cuadros sin pautas específicas dependen del ítem 39.
 73. [ ] Hoja de alimentación complementaria por edad para la familia (fuente: MSAL/SAP).
 74. [ ] Hojas para la familia: sueño seguro, lactancia, prevención de accidentes por edad.
 75. [ ] Interconsultas y derivaciones redactadas (cardiología, ORL, oftalmología, traumatología…).
