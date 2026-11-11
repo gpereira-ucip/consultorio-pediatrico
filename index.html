@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.43 (2026-11-11)
+  VERSION: 1.4.44 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.44 — Percentilo de presión arterial (1 a 17 años): con TA, sexo, edad y talla ubica la sistólica y la diastólica respecto de P50, P90 y P95 de las tablas de la guía AAP 2017; sale en el encabezado («TA S P50-P90 · D < P50», con P90 y P95 al pasar el mouse), en la antropometría del texto («TA 100/60 mmHg (PAS P50-P90, PAD < P50)») y, si alguna es ≥ P90, como alerta con frase para datos positivos. Sin talla asume P50 y lo aclara. No clasifica estadios.
   1.4.43 — Velocidad de crecimiento: con la talla actual y una medición previa cargada en Percentilos calcula los cm/año («Velocidad de crecimiento 6 cm/año (+6 cm en 12 meses, desde el 11/11/2025)»); usa la previa más reciente con al menos 6 meses de intervalo (3 meses en menores de 2 años) y, si no hay, avisa «intervalo corto, valor orientativo». Sale en la antropometría del texto y en un recuadro de la pestaña Percentilos. Sin percentilos de velocidad.
   1.4.42 — Peso para la talla (OMS 2006, 0-5 años): percentilo y puntaje z en el encabezado («P/T Pc 71»), en la antropometría del texto («Peso/talla (Pc 71, z +0,6)»), en la tabla de Percentilos y en una curva nueva (peso según longitud < 2 años o talla 2-5 años, con mediciones previas). Las alertas de sobrepeso, obesidad y emaciación en menores de 5 años pasan a usar peso/talla (antes IMC/edad). Tablas LMS oficiales de la OMS (paquete anthro). Arreglo: los percentilos extremos se muestran «< P1» y «> P99» (antes no se veían en el encabezado).
   1.4.41 — Estilo unificado de las plantillas de intercurrencia: «Se dan pautas de alarma» siempre al final de la conducta; «Control en 48-72 hs» (antes «a las» en 6 cuadros); porcentajes con espacio («mupirocina 2 %»); «por 3 dosis» en lugar de «x 3 dosis»; «Puñopercusión»; «> 6 años»; «RHA» en gastroenteritis. Sin cambios de contenido clínico ni de dosis.
@@ -976,7 +977,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.43";
+const VERSION = "1.4.44";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
 
@@ -1056,6 +1057,9 @@ function crecAlertas(){
   if(dr && !dr.rec && dr.d>=15) out.push({t:`No recuperó el peso de nacimiento a los ${dr.d} días (${fmtN(-dr.pct,1)} % por debajo del PN).`, f:`no recuperó el peso de nacimiento a los ${dr.d} días`, cruce:`sin recuperar el peso de nacimiento a los ${dr.d} días`});
   else if(dr && !dr.rec && dr.d>=10 && -dr.pct<10) out.push({t:`A los ${dr.d} días todavía no recuperó el PN (${fmtN(-dr.pct,1)} % por debajo): se espera que lo recupere entre los 10 y 15 días.`, f:`a los ${dr.d} días aún no recuperó el peso de nacimiento`});
   const p=num("peso"), t=num("talla");
+  const tp=taPc();
+  if(tp && tp.max>=2){ const cual=[tp.bs>=2?"sistólica":"", tp.bd>=2?"diastólica":""].filter(Boolean).join(" y "), niv=tp.max===3? "≥ P95" : "≥ P90";
+    out.push({t:`TA ${tp.s}/${tp.d} mmHg: ${cual} ${niv} para edad, sexo y talla (tablas AAP 2017; P90 ${tp.p90}, P95 ${tp.p95}${tp.sinTalla?"; sin talla, se asume P50":""}). Repetir la medición y confirmar en otras visitas.`, f:`TA ${tp.s}/${tp.d} mmHg, ${cual} ${niv} para edad, sexo y talla (AAP 2017)`}); }
   const ptA=pesoTalla(edad()), ptC=ptA && imcClase(ptA.z, 30);
   if(ptC) out.push({t:`Peso para la talla: ${ptC.c} según OMS (z ${zs(ptA.z)}).`, f:`peso para la talla con ${ptC.c} según OMS (z ${zs(ptA.z)})`, imc:ptC, pt:true});
   if(p && t && e.months>=24 && !(ptA && e.months<60)){ const r=percentil("imc", p/((t/100)**2), e); const c=r && imcClase(r.z, e.months);
@@ -1369,6 +1373,23 @@ function svgChartPT(){
   g+=`<text transform="translate(14 ${mt+ph/2}) rotate(-90)" font-size="11" text-anchor="middle" fill="#444">kg</text>`;
   if(!S.sexo) g+=`<text x="${ml+pw/2}" y="${mt+ph/2}" font-size="16" text-anchor="middle" fill="#b4531a">Elegí el sexo</text>`;
   return g+"</svg>";
+}
+/* PRESIÓN ARTERIAL (v1.4.44, ítem 51) — tablas 4 y 5 de la guía AAP 2017 (Flynn JT y col., Pediatrics 2017;140(3):e20171904): P50, P90 y P95
+   de PAS y PAD por sexo, edad (1-17 años cumplidos) y percentilo de talla (5, 10, 25, 50, 75, 90, 95). Transcripción tomada del paquete R «pedbp»
+   (github.com/dewittpe/pedbp, data-raw/flynn2017_bp_boys.dat y _girls.dat). BP_T[sexo][edad-1] = [PAS50, PAS90, PAS95, PAD50, PAD90, PAD95], cada uno con 7 columnas de talla.
+   La columna de talla se elige con el percentilo de talla OMS de la app (el más cercano); sin talla usa P50. Solo ubica la TA respecto de P50/P90/P95:
+   no clasifica estadios. Pendiente de revisión médica. */
+const BP_T = {"v":[[[85,85,86,86,87,88,88],[98,99,99,100,100,101,101],[102,102,103,103,104,105,105],[40,40,40,41,41,42,42],[52,52,53,53,54,54,54],[54,54,55,55,56,57,57]],[[87,87,88,89,89,90,91],[100,100,101,102,103,103,104],[104,105,105,106,107,107,108],[43,43,44,44,45,46,46],[55,55,56,56,57,58,58],[57,58,58,59,60,61,61]],[[88,89,89,90,91,92,92],[101,102,102,103,104,105,105],[106,106,107,107,108,109,109],[45,46,46,47,48,49,49],[58,58,59,59,60,61,61],[60,61,61,62,63,64,64]],[[90,90,91,92,93,94,94],[102,103,104,105,105,106,107],[107,107,108,108,109,110,110],[48,49,49,50,51,52,52],[60,61,62,62,63,64,64],[63,64,65,66,67,67,68]],[[91,92,93,94,95,96,96],[103,104,105,106,107,108,108],[107,108,109,109,110,111,112],[51,51,52,53,54,55,55],[63,64,65,65,66,67,67],[66,67,68,69,70,70,71]],[[93,93,94,95,96,97,98],[105,105,106,107,109,110,110],[108,109,110,111,112,113,114],[54,54,55,56,57,57,58],[66,66,67,68,68,69,69],[69,70,70,71,72,72,73]],[[94,94,95,97,98,98,99],[106,107,108,109,110,111,111],[110,110,111,112,114,115,116],[56,56,57,58,58,59,59],[68,68,69,70,70,71,71],[71,71,72,73,73,74,74]],[[95,96,97,98,99,99,100],[107,108,109,110,111,112,112],[111,112,112,114,115,116,117],[57,57,58,59,59,60,60],[69,70,70,71,72,72,73],[72,73,73,74,75,75,75]],[[96,97,98,99,100,101,101],[107,108,109,110,112,113,114],[112,112,113,115,116,118,119],[57,58,59,60,61,62,62],[70,71,72,73,74,74,74],[74,74,75,76,76,77,77]],[[97,98,99,100,101,102,103],[108,109,111,112,113,115,116],[112,113,114,116,118,120,121],[59,60,61,62,63,63,64],[72,73,74,74,75,75,76],[76,76,77,77,78,78,78]],[[99,99,101,102,103,104,106],[110,111,112,114,116,117,118],[114,114,116,118,120,123,124],[61,61,62,63,63,63,63],[74,74,75,75,75,76,76],[77,78,78,78,78,78,78]],[[101,101,102,104,106,108,109],[113,114,115,117,119,121,122],[116,117,118,121,124,126,128],[61,62,62,62,62,63,63],[75,75,75,75,75,76,76],[78,78,78,78,78,79,79]],[[103,104,105,108,110,111,112],[115,116,118,121,124,126,126],[119,120,122,125,128,130,131],[61,60,61,62,63,64,65],[74,74,74,75,76,77,77],[78,78,78,78,80,81,81]],[[105,106,109,111,112,113,113],[119,120,123,126,127,128,129],[123,125,127,130,132,133,134],[60,60,62,64,65,66,67],[74,74,75,77,78,79,80],[77,78,79,81,82,83,84]],[[108,110,112,113,114,114,114],[123,124,126,128,129,130,130],[127,129,131,132,134,135,135],[61,62,64,65,66,67,68],[75,76,78,79,80,81,81],[78,79,81,83,84,85,85]],[[111,112,114,115,115,116,116],[126,127,128,129,131,131,132],[130,131,133,134,135,136,137],[63,64,66,67,68,69,69],[77,78,79,80,81,82,82],[80,81,83,84,85,86,86]],[[114,115,116,117,117,118,118],[128,129,130,131,132,133,134],[132,133,134,135,137,138,138],[65,66,67,68,69,70,70],[78,79,80,81,82,82,83],[81,82,84,85,86,86,87]]],"m":[[[84,85,86,86,87,88,88],[98,99,99,100,101,102,102],[101,102,102,103,104,105,105],[41,42,42,43,44,45,46],[54,55,56,56,57,58,58],[59,59,60,60,61,62,62]],[[87,87,88,89,90,91,91],[101,101,102,103,104,105,106],[104,105,106,106,107,108,109],[45,46,47,48,49,50,51],[58,58,59,60,61,62,62],[62,63,63,64,65,66,66]],[[88,89,89,90,91,92,93],[102,103,104,104,105,106,107],[106,106,107,108,109,110,110],[48,48,49,50,51,53,53],[60,61,61,62,63,64,65],[64,65,65,66,67,68,69]],[[89,90,91,92,93,94,94],[103,104,105,106,107,108,108],[107,108,109,109,110,111,112],[50,51,51,53,54,55,55],[62,63,64,65,66,67,67],[66,67,68,69,70,70,71]],[[90,91,92,93,94,95,96],[104,105,106,107,108,109,110],[108,109,109,110,111,112,113],[52,52,53,55,56,57,57],[64,65,66,67,68,69,70],[68,69,70,71,72,73,73]],[[92,92,93,94,96,97,97],[105,106,107,108,109,110,111],[109,109,110,111,112,113,114],[54,54,55,56,57,58,59],[67,67,68,69,70,71,71],[70,71,72,72,73,74,74]],[[92,93,94,95,97,98,99],[106,106,107,109,110,111,112],[109,110,111,112,113,114,115],[55,55,56,57,58,59,60],[68,68,69,70,71,72,72],[72,72,73,73,74,74,75]],[[93,94,95,97,98,99,100],[107,107,108,110,111,112,113],[110,111,112,113,115,116,117],[56,56,57,59,60,61,61],[69,70,71,72,72,73,73],[72,73,74,74,75,75,75]],[[95,95,97,98,99,100,101],[108,108,109,111,112,113,114],[112,112,113,114,116,117,118],[57,58,59,60,60,61,61],[71,71,72,73,73,73,73],[74,74,75,75,75,75,75]],[[96,97,98,99,101,102,103],[109,110,111,112,113,115,116],[113,114,114,116,117,119,120],[58,59,59,60,61,61,62],[72,73,73,73,73,73,73],[75,75,76,76,76,76,76]],[[98,99,101,102,104,105,106],[111,112,113,114,116,118,120],[115,116,117,118,120,123,124],[60,60,60,61,62,63,64],[74,74,74,74,74,75,75],[76,77,77,77,77,77,77]],[[102,102,104,105,107,108,108],[114,115,116,118,120,122,122],[118,119,120,122,124,125,126],[61,61,61,62,64,65,65],[75,75,75,75,76,76,76],[78,78,78,78,79,79,79]],[[104,105,106,107,108,108,109],[116,117,119,121,122,123,123],[121,122,123,124,126,126,127],[62,62,63,64,65,65,66],[75,75,75,76,76,76,76],[79,79,79,79,80,80,81]],[[105,106,107,108,109,109,109],[118,118,120,122,123,123,123],[123,123,124,125,126,127,127],[63,63,64,65,66,66,66],[76,76,76,76,77,77,77],[80,80,80,80,81,81,82]],[[105,106,107,108,109,109,109],[118,119,121,122,123,123,124],[124,124,125,126,127,127,128],[64,64,64,65,66,67,67],[76,76,76,77,77,78,78],[80,80,80,81,82,82,82]],[[106,107,108,109,109,110,110],[119,120,122,123,124,124,124],[124,125,125,127,127,128,128],[64,64,65,66,66,67,67],[76,76,76,77,78,78,78],[80,80,80,81,82,82,82]],[[107,108,109,110,110,110,111],[120,121,123,124,124,125,125],[125,125,126,127,128,128,128],[64,64,65,66,66,66,67],[76,76,77,77,78,78,78],[80,80,80,81,82,82,82]]]};
+const BP_H = [5,10,25,50,75,90,95];
+function taPc(){
+  const m=($("ta").value||"").trim().match(/^(\d{2,3})\s*\/\s*(\d{2,3})$/), e=edad(); if(!m || !e || !S.sexo || e.y<1 || e.y>17) return null;
+  const s=+m[1], d=+m[2]; if(d>=s) return null;
+  const t=num("talla"), rh=t? percentil("h", t, e) : null, hp=rh? Phi(rh.z)*100 : null;
+  let c=3; if(hp!==null){ let best=1e9; BP_H.forEach((p,i)=>{ if(Math.abs(p-hp)<best){ best=Math.abs(p-hp); c=i; } }); }
+  const T=BP_T[S.sexo][e.y-1], band=(x,o)=> x>=T[o+2][c]? 3 : x>=T[o+1][c]? 2 : x>=T[o][c]? 1 : 0, N=["< P50","P50-P90","P90-P95","≥ P95"];
+  const bs=band(s,0), bd=band(d,3);
+  return {s, d, bs, bd, max:Math.max(bs,bd), col:BP_H[c], sinTalla:hp===null, p90:T[1][c]+"/"+T[4][c], p95:T[2][c]+"/"+T[5][c],
+    txt:`PAS ${N[bs]}, PAD ${N[bd]}`+(hp===null? "; talla no cargada, se asume P50" : ""), corto:`S ${N[bs]} · D ${N[bd]}`};
 }
 /* ---- curvas SVG ---- */
 const ZL=[[-1.881,"P3"],[-1.036,"P15"],[0,"P50"],[1.036,"P85"],[1.881,"P97"]];
@@ -2213,7 +2234,7 @@ function antropo(e){
   const g = ganancia(); if(g) parts.push(g);
   const vc = velCrec(); if(vc) parts.push(vc.txt);
   const dp = descensoRN(); if(dp) parts.push(dp.txt);
-  if($("ta").value.trim()) parts.push(`TA ${$("ta").value.trim()} mmHg (Pc )`);
+  if($("ta").value.trim()){ const tp=taPc(); parts.push(`TA ${$("ta").value.trim()} mmHg (${tp? tp.txt : "Pc "})`); }
   const b = blanco(); if(b && e && e.months>=24) parts.push(b);
   if(ec && parts.length && (p!==null||t!==null||pc!==null)) parts.push(ec.days<0? "percentilos OMS no aplicables antes del término" : "percentilos por edad corregida");
   return parts.join(" - ");
@@ -2753,7 +2774,7 @@ function update(){
   if($("sumDx")) $("sumDx").textContent = $("cDx").value;
   const pr=pcResumen(), nm={w:"Peso",h:"Talla",pc:"PC",imc:"IMC"};
   const ptH=pesoTalla(edad());
-  $("pcTxt").innerHTML = Object.keys(pr).filter(k=>pr[k]).map(k=>`${nm[k]} <b>${pr[k].pc}</b>`).concat(ptH? [`P/T <b>${ptH.pc}</b>`] : []).join(" · ");
+  $("pcTxt").innerHTML = Object.keys(pr).filter(k=>pr[k]).map(k=>`${nm[k]} <b>${pr[k].pc}</b>`).concat(ptH? [`P/T <b>${ptH.pc}</b>`] : []).concat((tp=>tp? [`<span title="Tablas AAP 2017 para ${edad().y} años y talla en P${tp.col}${tp.sinTalla?" (sin talla: se asume P50)":""}: P90 ${tp.p90} · P95 ${tp.p95} mmHg">TA <b>${tp.corto.replace(/</g,"&lt;")}</b></span>`] : [])(taPc())).join(" · ");
   if(S.tab==="perc") renderCharts();
   updateSums(e, pr);
   if(iCur){ renderInterDoses(); renderTal(); }
