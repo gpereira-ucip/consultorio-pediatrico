@@ -84,7 +84,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 67. [x] (v1.4.51, 11/11) Receta de medicamentos: fármaco, presentación, dosis, frecuencia, días y cantidad de envases. En la pestaña nueva «Recetas» (Alt+7).
 68. [x] (v1.4.52, 11/11) Certificado de reposo o evicción con fechas desde/hasta.
 69. [x] (v1.4.53, 11/11) Certificado de apto escolar / educación física (pestaña Recetas; el certificado de salud escolar completo sigue en Apto físico).
-70. [ ] Certificado de apto para natación (piel, uñas, pies).
+70. [x] (v1.4.54, 11/11) Certificado de apto para natación (piel, uñas, pies).
 71. [ ] Indicaciones para la familia en lenguaje simple, para copiar a WhatsApp.
 72. [ ] Pautas de alarma para la familia por cuadro (WhatsApp).
 73. [ ] Hoja de alimentación complementaria por edad para la familia (fuente: MSAL/SAP).

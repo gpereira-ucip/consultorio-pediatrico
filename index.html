@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.53 (2026-11-11)
+  VERSION: 1.4.54 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.54 — Certificado de apto para natación (pestaña Recetas): examen de piel, uñas, pies y espacios interdigitales y cuero cabelludo (vacío = «sin lesiones»), resultado (apto / no apto transitoriamente con motivo), validez editable (30 días) y observaciones. Texto administrativo, sin contenido clínico.
   1.4.53 — Certificado de apto escolar / educación física (pestaña Recetas): actividad (educación física escolar, concurrir a la escuela, actividad recreativa, colonia, campamento u otra), resultado (apto, apto con restricciones, no apto transitoriamente), restricciones o motivo, validez editable (1 año) y observaciones. Texto administrativo, sin contenido clínico.
   1.4.52 — Certificado de reposo / evicción (pestaña Recetas): tipo (reposo domiciliario, evicción escolar, sin educación física o solo constancia de atención), desde, días y hasta (se calculan entre sí; «hasta» es inclusive y agrega la fecha de reintegro), diagnóstico opcional, cuidador que acompaña y observaciones; botón para traer el diagnóstico y el reposo de Intercurrencia. Texto administrativo, sin contenido clínico.
   1.4.51 — Pestaña nueva «Recetas» (recetas y certificados; Alt+7) con la receta de medicamentos: renglones con fármaco (genérico), presentación, dosis, frecuencia, duración y envases; «Traer de la conducta de Intercurrencia» crea un renglón por cada medicamento con dosis tildado; diagnóstico, datos del paciente, peso opcional, una receta por medicamento o todas juntas, firma. Botones Copiar y Ver; COPIAR de la barra inferior copia el documento activo. No calcula dosis ni guarda nada. Encabezado ajustado para 7 pestañas.
@@ -938,6 +939,22 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="ce">Copiar certificado</button><button type="button" class="btn sec sm" data-doc-ver="ce">Ver</button><span class="hint">Para el apto con examen completo (ECG, antecedentes, constancia) usá la pestaña Apto físico; el certificado de salud escolar está ahí.</span></div>
     </div>
   </details>
+  <details class="card" id="cnCard" data-doc="cn">
+    <summary><span class="ic">🏊</span>Certificado de apto para natación<span class="sum" id="sumCn"></span></summary>
+    <div class="inner">
+      <div class="grid">
+        <label class="f">Piel<input id="cnPiel" placeholder="sin lesiones"></label>
+        <label class="f">Uñas<input id="cnUnas" placeholder="sin lesiones"></label>
+        <label class="f">Pies y espacios interdigitales<input id="cnPies" placeholder="sin lesiones"></label>
+        <label class="f">Cuero cabelludo<input id="cnPelo" placeholder="sin lesiones"></label>
+        <label class="f">Resultado<select id="cnRes"><option value="apto">Apto</option><option value="no">No apto transitoriamente</option></select></label>
+        <label class="f">Validez<input id="cnVal" value="30 días"></label>
+      </div>
+      <input id="cnDet" placeholder="Motivo si no es apto (ej. molusco contagioso en tratamiento)" style="width:100%;margin-top:8px">
+      <input id="cnObs" placeholder="Observaciones (opcional)" style="width:100%;margin-top:8px">
+      <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="cn">Copiar certificado</button><button type="button" class="btn sec sm" data-doc-ver="cn">Ver</button><span class="hint">Los campos vacíos salen como «sin lesiones». La validez depende de cada club o colonia: cambiala si hace falta.</span></div>
+    </div>
+  </details>
 </div>
 
 <!-- ================= AJUSTES ================= -->
@@ -1051,7 +1068,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.53";
+const VERSION = "1.4.54";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -2984,7 +3001,15 @@ function genCe(){ const act=$("ceAct").value==="otro"? ($("ceActOtro").value.tri
   else t+=`no se encuentra en condiciones de ${act} en forma transitoria`+(det? " ("+det+")" : "")+", hasta nueva evaluación.";
   L.push(G(t)); if(val && res!=="no") L.push("Válido por "+val+" a partir de la fecha, salvo que se presente una enfermedad o lesión.");
   if(obs) L.push("Observaciones: "+obs.replace(/\.$/,"")+"."); L.push(certPie()); return L.join("\n"); }
-const DOCS={rp:genRp, cr:genCr, ce:genCe};
+/* certificado de apto para natación / pileta (ítem 70): examen de piel, uñas, pies y cuero cabelludo. Redacción administrativa propia. */
+const CN_C=[["cnPiel","Piel"],["cnUnas","Uñas"],["cnPies","Pies y espacios interdigitales"],["cnPelo","Cuero cabelludo"]];
+function genCn(){ const res=$("cnRes").value, det=$("cnDet").value.trim().replace(/\.$/,""), val=$("cnVal").value.trim(), obs=$("cnObs").value.trim();
+  const ex=CN_C.map(c=>c[1].toLowerCase()+": "+($(c[0]).value.trim()||"sin lesiones")).join("; ");
+  const L=["CERTIFICADO DE APTO PARA NATACIÓN"]; L.push(G(`Certifico que ${certQuien()} fue examinad{o} en el día de la fecha. Examen: ${ex}.`));
+  L.push(G(res==="apto"? "Al momento del examen no presenta lesiones cutáneas, micosis ni pediculosis que contraindiquen el ingreso a la pileta. Se encuentra apt{o} para natación y actividades acuáticas." : "No se encuentra apt{o} para ingresar a la pileta en forma transitoria"+(det? " ("+det+")" : "")+", hasta nuevo control."));
+  if(val && res==="apto") L.push("Válido por "+val+" a partir de la fecha.");
+  if(obs) L.push("Observaciones: "+obs.replace(/\.$/,"")+"."); L.push(certPie()); return L.join("\n"); }
+const DOCS={rp:genRp, cr:genCr, ce:genCe, cn:genCn};
 function genDoc(k){ return DOCS[k]? DOCS[k]() : ""; }
 function docMay(t){ return $("sMay").value==="mayus"? t.toUpperCase() : t; }
 $("rpList").addEventListener("input", ev=>{ const d=ev.target.dataset.rp; if(!d) return; const [i,k]=d.split(":"); rpItems[+i][k]=ev.target.value; S.doc="rp"; update(); });
@@ -3064,6 +3089,7 @@ function updateSums(e, pr){
   }
   if($("sumRp")){ const n=rpItems.filter(it=>(it.f||"").trim()).length; $("sumRp").textContent = n? n+(n===1?" medicamento":" medicamentos") : "sin medicamentos"; }
   if($("sumCr")){ const f=crFechas(); $("sumCr").textContent = $("crTipo").value==="const"? "constancia" : f && f.h? f.n+(f.n===1?" día":" días")+" · hasta el "+dmy(f.h) : ""; }
+  if($("sumCn")) $("sumCn").textContent = $("cnRes").value==="apto"? "apto · "+$("cnVal").value.trim() : "no apto transitoriamente";
   if($("sumCe")){ $("ceActOtroL").classList.toggle("hidden", $("ceAct").value!=="otro"); $("sumCe").textContent = $("ceRes").selectedOptions[0].textContent.toLowerCase(); }
   if(iCur){ const ne=cnt("#iEst"); $("sumIEst").textContent = ne? ne+" seleccionado(s)" : "ninguno"; }
   const sexo = S.sexo==="v"?"Varón":S.sexo==="m"?"Mujer":"elegí sexo";
@@ -3312,7 +3338,7 @@ document.addEventListener("keydown", e=>{
 $("nuevo").onclick = ()=>{
   undoGuardar();
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
-   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta","ceDet","ceObs","ceActOtro"].forEach(id=>$(id).value=""); $("ceRes").value="apto"; $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
+   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta","ceDet","ceObs","ceActOtro","cnPiel","cnUnas","cnPies","cnPelo","cnDet","cnObs"].forEach(id=>$(id).value=""); $("ceRes").value="apto"; $("cnRes").value="apto"; $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
   $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();

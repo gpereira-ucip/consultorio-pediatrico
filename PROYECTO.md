@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.4.53 (11/11/2026)
+- Versión actual: 1.4.54 (11/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -70,6 +70,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - **Pestaña «Recetas»** (v1.4.51): `t-docs` (botón `data-t="docs"`, Alt+7; Ajustes sigue en Alt+6). `S.doc` = documento activo, `genDoc(k)` lo arma y `update()` lo pone en `out`; botones `data-doc-copy` / `data-doc-ver`; `pacLinea(conPeso)` arma la línea del paciente. **Receta de medicamentos**: `rpItems` ([{f,p,d,fr,di,e}], solo en memoria; `UNDO` lo recupera; «Nuevo paciente» lo vacía), `renderRp`, `genRp` («Rp/ Fármaco, presentación — N envases» + «Indicación: dosis frecuencia por duración» + Dx + firma; `rpSep` = una receta por medicamento), `rpInter` (trae los ítems `DOSIS` tildados de `iCondState`: nombre → fármaco, resto del texto → dosis).
 - **Certificado de reposo / evicción** (v1.4.52): tarjeta `crCard` (`data-doc="cr"`), `crFechas()` (hasta = desde + días − 1, inclusive; reintegro = hasta + 1), `crSync` (días ↔ hasta), `genCr()` (4 tipos: reposo, evic, ef, const), `crInter` (trae `iDx`, `iRep`/24 y `iRepTipo`). Auxiliares de certificados: `certQuien()`, `certPie()`, `dxMin()`, `sumar()`, `iso()`. Registro de documentos `DOCS={rp,cr,…}` y `data-doc` en cada tarjeta.
 - **Certificado de apto escolar / educación física** (v1.4.53): tarjeta `ceCard` (`data-doc="ce"`), `genCe()` («…al momento del examen no presenta contraindicaciones clínicas para … Se encuentra apt{o}» / «apt{o} … con las siguientes restricciones» / «no se encuentra en condiciones de … en forma transitoria»; validez `ceVal`).
+- **Certificado de apto para natación** (v1.4.54): tarjeta `cnCard` (`data-doc="cn"`), `genCn()` con `CN_C` (piel, uñas, pies, cuero cabelludo), `cnRes`, `cnVal` (30 días), `cnDet`, `cnObs`.
 - **Apto físico** con constancia modelo. **Ajustes** (médico, matrícula, mayúsculas, títulos) en localStorage.
 
 ## Identidad visual
@@ -164,8 +165,10 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.51 Receta de medicamentos: formato propio («Rp/ … — N envases», «Indicación: …», «Dx: …»); revisar si coincide con lo que pide su sistema de receta electrónica (los datos obligatorios de una receta —fecha, firma, matrícula, genérico— dependen de la normativa y del sistema que use). «Traer de la conducta» copia el texto de la dosis calculada tal cual, con el cálculo entre paréntesis: conviene editarlo.
 - v1.4.52 Certificado de reposo: redacción propia («debe guardar reposo domiciliario por N días, desde … hasta … inclusive. Podrá reintegrarse el …, si la evolución es favorable»; «Durante ese período requiere el cuidado de …»). Las 48 hs de reposo de Intercurrencia se traen como 2 días contando el día de la consulta. Revisar redacción y si su obra social o las escuelas piden otro formato.
 - v1.4.53 Certificado de apto: redacción propia y validez por defecto de 1 año (editable); no reemplaza la evaluación de la pestaña Apto físico (antecedentes, ECG). Revisar la redacción y la validez que use Gonzalo.
+- v1.4.54 Apto para natación: redacción propia («no presenta lesiones cutáneas, micosis ni pediculosis que contraindiquen el ingreso a la pileta») y validez por defecto de 30 días (cada club o colonia pide la suya). Revisar.
 
 ## Historial
+- 1.4.54 (11/11/2026): ítem 70 — certificado de apto para natación. Probado con Playwright (apto, no apto con motivo, 390 px con todas las tarjetas abiertas; regresión completa).
 - 1.4.53 (11/11/2026): ítem 69 — certificado de apto escolar / educación física. Probado con Playwright (3 resultados, 6 actividades, ambos sexos; regresión completa).
 - 1.4.52 (11/11/2026): ítem 68 — certificado de reposo / evicción con fechas. Probado con Playwright (4 tipos, días ↔ hasta, 1 día, con y sin diagnóstico, cuidador, traer de Intercurrencia, ambos sexos, sin nombre, nuevo paciente; regresión completa).
 - 1.4.51 (11/11/2026): ítem 67 — pestaña «Recetas» con receta de medicamentos. Sin contenido clínico nuevo. Probado con Playwright (Alt+7, un medicamento, traer de OMA, una receta por medicamento, peso, quitar renglón, nuevo paciente + deshacer, encabezado a 1440/1100/1000/390 px; regresión completa).
