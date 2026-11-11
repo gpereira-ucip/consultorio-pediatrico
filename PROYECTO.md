@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.4.50 (11/11/2026)
+- Versión actual: 1.4.51 (11/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -67,6 +67,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - **Frase de crecimiento** (v1.4.48): `crecFrase()` agrupa peso, talla y PC (< 3 años) por franja (`zona`/`PCN`: < P3, P3-P15, P15-P50, P50-P85, P85-P97, > P97) y, si hay mediciones previas, agrega «sin cruces de líneas…» o el cruce (≥ 2 franjas) respecto de la última previa de cada indicador. Sale como sección «Crecimiento» después de «Antropometría» en `genControl`, `genPerc` y «Copiar parte → Antropometría» del control. Ajustes → `sCrecF` (si/no).
 - **Dosis recibidas** (v1.4.49): `vacRec` (Set de «vacuna|dosis», solo en memoria; `UNDO` lo recupera; «Nuevo paciente» lo borra). Columna «Ya recibida» (`data-vr`) en la tabla de Vacunas, botones `vRecPrev` (tilda previas y fuera de edad) y `vRecClear`. `vacAtrasadas(e)` = previas sin tildar cuando hay al menos una tilde; aviso con `vAtrSel` (las suma a `vacSel`). `vacProx(e)` → próxima cita con lista, fecha exacta y días. `vacFrase` pasa a «carnet incompleto» si hay atrasadas y agrega «Dosis atrasadas: …» (las no indicadas hoy).
 - **Mensaje de vacunas para la familia** (v1.4.50): `vacFamilia()` arma texto plano (título con primer nombre, fecha y edad; «Le corresponde aplicarse ahora» = `vacSeleccionadas`; «pendientes de antes» = `vacAtrasadas` no indicadas hoy; «Próximas vacunas» = `vacProx`; nota final; firma si `vFirma`). Tarjeta en Vacunas con `vFam` (solo lectura) y `vFamCopy`.
+- **Pestaña «Recetas»** (v1.4.51): `t-docs` (botón `data-t="docs"`, Alt+7; Ajustes sigue en Alt+6). `S.doc` = documento activo, `genDoc(k)` lo arma y `update()` lo pone en `out`; botones `data-doc-copy` / `data-doc-ver`; `pacLinea(conPeso)` arma la línea del paciente. **Receta de medicamentos**: `rpItems` ([{f,p,d,fr,di,e}], solo en memoria; `UNDO` lo recupera; «Nuevo paciente» lo vacía), `renderRp`, `genRp` («Rp/ Fármaco, presentación — N envases» + «Indicación: dosis frecuencia por duración» + Dx + firma; `rpSep` = una receta por medicamento), `rpInter` (trae los ítems `DOSIS` tildados de `iCondState`: nombre → fármaco, resto del texto → dosis).
 - **Apto físico** con constancia modelo. **Ajustes** (médico, matrícula, mayúsculas, títulos) en localStorage.
 
 ## Identidad visual
@@ -158,8 +159,10 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.47 Blanco genético en la curva: el canal se proyecta manteniendo el puntaje z que tiene el blanco genético a los 19 años (OMS 2007); en lactantes es solo orientativo (la talla de los primeros 2 años no refleja todavía el canal genético). La fórmula (promedio de tallas parentales ± 6,5 cm, rango ± 8,5 cm) es la que ya traía la v1.0.0: confirmar que es la que usa Gonzalo.
 - v1.4.48 Frase de crecimiento: redacción propia («en el canal P15-P50», «por debajo del P3», «sin cruces de líneas de percentil»); mismo criterio de cruce que las alertas de v1.4.14 (cambio de 2 o más franjas entre P3-P15-P50-P85-P97). Revisar si Gonzalo prefiere otra redacción o que salga solo cuando hay mediciones previas.
 - v1.4.49 Dosis recibidas: «atrasada» = dosis de calendario con edad ya cumplida y no tildada como recibida; la app NO verifica intervalos mínimos ni edades máximas de recupero (p. ej., ofrece recetar el mismo día triple viral 1.ª y 2.ª dosis): por eso muestra «Verificar los intervalos mínimos entre dosis». Se completa con el ítem 59 (Lineamientos MSAL).
+- v1.4.51 Receta de medicamentos: formato propio («Rp/ … — N envases», «Indicación: …», «Dx: …»); revisar si coincide con lo que pide su sistema de receta electrónica (los datos obligatorios de una receta —fecha, firma, matrícula, genérico— dependen de la normativa y del sistema que use). «Traer de la conducta» copia el texto de la dosis calculada tal cual, con el cálculo entre paréntesis: conviene editarlo.
 
 ## Historial
+- 1.4.51 (11/11/2026): ítem 67 — pestaña «Recetas» con receta de medicamentos. Sin contenido clínico nuevo. Probado con Playwright (Alt+7, un medicamento, traer de OMA, una receta por medicamento, peso, quitar renglón, nuevo paciente + deshacer, encabezado a 1440/1100/1000/390 px; regresión completa).
 - 1.4.50 (11/11/2026): ítem 64 — mensaje de vacunas para la familia (WhatsApp). Ítems 63, 65 y 66 quedan [~] sin empezar (sin acceso web). Probado con Playwright (2 meses, 15 meses, 7 y 14 años, con pendientes, 390 px; regresión completa).
 - 1.4.49 (11/11/2026): ítem 62 — dosis recibidas tildables, atrasadas y próxima vacunación con fecha exacta. Ítems 59-61 quedan [~] sin empezar (sin acceso web). Sin contenido clínico nuevo. Probado con Playwright (15 meses: carnet al día, dos dosis destildadas → atrasadas, receta, texto del control, dosis de hoy ya recibida, nuevo paciente + deshacer, 1440/390 px sin scroll horizontal; regresión completa).
 - 1.4.48 (11/11/2026): ítem 58 — frase automática de crecimiento. Probado con Playwright (sin previas, con previas sin cruce, descenso y ascenso de 2 líneas, sin mediciones, prematuro con edad corregida, adolescente, opción desactivada, pestaña Percentilos; regresión completa).

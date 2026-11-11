@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.50 (2026-11-11)
+  VERSION: 1.4.51 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.51 — Pestaña nueva «Recetas» (recetas y certificados; Alt+7) con la receta de medicamentos: renglones con fármaco (genérico), presentación, dosis, frecuencia, duración y envases; «Traer de la conducta de Intercurrencia» crea un renglón por cada medicamento con dosis tildado; diagnóstico, datos del paciente, peso opcional, una receta por medicamento o todas juntas, firma. Botones Copiar y Ver; COPIAR de la barra inferior copia el documento activo. No calcula dosis ni guarda nada. Encabezado ajustado para 7 pestañas.
   1.4.50 — Vacunas: tarjeta «Mensaje para la familia» con un texto simple para WhatsApp (vacunas que le corresponden ahora, pendientes de antes si se tildó el carnet, próximas vacunas con fecha, y el recordatorio de que no requieren orden médica y de llevar el carnet) y botón «Copiar mensaje». Usa solo el primer nombre si está cargado. Sin contenido clínico nuevo (las notas son las que ya traía el calendario de la app).
   1.4.49 — Vacunas: columna «Ya recibida» para tildar las dosis del carnet (botón «Carnet al día» tilda todas las previas; se destildan las que falten). Las previas sin tildar pasan a «atrasada», se listan en un aviso con botón para sumarlas a la receta y salen en el texto del control («carnet incompleto… Dosis atrasadas: …»); una dosis de hoy tildada como recibida deja de indicarse. «Próxima vacunación» ahora dice las vacunas, la fecha exacta y los días que faltan. Los tildes no se guardan. No calcula intervalos mínimos de recupero.
   1.4.48 — Frase automática de crecimiento en el control y en Percentilos: «Crecimiento: Peso y talla en el canal P15-P50 para la edad, sin cruces de líneas de percentil respecto de la medición previa (11/08/2026)»; avisa ascensos o descensos de 2 o más líneas y usa edad corregida si corresponde. Se desactiva en Ajustes. Redacción propia, sin contenido clínico nuevo.
@@ -198,6 +199,7 @@ h3 .hint{text-transform:none;letter-spacing:0}
 .fiebox .fieT{font:600 13.5px var(--font);color:#9b3a2f;align-self:center}
 .fiebox .fg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
 .fiebox .fg>small{min-width:84px;color:var(--muted);font-size:12px}
+.rprow{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:flex-end;padding:8px 0;border-bottom:1px dashed var(--line)}.rprow .rpn{align-self:center;min-width:16px;color:var(--muted);font:600 12px var(--font)}.rprow input{width:100%}
 .st.rec{background:var(--okbg);color:#24603b}
 .chip.on{background:var(--okbg);border-color:#a9d4b7;color:#24603b}
 .chip.p{background:var(--okbg);border-color:#a9d4b7;color:#24603b}
@@ -361,7 +363,7 @@ input.bad{border-color:var(--coral)!important;background:#fff6f4}
 /* modo compacto (v1.4.10): ventana partida al lado del sistema de turnos o pantallas chicas */
 #compBtn{font-size:13px;padding:4px 9px}
 #nuevo{white-space:nowrap}
-@media(min-width:1081px){nav.tabs{flex-wrap:nowrap} nav.tabs button[data-t]{padding:7px 11px;white-space:nowrap} .topbar{gap:10px}}
+@media(min-width:1081px){nav.tabs{flex-wrap:nowrap;gap:2px} nav.tabs button[data-t]{padding:7px 8px;font-size:13px;white-space:nowrap} .topbar{gap:10px} .brand{flex:none}}
 body.compact{font-size:13.5px;padding-bottom:66px}
 .compact .wrap{padding:0 10px}
 .compact .topbar{padding:5px 0;gap:8px}
@@ -439,6 +441,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <button data-t="perc">Percentilos</button>
       <button data-t="vac">Vacunas</button>
       <button data-t="apto">Apto físico</button>
+      <button data-t="docs">Recetas</button>
       <button data-t="ajustes">Ajustes</button>
     </nav>
     <button class="btn ghost sm" id="compBtn" type="button" title="Modo compacto (para usar en media pantalla al lado del sistema de turnos)" aria-pressed="false">⇔</button>
@@ -884,6 +887,26 @@ body.compact{font-size:13.5px;padding-bottom:66px}
   </details>
 </div>
 
+<!-- ================= RECETAS Y CERTIFICADOS (v1.4.51) ================= -->
+<div id="t-docs" class="hidden">
+  <div class="sechead"><div style="flex:1"><h2>Recetas y certificados</h2><div class="sub">Textos listos para copiar · usan los datos del paciente del encabezado · no se guardan</div></div></div>
+  <details class="card" id="rpCard" open>
+    <summary><span class="ic">💊</span>Receta de medicamentos<span class="sum" id="sumRp"></span></summary>
+    <div class="inner">
+      <div id="rpList"></div>
+      <div class="btns" style="margin-top:8px"><button type="button" class="btn sec sm" id="rpAdd">＋ Agregar medicamento</button><button type="button" class="btn sec sm" id="rpInter" title="Crea un renglón por cada medicamento con dosis calculada que esté tildado en la conducta de Intercurrencia">↧ Traer de la conducta de Intercurrencia</button><button type="button" class="linkbtn" id="rpClear">vaciar</button></div>
+      <div class="row" style="margin-top:10px">
+        <label class="f" style="flex:1;min-width:220px">Diagnóstico<input id="rpDx" placeholder="ej. Otitis media aguda"></label>
+        <label class="chk"><input type="checkbox" id="rpDatos" checked> datos del paciente</label>
+        <label class="chk"><input type="checkbox" id="rpPeso"> peso</label>
+        <label class="chk"><input type="checkbox" id="rpSep"> una receta por medicamento</label>
+        <label class="chk"><input type="checkbox" id="rpFirma" checked> firma</label>
+      </div>
+      <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="rp">Copiar receta</button><button type="button" class="btn sec sm" data-doc-ver="rp">Ver</button><span class="hint">Recetá por nombre genérico. Las dosis las escribís vos: la app no las calcula acá.</span></div>
+    </div>
+  </details>
+</div>
+
 <!-- ================= AJUSTES ================= -->
 <div id="t-ajustes" class="hidden">
   <div class="sechead"><div style="flex:1"><h2>Ajustes</h2></div></div>
@@ -960,7 +983,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
     <div class="row" style="justify-content:space-between;margin-bottom:8px"><h2 style="font-size:18px" id="atajosT">Atajos de teclado</h2><button class="btn ghost sm" id="atajosCerrar">Cerrar</button></div>
     <table class="kbdl"><tbody>
       <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td><td>Copiar el texto para la HC</td></tr>
-      <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>6</kbd></td><td>Ir a Control · Intercurrencia · Percentilos · Vacunas · Apto físico · Ajustes</td></tr>
+      <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>7</kbd></td><td>Ir a Control · Intercurrencia · Percentilos · Vacunas · Apto físico · Ajustes · Recetas y certificados</td></tr>
       <tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd></td><td>Buscar cuadro de intercurrencia</td></tr>
       <tr><td><kbd>Esc</kbd></td><td>Cerrar ventanas (vista previa, Mis frases, Copiar parte, esta ayuda)</td></tr>
       <tr><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>+</kbd> / <kbd>−</kbd></td><td>Agrandar o achicar la letra del formulario (también en Ajustes)</td></tr>
@@ -995,9 +1018,9 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.50";
+const VERSION = "1.4.51";
 const $ = id => document.getElementById(id);
-const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta" };
+const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
 /* ---------- utilidades de género ---------- */
 const TOK = {
@@ -2880,6 +2903,36 @@ function genReceta(){
   return sel.map(x=>`${datos}Rp/ ${x.nombre} - ${x.d}${x.nota?" ("+x.nota+")":""}\n${dx}${f}`).join("\n\n----------\n\n");
 }
 
+/* ---------- recetas y certificados (pestaña «Recetas», v1.4.51) ----------
+   Documentos de texto para copiar. S.doc = documento activo (el último tocado); genDoc(k) lo arma. Nada se guarda en el navegador. */
+function pacLinea(conPeso){ const e=edad(), p=num("peso");
+  return "Paciente: "+($("nombre").value.trim()||"__________")+($("dni").value.trim()? " - DNI "+$("dni").value.trim() : "")+(e? " - FN "+dmy(e.fn)+" ("+edadTxt(e)+")" : "")+(conPeso && p? " - Peso "+fmtN(p,2)+" kg" : ""); }
+/* receta de medicamentos (ítem 67): renglones {f: fármaco, p: presentación, d: dosis, fr: frecuencia, di: días, e: envases}. Sin cálculo de dosis. */
+let rpItems=[{}];
+const RP_C=[["f","Fármaco (genérico)","amoxicilina",2],["p","Presentación","susp. 500 mg/5 ml",2],["d","Dosis","6 ml",1],["fr","Frecuencia","cada 12 hs",1],["di","Duración","10 días",1],["e","Envases","1",1]];
+function renderRp(){ $("rpList").innerHTML = rpItems.map((it,i)=>`<div class="rprow"><b class="rpn">${i+1}</b>`+RP_C.map(c=>`<label class="f" style="flex:${c[3]} 1 ${c[3]*90}px">${c[1]}<input data-rp="${i}:${c[0]}" value="${mfEsc(it[c[0]]||"")}" placeholder="${c[2]}"></label>`).join("")+`<button type="button" class="btn ghost sm" data-rpdel="${i}" aria-label="Quitar medicamento ${i+1}" title="Quitar">✕</button></div>`).join(""); }
+function rpLinea(it){ const cab=[cap((it.f||"").trim()), (it.p||"").trim()].filter(Boolean).join(", "), env=(it.e||"").trim();
+  const ind=[(it.d||"").trim(), (it.fr||"").trim(), (it.di||"").trim()? ((/^(por|durante|hasta)\b/i.test(it.di.trim())? "" : "por ")+it.di.trim()) : ""].filter(Boolean).join(" ");
+  return {cab: cab+(env? " — "+(/^\d+$/.test(env)? env+(env==="1"?" envase":" envases") : env) : ""), ind}; }
+function genRp(){ const its=rpItems.filter(it=>(it.f||"").trim()); if(!its.length) return "";
+  const cabz="Fecha: "+dmy(parseD($("fc").value))+"\n"+($("rpDatos").checked? pacLinea($("rpPeso").checked)+"\n" : ""), dx=$("rpDx").value.trim()? "\nDx: "+$("rpDx").value.trim() : "", f=$("rpFirma").checked? "\n"+firma() : "";
+  const uno=(it,n)=>{ const l=rpLinea(it); return (n? n+") " : "Rp/ ")+l.cab+(l.ind? "\n"+(n?"   ":"")+"Indicación: "+l.ind : ""); };
+  if($("rpSep").checked || its.length===1) return its.map(it=>cabz+uno(it,0)+dx+f).join("\n\n----------\n\n");
+  return cabz+"Rp/\n"+its.map((it,i)=>uno(it,i+1)).join("\n")+dx+f; }
+function genDoc(k){ return k==="rp"? genRp() : ""; }
+function docMay(t){ return $("sMay").value==="mayus"? t.toUpperCase() : t; }
+$("rpList").addEventListener("input", ev=>{ const d=ev.target.dataset.rp; if(!d) return; const [i,k]=d.split(":"); rpItems[+i][k]=ev.target.value; S.doc="rp"; update(); });
+$("rpAdd").onclick=()=>{ rpItems.push({}); renderRp(); update(); const el=document.querySelector(`[data-rp="${rpItems.length-1}:f"]`); if(el) el.focus(); };
+$("rpClear").onclick=()=>{ rpItems=[{}]; $("rpDx").value=""; renderRp(); update(); };
+$("rpInter").onclick=()=>{ if(!iCur){ return; } const ks=iCondState.filter(s=>s[1] && DOSIS[s[0]]); if(!ks.length){ toast("No hay medicamentos con dosis tildados en la conducta de Intercurrencia"); return; }
+  const nuevos=ks.map(s=>{ const t=condText(s[0]), m=t.match(/^(?:Si hay foco dentario: )?(.*?)\s+(?=\d|\(|cada\b|:)/); const f=m? m[1] : t.split(" ")[0]; return {f:f.replace(/\s+gotas$/,""), d:t.slice(t.indexOf(f)+f.length).trim()}; });
+  rpItems = rpItems.filter(it=>(it.f||"").trim()).concat(nuevos); if(!$("rpDx").value.trim()) $("rpDx").value=$("iDx").value; S.doc="rp"; renderRp(); update(); toast(nuevos.length+" medicamento(s) traídos: completá presentación y envases"); };
+document.addEventListener("click", ev=>{ const x=ev.target.closest("[data-rpdel]"); if(x){ rpItems.splice(+x.dataset.rpdel,1); if(!rpItems.length) rpItems=[{}]; renderRp(); update(); return; }
+  const c=ev.target.closest("[data-doc-copy]"), v=ev.target.closest("[data-doc-ver]"); if(!c && !v) return; const k=(c||v).dataset.docCopy||(c||v).dataset.docVer; S.doc=k; update(); const t=genDoc(k);
+  if(!t){ toast(k==="rp"? "Cargá al menos un medicamento" : "Faltan datos para armar el texto"); return; }
+  if(c) copy(docMay(t), "Copiado: pegalo con Ctrl+V"); else { $("preview").classList.remove("hidden"); $("out").scrollTop=0; } });
+$("t-docs").addEventListener("focusin", ev=>{ const d=ev.target.closest("details[id]"); const k=d && {rpCard:"rp"}[d.id]; if(k && S.doc!==k){ S.doc=k; update(); } });
+
 /* ---------- render vacunas ---------- */
 function renderVac(){
   const e=edad();
@@ -2930,7 +2983,7 @@ function update(){
   if(S.tab==="perc") renderCharts();
   updateSums(e, pr);
   if(iCur){ renderInterDoses(); renderTal(); }
-  let txt = S.tab==="control"? genControl() : S.tab==="inter"? genInter() : S.tab==="apto"? genApto() : S.tab==="vac"? (genReceta()||"No hay vacunas seleccionadas para recetar.") : S.tab==="perc"? genPerc() : "";
+  let txt = S.tab==="control"? genControl() : S.tab==="inter"? genInter() : S.tab==="apto"? genApto() : S.tab==="vac"? (genReceta()||"No hay vacunas seleccionadas para recetar.") : S.tab==="perc"? genPerc() : S.tab==="docs"? genDoc(S.doc) : "";
   if($("sMay").value==="mayus") txt = txt.toUpperCase();
   $("out").value = txt;
 }
@@ -2943,9 +2996,10 @@ function updateSums(e, pr){
     const ne=cnt("#cEst"); $("sumEst").textContent = ne? ne+" seleccionado(s)" : "ninguno";
     $("sumPlan").textContent = cnt("#cRec")+" indicaciones"+(e && e.months<12? " + suplementos":"");
   }
+  if($("sumRp")){ const n=rpItems.filter(it=>(it.f||"").trim()).length; $("sumRp").textContent = n? n+(n===1?" medicamento":" medicamentos") : "sin medicamentos"; }
   if(iCur){ const ne=cnt("#iEst"); $("sumIEst").textContent = ne? ne+" seleccionado(s)" : "ninguno"; }
   const sexo = S.sexo==="v"?"Varón":S.sexo==="m"?"Mujer":"elegí sexo";
-  const ctx = {control:"Control de salud", inter:"Intercurrencia: "+(iCur?iCur.n:""), perc:"Percentilos", vac:"Vacunas", apto:"Apto físico", ajustes:"Ajustes"}[S.tab]||"";
+  const ctx = {control:"Control de salud", inter:"Intercurrencia: "+(iCur?iCur.n:""), perc:"Percentilos", vac:"Vacunas", apto:"Apto físico", docs:"Recetas y certificados", ajustes:"Ajustes"}[S.tab]||"";
   const pcs = pr? Object.keys(pr).filter(k=>pr[k]).map(k=>({w:"Peso",h:"Talla",pc:"PC",imc:"IMC"})[k]+" "+pr[k].pc).join(" · ") : "";
   $("barInfo").innerHTML = `<b>${ctx}</b> · ${sexo}${e?" · "+edadTxt(e):""}${pcs?" · "+pcs:""}`;
 }
@@ -2965,7 +3019,7 @@ function setSexo(s){
 document.querySelectorAll("#sexoBox button").forEach(b=>b.onclick=()=>setSexo(b.dataset.s));
 document.querySelectorAll("#tabs button[data-t]").forEach(b=>b.onclick=()=>{
   S.tab=b.dataset.t; document.querySelectorAll("#tabs button[data-t]").forEach(x=>x.classList.toggle("on",x===b));
-  ["control","inter","perc","vac","apto","ajustes"].forEach(t=>$("t-"+t).classList.toggle("hidden", t!==S.tab));
+  ["control","inter","perc","vac","apto","docs","ajustes"].forEach(t=>$("t-"+t).classList.toggle("hidden", t!==S.tab));
   $("copiarRec").classList.toggle("hidden", !(S.tab==="vac"||S.tab==="control"));
   $("parteBtn").classList.toggle("hidden", !["control","inter","apto"].includes(S.tab)); parteCerrar();
   update();
@@ -3068,7 +3122,7 @@ document.addEventListener("keydown", ev=>{ if(ev.key==="Escape") parteCerrar(); 
 $("copiarRec").onclick = ()=>{ const r=genReceta(); r? copy($("sMay").value==="mayus"?r.toUpperCase():r, "Receta copiada") : toast("No hay vacunas para recetar"); };
 document.addEventListener("keydown", e=>{ if((e.ctrlKey||e.metaKey) && e.key==="Enter"){ e.preventDefault(); $("copiar").click(); } });
 /* ---------- atajos de teclado (v1.4.2) ---------- */
-const TAB_ORDEN=["control","inter","perc","vac","apto","ajustes"];
+const TAB_ORDEN=["control","inter","perc","vac","apto","ajustes","docs"];
 function irTab(t){ const b=document.querySelector('#tabs button[data-t="'+t+'"]'); if(b && S.tab!==t) b.click(); }
 function buscarCuadro(){
   irTab("inter");
@@ -3085,7 +3139,7 @@ document.addEventListener("keydown", e=>{
   const enCampo = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
   if((e.ctrlKey||e.metaKey) && e.altKey && (e.key==="+"||e.key==="="||e.code==="Equal"||e.code==="NumpadAdd")){ e.preventDefault(); pasoZoom(1); toast("Letra "+$("fzTxt").textContent); return; }
   if((e.ctrlKey||e.metaKey) && e.altKey && (e.key==="-"||e.code==="Minus"||e.code==="NumpadSubtract")){ e.preventDefault(); pasoZoom(-1); toast("Letra "+$("fzTxt").textContent); return; }
-  if(e.altKey && !e.ctrlKey && !e.metaKey && /^Digit[1-6]$/.test(e.code)){ e.preventDefault(); irTab(TAB_ORDEN[+e.code.slice(5)-1]); return; }
+  if(e.altKey && !e.ctrlKey && !e.metaKey && /^Digit[1-7]$/.test(e.code)){ e.preventDefault(); irTab(TAB_ORDEN[+e.code.slice(5)-1]); return; }
   if((e.ctrlKey||e.metaKey) && !e.altKey && (e.key==="k"||e.key==="K")){ e.preventDefault(); buscarCuadro(); return; }
   if(e.key==="?" && !enCampo && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); toggleAtajos(); }
 });
@@ -3155,7 +3209,7 @@ function undoGuardar(){
   UNDO={ t:Date.now(), vals, supl, sexo:S.sexo, iModo:S.iModo, cB:cB&&cB.id, iSel:$("iSel").value,
     cHitosState:cl(cHitosState), cRecState:cl(cRecState), cEstState:cl(cEstState),
     iSintState:cl(iSintState), iEstState:cl(iEstState), iCondState:cl(iCondState), talS:cl(talS), efDirty:cl(efDirty),
-    vacSel:[...vacSel], vacKey, uso:[...usoContados], cDxDirty, pesqS:cl(pesqS), sdS:cl(sdS), fieS:cl(fieS), evoS:cl(evoS), vacRec:[...vacRec] };
+    vacSel:[...vacSel], vacKey, uso:[...usoContados], cDxDirty, pesqS:cl(pesqS), sdS:cl(sdS), fieS:cl(fieS), evoS:cl(evoS), vacRec:[...vacRec], rpItems:cl(rpItems) };
 }
 function undoAplicarVals(vals){ Object.keys(vals).forEach(id=>{ const el=$(id); if(!el) return; if("c" in vals[id]) el.checked=vals[id].c; else el.value=vals[id].v; }); }
 function undoRestaurar(){
@@ -3168,7 +3222,7 @@ function undoRestaurar(){
   iSintState=u.iSintState; iEstState=u.iEstState; iCondState=u.iCondState; talS=u.talS;
   Object.assign(efDirty, u.efDirty);
   S.iModo=u.iModo; document.querySelectorAll("#iModo button").forEach(x=>x.classList.toggle("on", x.dataset.m===S.iModo)); $("iCtrlBox").classList.toggle("hidden", S.iModo==="ini");
-  vacSel=new Set(u.vacSel); vacKey=u.vacKey; cDxDirty=u.cDxDirty; pesqS=u.pesqS||{}; sdS=u.sdS||{}; fieS=u.fieS||{}; evoS=u.evoS||{ev:0}; vacRec=new Set(u.vacRec||[]); usoContados.clear(); u.uso.forEach(x=>usoContados.add(x));
+  vacSel=new Set(u.vacSel); vacKey=u.vacKey; cDxDirty=u.cDxDirty; pesqS=u.pesqS||{}; sdS=u.sdS||{}; fieS=u.fieS||{}; evoS=u.evoS||{ev:0}; vacRec=new Set(u.vacRec||[]); rpItems=u.rpItems&&u.rpItems.length? u.rpItems : [{}]; renderRp(); usoContados.clear(); u.uso.forEach(x=>usoContados.add(x));
   renderControl();
   document.querySelectorAll("#cSupl input").forEach(i=>{ if(i.dataset.s in u.supl) i.checked=u.supl[i.dataset.s]; });
   renderInter(); if(typeof plBotones==="function") plBotones();
@@ -3190,7 +3244,7 @@ document.addEventListener("keydown", e=>{
 $("nuevo").onclick = ()=>{
   undoGuardar();
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
-   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); $("eIncl").checked=false;
+   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
   $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();
@@ -3238,6 +3292,7 @@ $("sInicioChk").checked = $("sInicio").value!=="no";
 (function(){ const c=document.querySelector('#tabs button[data-t="control"] img'), i=document.querySelector('#tabs button[data-t="inter"] img');
   if(c){ $("iniImgC").src=c.src; $("inicioLogo").src=document.querySelector(".logo-b").src; } if(i) $("iniImgI").src=i.src; })();
 if($("sInicio").value!=="no") inicioAbrir();
+renderRp();
 loadControl("rn");
 loadInter("cvas");
 $("copiarRec").classList.remove("hidden");

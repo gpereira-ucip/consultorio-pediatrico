@@ -81,7 +81,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 66. [~] Contraindicaciones y precauciones frecuentes, en pantalla. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
 
 ## F. Recetas, certificados e indicaciones
-67. [ ] Receta de medicamentos: fármaco, presentación, dosis, frecuencia, días y cantidad de envases.
+67. [x] (v1.4.51, 11/11) Receta de medicamentos: fármaco, presentación, dosis, frecuencia, días y cantidad de envases. En la pestaña nueva «Recetas» (Alt+7).
 68. [ ] Certificado de reposo o evicción con fechas desde/hasta.
 69. [ ] Certificado de apto escolar / educación física.
 70. [ ] Certificado de apto para natación (piel, uñas, pies).
