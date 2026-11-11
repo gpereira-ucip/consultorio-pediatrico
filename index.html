@@ -15,7 +15,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.55 (2026-11-11)
+  VERSION: 1.4.56 (2026-11-11)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -31,6 +31,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.56 — Interconsulta / derivación (pestaña Recetas): tipo, especialidad (24 opciones u otra), prioridad, motivo, resumen, estudios realizados, diagnóstico presuntivo y lo que se solicita; arma la nota («Estimado/a colega: solicito interconsulta para la paciente de … por …») con datos del paciente, fecha y firma. Botón para traer los datos positivos, antecedentes y diagnóstico de la consulta. El contenido lo escribe el médico.
   1.4.55 — Mensaje para la familia en Intercurrencia (tarjeta al final): «Copiar indicaciones + alarma» arma un texto para WhatsApp con el diagnóstico, lo tildado en la conducta en lista (sin el cálculo en mg/kg, con los ml y la fecha de fin), el reposo, las pautas de alarma del cuadro una por renglón y el control; «Copiar solo pautas de alarma» manda solo esa parte. No agrega contenido clínico: reordena lo que ya está en la conducta.
   1.4.54 — Certificado de apto para natación (pestaña Recetas): examen de piel, uñas, pies y espacios interdigitales y cuero cabelludo (vacío = «sin lesiones»), resultado (apto / no apto transitoriamente con motivo), validez editable (30 días) y observaciones. Texto administrativo, sin contenido clínico.
   1.4.53 — Certificado de apto escolar / educación física (pestaña Recetas): actividad (educación física escolar, concurrir a la escuela, actividad recreativa, colonia, campamento u otra), resultado (apto, apto con restricciones, no apto transitoriamente), restricciones o motivo, validez editable (1 año) y observaciones. Texto administrativo, sin contenido clínico.
@@ -963,6 +964,25 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="cn">Copiar certificado</button><button type="button" class="btn sec sm" data-doc-ver="cn">Ver</button><span class="hint">Los campos vacíos salen como «sin lesiones». La validez depende de cada club o colonia: cambiala si hace falta.</span></div>
     </div>
   </details>
+  <details class="card" id="icCard" data-doc="ic">
+    <summary><span class="ic">📨</span>Interconsulta / derivación<span class="sum" id="sumIc"></span></summary>
+    <div class="inner">
+      <div class="row">
+        <label class="f">Tipo<select id="icTipo"><option value="ic">Interconsulta</option><option value="der">Derivación</option></select></label>
+        <label class="f" style="flex:1;min-width:200px">Especialidad<select id="icEsp"></select></label>
+        <label class="f hidden" id="icEspOtraL" style="flex:1;min-width:180px">Cuál<input id="icEspOtra"></label>
+        <label class="f">Prioridad<select id="icPri"><option value="">— no mencionar —</option><option>programada</option><option>preferente</option><option>urgente</option></select></label>
+      </div>
+      <label class="f" style="margin-top:8px">Motivo<input id="icMot" placeholder="ej. soplo sistólico 2/6 en mesocardio, asintomático"></label>
+      <label class="f" style="margin-top:8px">Resumen (antecedentes y hallazgos)<textarea id="icRes" class="sm" placeholder="ej. Previamente sano. Crecimiento y desarrollo acordes. Sin disnea ni síncope. Pulsos femorales presentes."></textarea></label>
+      <div class="row" style="margin-top:8px">
+        <label class="f" style="flex:1;min-width:220px">Estudios realizados<input id="icEst" placeholder="ej. ECG sin particularidades"></label>
+        <label class="f" style="flex:1;min-width:220px">Diagnóstico presuntivo<input id="icDx"></label>
+      </div>
+      <label class="f" style="margin-top:8px">Solicito<input id="icSol" placeholder="evaluación y conducta"></label>
+      <div class="btns" style="margin-top:10px"><button type="button" class="btn sm" data-doc-copy="ic">Copiar</button><button type="button" class="btn sec sm" data-doc-ver="ic">Ver</button><button type="button" class="btn sec sm" id="icTraer">↧ Traer datos positivos y diagnóstico de la consulta</button></div>
+    </div>
+  </details>
 </div>
 
 <!-- ================= AJUSTES ================= -->
@@ -1076,7 +1096,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.55";
+const VERSION = "1.4.56";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3035,7 +3055,20 @@ function genCn(){ const res=$("cnRes").value, det=$("cnDet").value.trim().replac
   L.push(G(res==="apto"? "Al momento del examen no presenta lesiones cutáneas, micosis ni pediculosis que contraindiquen el ingreso a la pileta. Se encuentra apt{o} para natación y actividades acuáticas." : "No se encuentra apt{o} para ingresar a la pileta en forma transitoria"+(det? " ("+det+")" : "")+", hasta nuevo control."));
   if(val && res==="apto") L.push("Válido por "+val+" a partir de la fecha.");
   if(obs) L.push("Observaciones: "+obs.replace(/\.$/,"")+"."); L.push(certPie()); return L.join("\n"); }
-const DOCS={rp:genRp, cr:genCr, ce:genCe, cn:genCn};
+/* interconsulta / derivación (ítem 75). Redacción propia; el contenido lo escribe el médico. */
+const IC_ESP=["Cardiología","Otorrinolaringología","Oftalmología","Ortopedia y traumatología","Neurología","Gastroenterología","Dermatología","Endocrinología","Nefrología","Urología","Neumonología","Alergia e inmunología","Cirugía pediátrica","Odontología","Fonoaudiología","Salud mental","Kinesiología","Nutrición","Genética","Hematología","Infectología","Ginecología infantojuvenil","Desarrollo / neurodesarrollo","Guardia / emergencias"];
+function genIc(){ const esp=($("icEsp").value==="otra"? $("icEspOtra").value.trim() : $("icEsp").value)||"……………………", tipo=$("icTipo").value, e=edad();
+  const mot=$("icMot").value.trim().replace(/\.$/,""), res=$("icRes").value.trim(), est=$("icEst").value.trim(), dx=$("icDx").value.trim(), sol=$("icSol").value.trim(), pri=$("icPri").value;
+  if(!mot && !res && !dx) return "";
+  const L=[(tipo==="der"? "DERIVACIÓN A " : "INTERCONSULTA CON ")+esp.toUpperCase(), pacLinea(false)];
+  L.push(G("Estimado/a colega: "+(tipo==="der"? "derivo {al}" : "solicito interconsulta para {el}")+" paciente"+(e? " de "+edadTxt(e) : "")+(mot? " por "+dxMin(mot) : "")+"."));
+  if(res) L.push("Resumen: "+res.replace(/\.?$/,"."));
+  if(est) L.push("Estudios realizados: "+est.replace(/\.?$/,"."));
+  if(dx) L.push("Diagnóstico presuntivo: "+dx.replace(/\.?$/,"."));
+  L.push("Solicito: "+(sol||"evaluación y conducta").replace(/\.?$/,"."));
+  if(pri) L.push("Prioridad: "+pri+".");
+  L.push("Agradezco su evaluación.", "Fecha: "+dmy(parseD($("fc").value)), firma()); return L.join("\n"); }
+const DOCS={rp:genRp, cr:genCr, ce:genCe, cn:genCn, ic:genIc};
 function genDoc(k){ return DOCS[k]? DOCS[k]() : ""; }
 function docMay(t){ return $("sMay").value==="mayus"? t.toUpperCase() : t; }
 $("rpList").addEventListener("input", ev=>{ const d=ev.target.dataset.rp; if(!d) return; const [i,k]=d.split(":"); rpItems[+i][k]=ev.target.value; S.doc="rp"; update(); });
@@ -3115,6 +3148,7 @@ function updateSums(e, pr){
   }
   if($("sumRp")){ const n=rpItems.filter(it=>(it.f||"").trim()).length; $("sumRp").textContent = n? n+(n===1?" medicamento":" medicamentos") : "sin medicamentos"; }
   if($("sumCr")){ const f=crFechas(); $("sumCr").textContent = $("crTipo").value==="const"? "constancia" : f && f.h? f.n+(f.n===1?" día":" días")+" · hasta el "+dmy(f.h) : ""; }
+  if($("sumIc")){ $("icEspOtraL").classList.toggle("hidden", $("icEsp").value!=="otra"); $("sumIc").textContent = ($("icMot").value.trim()||$("icRes").value.trim()||$("icDx").value.trim())? ($("icEsp").value==="otra"? $("icEspOtra").value : $("icEsp").value) : ""; }
   if($("sumCn")) $("sumCn").textContent = $("cnRes").value==="apto"? "apto · "+$("cnVal").value.trim() : "no apto transitoriamente";
   if($("sumCe")){ $("ceActOtroL").classList.toggle("hidden", $("ceAct").value!=="otro"); $("sumCe").textContent = $("ceRes").selectedOptions[0].textContent.toLowerCase(); }
   if(iCur){ const ne=cnt("#iEst"); $("sumIEst").textContent = ne? ne+" seleccionado(s)" : "ninguno"; }
@@ -3366,7 +3400,7 @@ document.addEventListener("keydown", e=>{
 $("nuevo").onclick = ()=>{
   undoGuardar();
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
-   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta","ceDet","ceObs","ceActOtro","cnPiel","cnUnas","cnPies","cnPelo","cnDet","cnObs"].forEach(id=>$(id).value=""); $("ceRes").value="apto"; $("cnRes").value="apto"; $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
+   "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta","ceDet","ceObs","ceActOtro","cnPiel","cnUnas","cnPies","cnPelo","cnDet","cnObs","icMot","icRes","icEst","icDx","icSol","icEspOtra"].forEach(id=>$(id).value=""); $("ceRes").value="apto"; $("cnRes").value="apto"; $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
   $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();
@@ -3414,6 +3448,10 @@ $("sInicioChk").checked = $("sInicio").value!=="no";
 (function(){ const c=document.querySelector('#tabs button[data-t="control"] img'), i=document.querySelector('#tabs button[data-t="inter"] img');
   if(c){ $("iniImgC").src=c.src; $("inicioLogo").src=document.querySelector(".logo-b").src; } if(i) $("iniImgI").src=i.src; })();
 if($("sInicio").value!=="no") inicioAbrir();
+$("icEsp").innerHTML = IC_ESP.map(x=>`<option>${x}</option>`).join("")+'<option value="otra">Otra (escribir)</option>';
+$("icTraer").onclick=()=>{ const pos=[$("iPos").value.trim(), $("cPos").value.trim(), $("aPos").value.trim()].filter(Boolean).join(". "), ap=$("iAP").value.trim();
+  const usoInter = !!($("iPos").value.trim() || usoContados.size); if(pos || ap) $("icRes").value=[ap? "Antecedentes: "+ap : "", pos].filter(Boolean).join(". ");
+  const dx = usoInter && iCur? $("iDx").value.trim() : ""; if(dx && !$("icDx").value.trim()) $("icDx").value=dx; S.doc="ic"; update(); toast(pos||ap||dx? "Datos traídos: revisalos" : "No hay datos positivos ni antecedentes cargados"); };
 renderRp();
 loadControl("rn");
 loadInter("cvas");
