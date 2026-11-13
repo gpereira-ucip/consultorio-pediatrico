@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.4.66 (13/11/2026)
+- Versión actual: 1.5.0 (13/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -86,8 +86,9 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - **Resaltado de cambios** (v1.4.66, ítem 89): en «Ver texto», casilla «Resaltar lo que cambié respecto de la plantilla» (`hlOn`, preferencia en localStorage `consultorioPed.hl`). Compara el texto actual con el que salió la primera vez tras elegir cuadro/control/modo/certificado (`HL.base`, clave pestaña+cuadro+modo; se reinicia con «Nuevo paciente»), por palabras (LCS, `hlDiff`), y marca en verde lo agregado o cambiado; informa cuántas palabras se sacaron. Vista de solo lectura (`#outHl`); la copia usa el textarea sin marcas. Lo que se carga en el encabezado después de elegir el cuadro (peso, signos vitales) también se marca como agregado.
 
 ## Identidad visual
-- Logos embebidos en base64 (no cambiarlos): control de salud = niño rompecabezas; intercurrencia = figura collage.
-- Paleta: fondo #f7f4ef, tarjetas #fff, acento verde azulado #2f6f6d, cálido #c47a52, coral #df6a5c (intercurrencia). Tipografías Inter + Lora embebidas en base64 (woff).
+- **Rediseño v1.5.0 (pedido directo de Gonzalo, 13/11/2026; reemplaza lo anterior):** un solo logo, dibujado en SVG (`<symbol id="logo">`: corazón con pulso sobre degradé verde azulado), en el encabezado y la pantalla de inicio. Sin dibujos en pestañas ni en Control / Intercurrencia / Apto (íconos de línea del sprite). Los logos viejos (niño rompecabezas, figura collage) se quitaron.
+- Paleta: fondo #f3f6f8, tarjetas #fff, acento #0f766e (hover #0b5d57), coral #e8604c (intercurrencia), cálido #c9733f (apto), texto #14232f. Una sola tipografía: Inter embebida (se sacó Lora). Estilos nuevos al final del `<style>` (sección «Rediseño v1.5.0»).
+- Signos vitales separados de las mediciones: dos bloques `.grp` dentro de `.meds` («Mediciones»: peso, talla, PC, PN, EG; «Signos vitales»: T, FC, FR, SatO₂, TA). Los ids no cambiaron.
 
 ## Reglas de trabajo
 - Íconos: no usar emojis en la interfaz; usar el sprite propio (v1.4.65). Para un ícono nuevo, agregar un `<symbol id="i-nombre" viewBox="0 0 24 24">` de trazo (sin relleno).
@@ -187,6 +188,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 13/11/2026 · v1.5.0 · Rediseño visual completo y signos vitales separados de las mediciones (pedido de Gonzalo). Sin contenido clínico nuevo. Probado: sin errores de consola, 1440 y 390 px sin desborde, autodiagnóstico 1469 comprobaciones OK.
 - 13/11/2026 · v1.4.66 · Ítem 89: vista previa con resaltado de lo agregado o modificado respecto de la plantilla. Probado: sin errores de consola, ambos sexos, 1440 y 390 px, autodiagnóstico 1469 comprobaciones OK.
 - 1.4.65 (12/11/2026): ítem 87 — íconos propios en lugar de emojis (sprite SVG `<symbol id="i-…">` al inicio del `<body>`; en HTML se usan con `<svg class="i"><use href="#i-nombre"/></svg>` y dentro de cadenas JS sin comillas: `<svg class=i aria-hidden=true><use href=#i-nombre></use></svg>`). Sin contenido clínico. Además se quitó un envoltorio HTML ajeno (`<!doctype html><html><head>…<body>` antes del `<!DOCTYPE>` real y `</body></html>` duplicado al final) que había quedado en el archivo y dejaba las etiquetas meta dentro del body. Probado con Playwright (sin errores de consola; ambos sexos × 7 edades × 54 cuadros × 3 modos sin undefined/NaN/{ ni emojis; autodiagnóstico 1.469 comprobaciones sin fallas; todos los `<use>` resuelven; los botones conservan el ícono después del clic; 1440 y 390 px sin scroll horizontal; capturas revisadas). Los ítems 37-39, 46, 47, 54, 59-61, 63, 65, 66, 71, 73, 74, 77-81, 84 y 85 se saltearon otra vez: siguen sin acceso web a las fuentes oficiales (ver «Problemas conocidos»).
 - 1.4.64 (11/11/2026): ítem 96 — autodiagnóstico interno. Probado con Playwright (≈ 1.500 comprobaciones sin fallas, paciente y texto idénticos antes y después, sin tocar el contador de uso, falla provocada en una dosis → la informa; regresión completa).
