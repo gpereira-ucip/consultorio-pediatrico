@@ -14,7 +14,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.4.65 (2026-11-12)
+  VERSION: 1.4.66 (2026-11-13)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -30,6 +30,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.4.66 — Vista previa con resaltado de cambios: casilla «Resaltar lo que cambié respecto de la plantilla» en «Ver texto». Marca en verde las palabras agregadas o modificadas respecto del texto que salió al elegir el cuadro / control / certificado (solo en pantalla; lo que se copia es el mismo texto) y avisa cuántas palabras se sacaron. Ítem 89.
   1.4.65 — Íconos propios en lugar de emojis: 34 íconos de línea dibujados para la app (trazo redondeado, del color de la paleta) en los títulos de las tarjetas, la barra inferior, los botones de copiar, los avisos, las ventanas y la pantalla de inicio; se ven igual en Windows, Mac, Android y iPhone. Los signos tipográficos (★ ☆ ✓ ✕ ↺) siguen como texto. Sin cambios de contenido.
   1.4.64 — Autodiagnóstico en Ajustes: un botón recorre todos los controles por edad, las intercurrencias en los 3 modos (incluidas Mis plantillas), apto, vacunas, percentilos, certificados y mensajes para la familia en ambos sexos, y revisa cálculos de referencia (tablas OMS, peso/talla, presión arterial, dosis con varios pesos, fechas). Informa «todo en orden» o la lista de problemas; no guarda nada y deja el paciente como estaba.
   1.4.63 — Respaldo completo en Ajustes: «Descargar respaldo (.json)» guarda en un archivo los ajustes, Mis frases, Mis plantillas y el contador de cuadros más usados; «Importar respaldo» lo lee y deja elegir entre agregar a lo que hay (sin duplicar) o reemplazar todo. No incluye datos de pacientes. Los exportar/importar anteriores de frases y plantillas siguen funcionando.
@@ -261,6 +262,7 @@ body{padding-bottom:90px}
 /* vista previa */
 .modal{position:fixed;inset:0;z-index:50;background:rgba(36,48,58,.35);display:flex;align-items:flex-end;justify-content:center;padding:20px}
 .modal .sheet{background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.25);width:min(900px,100%);max-height:88vh;display:flex;flex-direction:column;padding:16px 18px;margin-bottom:70px}
+.hlbar{margin:0 0 6px;gap:10px;align-items:center}.hlbar .hint{margin:0}.hlview{flex:1;min-height:52vh;overflow:auto;white-space:pre-wrap;word-break:break-word;border:1px solid var(--fline);border-radius:10px;padding:7px 10px;background:#fbfaf7;font:13.5px/1.55 ui-monospace,"SF Mono",Consolas,monospace}.hlview.hidden{display:none}.hlview mark{background:#cfe9d6;color:#1c4d31;border-radius:3px;padding:0 1px}
 .modal textarea{flex:1;min-height:52vh;font:13.5px/1.55 ui-monospace,"SF Mono",Consolas,monospace;background:#fbfaf7}
 #gCharts>div{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:10px 14px;margin:14px 0}
 .hidden{display:none!important}
@@ -1170,8 +1172,10 @@ body.compact{font-size:13.5px;padding-bottom:66px}
       <h2 style="font-size:18px">Texto para la historia clínica</h2>
       <div class="btns" style="margin:0"><button class="btn" id="copiar"><svg class="i" aria-hidden="true"><use href="#i-lista"/></svg> Copiar</button><button class="btn ghost" id="cerrarPrev">Cerrar</button></div>
     </div>
+    <div class="row hlbar"><label class="chk"><input type="checkbox" id="hlOn"> Resaltar lo que cambié respecto de la plantilla</label><span class="hint" id="hlInfo" aria-live="polite"></span></div>
     <textarea id="out" spellcheck="false"></textarea>
-    <div class="hint" style="margin-top:6px">Podés retocar acá antes de copiar; si cambiás un campo del formulario, el texto se regenera.</div>
+    <div id="outHl" class="hlview hidden" tabindex="0" aria-label="Texto con los cambios resaltados"></div>
+    <div class="hint" style="margin-top:6px" id="prevHint">Podés retocar acá antes de copiar; si cambiás un campo del formulario, el texto se regenera.</div>
   </div>
 </div>
 <div class="modal hidden" id="atajos">
@@ -1215,7 +1219,7 @@ body.compact{font-size:13.5px;padding-bottom:66px}
 
 <script>
 "use strict";
-const VERSION = "1.4.65";
+const VERSION = "1.4.66";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3269,6 +3273,38 @@ function update(){
   let txt = S.tab==="control"? genControl() : S.tab==="inter"? genInter() : S.tab==="apto"? genApto() : S.tab==="vac"? (genReceta()||"No hay vacunas seleccionadas para recetar.") : S.tab==="perc"? genPerc() : S.tab==="docs"? genDoc(S.doc) : "";
   if($("sMay").value==="mayus") txt = txt.toUpperCase();
   $("out").value = txt;
+  const hk=[S.tab, cB&&cB.id, iCur&&iCur.id, S.iModo, S.doc].join("|");
+  if(HL.key!==hk){ HL.key=hk; HL.base=txt; }
+  hlRender();
+}
+/* ---------- resaltado de cambios en la vista previa (v1.4.66) ---------- */
+const HL={key:"", base:""};
+function hlEsc(t){ return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function hlDiff(base, cur){
+  const ct=cur.match(/\s+|\S+/g)||[], bw=(base.match(/\S+/g)||[]);
+  const wi=[]; ct.forEach((t,i)=>{ if(/\S/.test(t)) wi.push(i); });
+  const cw=wi.map(i=>ct[i]), n=bw.length, m=cw.length;
+  let p=0; while(p<n && p<m && bw[p]===cw[p]) p++;
+  let q=0; while(q<n-p && q<m-p && bw[n-1-q]===cw[m-1-q]) q++;
+  const A=bw.slice(p,n-q), B=cw.slice(p,m-q), ch=new Array(m).fill(false); let sacadas=0;
+  if(A.length*B.length>6e6){ for(let j=0;j<B.length;j++) ch[p+j]=true; sacadas=A.length; }
+  else {
+    const W=B.length+1, L=new Uint16Array((A.length+1)*W);
+    for(let i=A.length-1;i>=0;i--) for(let j=B.length-1;j>=0;j--) L[i*W+j]= A[i]===B[j]? L[(i+1)*W+j+1]+1 : Math.max(L[(i+1)*W+j], L[i*W+j+1]);
+    let i=0,j=0; while(i<A.length && j<B.length){ if(A[i]===B[j]){i++;j++;} else if(L[(i+1)*W+j]>=L[i*W+j+1]){ sacadas++; i++; } else { ch[p+j]=true; j++; } }
+    sacadas+=A.length-i; while(j<B.length){ ch[p+j]=true; j++; }
+  }
+  let k=0, html="", agregadas=0;
+  ct.forEach(t=>{ if(/\S/.test(t)){ if(ch[k]){ agregadas++; html+="<mark>"+hlEsc(t)+"</mark>"; } else html+=hlEsc(t); k++; } else html+=hlEsc(t); });
+  html=html.replace(/<\/mark>([ \t]+)<mark>/g,"$1");
+  return {html, agregadas, sacadas};
+}
+function hlRender(){
+  const on=$("hlOn").checked; $("out").classList.toggle("hidden", on); $("outHl").classList.toggle("hidden", !on);
+  $("prevHint").textContent = on? "Solo para mirar: desactivá el resaltado para retocar el texto. Lo que se copia es el mismo texto, sin marcas." : "Podés retocar acá antes de copiar; si cambiás un campo del formulario, el texto se regenera.";
+  if(!on){ $("hlInfo").textContent=""; return; }
+  const r=hlDiff(HL.base, $("out").value); $("outHl").innerHTML=r.html;
+  $("hlInfo").textContent = r.agregadas||r.sacadas? r.agregadas+" palabra(s) agregada(s) o cambiada(s) · "+r.sacadas+" sacada(s)" : "Sin cambios respecto de la plantilla";
 }
 function updateSums(e, pr){
   const cnt=(sel)=>document.querySelectorAll(sel+" input:checked").length;
@@ -3387,6 +3423,8 @@ function copiarHC(){
 }
 $("copiar").onclick = copiarHC; $("copiarGrande").onclick = copiarHC;
 $("verTexto").onclick = ()=>{ $("preview").classList.remove("hidden"); $("out").scrollTop=0; };
+try{ $("hlOn").checked = localStorage.getItem("consultorioPed.hl")==="1"; }catch(e){}
+$("hlOn").onchange = ()=>{ try{ localStorage.setItem("consultorioPed.hl", $("hlOn").checked?"1":"0"); }catch(e){} hlRender(); };
 $("cerrarPrev").onclick = ()=>$("preview").classList.add("hidden");
 $("preview").addEventListener("click", ev=>{ if(ev.target.id==="preview") $("preview").classList.add("hidden"); });
 document.addEventListener("keydown", ev=>{ if(ev.key==="Escape"){ $("preview").classList.add("hidden"); $("atajos").classList.add("hidden"); } });
@@ -3592,7 +3630,7 @@ $("nuevo").onclick = ()=>{
   ["fn","eg","pn","cEpds","cBuco","cPrev","cTanner","nombre","dni","peso","talla","pc","temp","fcard","fr","sat","ta","pesoAnt","fechaAnt","tMadre","tPadre","cAlimDet","cSueno","cExtra1","cExtra2","cPant","cEstOtro","cRecOtro","cObs","iEAextra","iMed","iTto","iUltFiebre","iEstOtro","iCondOtro","iAP","aTanner","aECG","aAct",
    "cPos","iPos","aPos","cPend","iPend","aPend","cDx","pnMadreEdad","pnGPCA","pnEG","pnPeso","pnTalla","pnPC","pnApgar","pnAlta","pnGF","pnEco","pnCordon","pnSanat","pnConv","pnOtros","eEsc","eDet","eObs","iFMax","iFDias"].forEach(id=>$(id).value=""); fieS={}; evoS={ev:0}; vacRec=new Set(); rpItems=[{}]; peSel=new Set(); renderPe(); $("rpDx").value=""; renderRp(); ["crDx","crCuid","crObs","crDesde","crHasta","ceDet","ceObs","ceActOtro","cnPiel","cnUnas","cnPies","cnPelo","cnDet","cnObs","icMot","icRes","icEst","icDx","icSol","icEspOtra","peOtros","peDx","peObs"].forEach(id=>$(id).value=""); $("ceRes").value="apto"; $("cnRes").value="apto"; $("crDias").value="2"; $("crTipo").value="reposo"; $("eIncl").checked=false;
   $("cInter").value="niega"; $("primeraVez").checked=false; S.sexo=""; document.querySelectorAll("#sexoBox button").forEach(b=>b.classList.remove("on"));
-  $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
+  $("fc").value = isoHoy(); vacKey=""; usoContados.clear(); HL.key=""; cDxDirty=false; pesqS={}; sdS={}; if($("cSD")) $("cSD").checked=false; HEE.forEach(d=>{ if($(d.id)) $(d.id).value=""; }); loadControl("rn"); $("ctrlBracket").value="rn"; loadInter(iCur.id); refreshEFs(); update();
   undoMostrar();
 };
 
