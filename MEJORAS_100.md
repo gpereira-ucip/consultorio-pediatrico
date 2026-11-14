@@ -108,7 +108,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 87. [x] (v1.4.65, 12/11) Íconos propios, coherentes con los logos, en lugar de emojis. 34 íconos SVG de línea (sprite interno, color de la paleta); los signos tipográficos (★ ☆ ✓ ✕ ↺ ＋) y los de las listas desplegables siguen como texto.
 88. [x] (v1.4.61, 11/11) Microanimaciones suaves al copiar, abrir tarjetas y cambiar de pestaña.
 89. [x] (v1.4.66, 13/11) Vista previa con resaltado de lo agregado o modificado respecto de la plantilla.
-90. [ ] Modo oscuro opcional para guardias nocturnas.
+90. [x] (v1.5.2, 14/11) Modo oscuro opcional para guardias nocturnas. Botón en el encabezado y «Tema» en Ajustes (Claro / Oscuro / Automático); las curvas quedan sobre fondo blanco.
 91. [ ] Diseño de impresión (Ctrl+P) limpio para indicaciones, recetas y curvas.
 92. [ ] Accesibilidad: foco visible, navegación completa con Tab, etiquetas ARIA, contraste AA.
 93. [x] (v1.4.62, 11/11) Pantalla «Novedades» con lo que cambió en cada versión.

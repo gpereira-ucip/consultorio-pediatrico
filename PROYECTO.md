@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.5.1 (13/11/2026)
+- Versión actual: 1.5.2 (14/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -120,6 +120,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 16. Sección «Fuentes y actualización» visible con fecha de cada referencia.
 
 ## Problemas conocidos
+- (14/11/2026) Sigue igual (sap.org.ar, argentina.gob.ar, garrahan.gov.ar y who.int bloqueados por el proxy). Quedan sin contenido clínico: 91, 92, 94, 95, 99 y 100.
 - (13/11/2026) Sigue igual (sap.org.ar y argentina.gob.ar bloqueados por el proxy). Quedan sin contenido clínico: 90, 91, 92, 94, 95, 99 y 100.
 - (12/11/2026) Sigue igual: WebFetch y curl a sap.org.ar y argentina.gob.ar fallan (dominio no permitido). Mientras no se habiliten, la tarea avanza solo con los ítems sin contenido clínico (quedan 89, 90, 91, 92, 94, 95, 99 y 100).
 - (12/11/2026) Si se relee el HTML desde un artifact publicado, viene envuelto en un esqueleto extra (`<!doctype html><html><head><meta charset=utf8>…<body>` … `</body></html>`): no subirlo así al repo; el archivo debe empezar con `<!DOCTYPE html>`.
@@ -188,6 +189,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 14/11/2026 · v1.5.2 · Ítem 90: modo oscuro opcional (variables `html[data-tema="oscuro"]` al final del `<style>`; ajuste `sTema`, botón `temaBtn`). Probado: sin errores de consola, 1440 y 390 px sin desborde, persistencia al recargar, autodiagnóstico 1469 comprobaciones OK. Sin contenido clínico.
 - 13/11/2026 · v1.5.1 · Paleta azul sobre fondo blanco (pedido de Gonzalo) y chips unificados. Mismas pruebas OK.
 - 13/11/2026 · v1.5.0 · Rediseño visual completo y signos vitales separados de las mediciones (pedido de Gonzalo). Sin contenido clínico nuevo. Probado: sin errores de consola, 1440 y 390 px sin desborde, autodiagnóstico 1469 comprobaciones OK.
 - 13/11/2026 · v1.4.66 · Ítem 89: vista previa con resaltado de lo agregado o modificado respecto de la plantilla. Probado: sin errores de consola, ambos sexos, 1440 y 390 px, autodiagnóstico 1469 comprobaciones OK.
