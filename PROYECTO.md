@@ -265,3 +265,8 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - 1.1.0 (06/11/2026): rediseño completo de la interfaz (columna única, tarjetas plegables, barra inferior con copiar y vista previa, tipografías Inter/Lora, paleta nueva).
 - 1.0.3 (06/11/2026): campos «Datos positivos» y «Pendientes».
 - 1.0.2 (06/11/2026): logos de Gonzalo (control = niño rompecabezas; intercurrencia = figura collage, pestaña en coral) y paleta cálida (crema, verde azulado, terracota, coral). Se quitó la aclaración «Sexo (primero)» y el cartel de aviso, a pedido.
+
+
+## Instalación en el teléfono (14/11/2026)
+- `manifest.json`, `icon-192.png`, `icon-512.png` y `sw.js` permiten instalar la app con su ícono desde la dirección de GitHub Pages. No los borres ni quites las etiquetas `<link rel="manifest">`, ícono y el registro de `sw.js` del `<head>` de index.html.
+- `sw.js` no guarda caché a propósito: así Gonzalo ve siempre la última mejora diaria.
