@@ -109,7 +109,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 88. [x] (v1.4.61, 11/11) Microanimaciones suaves al copiar, abrir tarjetas y cambiar de pestaña.
 89. [x] (v1.4.66, 13/11) Vista previa con resaltado de lo agregado o modificado respecto de la plantilla.
 90. [x] (v1.5.2, 14/11) Modo oscuro opcional para guardias nocturnas. Botón en el encabezado y «Tema» en Ajustes (Claro / Oscuro / Automático); las curvas quedan sobre fondo blanco.
-91. [ ] Diseño de impresión (Ctrl+P) limpio para indicaciones, recetas y curvas.
+91. [x] (v1.5.3, 15/11) Diseño de impresión (Ctrl+P) limpio para indicaciones, recetas y curvas. Botón «Imprimir» en la vista previa y «Imprimir curvas» en Percentilos; hoja A4 solo con el texto o las curvas, siempre negro sobre blanco.
 92. [ ] Accesibilidad: foco visible, navegación completa con Tab, etiquetas ARIA, contraste AA.
 93. [x] (v1.4.62, 11/11) Pantalla «Novedades» con lo que cambió en cada versión.
 94. [ ] Tarjeta del paciente más compacta cuando se hace scroll (encabezado pegajoso con edad, sexo y peso).

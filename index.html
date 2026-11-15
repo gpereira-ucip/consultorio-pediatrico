@@ -18,7 +18,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.5.2 (2026-11-14)
+  VERSION: 1.5.3 (2026-11-15)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -34,6 +34,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.5.3 — Diseño de impresión (ítem 91): botón «Imprimir» en la vista previa y en Percentilos; Ctrl+P imprime la hoja limpia (solo el texto generado —indicaciones, recetas, certificados— o solo las curvas) en A4, sin menús ni barras, siempre en blanco y negro sobre blanco aunque esté el modo oscuro.
   1.5.2 — Modo oscuro opcional para guardias nocturnas (ítem 90): botón en el encabezado y «Tema» en Ajustes (Claro / Oscuro / Automático según el dispositivo; por defecto Claro), guardado en el navegador. Las curvas de percentilos siguen en fondo blanco. Sin contenido clínico nuevo.
   1.5.1 — Colores: azul como color principal (botones, pestañas, chips, logo) y fondo blanco, sin el verde agua. Tarjetas con borde fino y sombra suave sobre blanco.
   1.5.0 — Rediseño completo: paleta fría y limpia (verde azulado profundo, grises azulados), una sola tipografía moderna (Inter, sin serif), botones, campos, tarjetas, chips y barra inferior nuevos; un solo logo (portada y encabezado, dibujado nuevo) y sin dibujos en las pestañas ni en Control / Intercurrencia / Apto; signos vitales separados de las mediciones (dos bloques: Mediciones y Signos vitales); pantalla de inicio rediseñada con íconos de línea.
@@ -646,6 +647,19 @@ html[data-tema="oscuro"] .hlview{background:var(--field)}
 html[data-tema="oscuro"] .logo-t,html[data-tema="oscuro"] .li,html[data-tema="oscuro"] .logo-s,html[data-tema="oscuro"] .ibtns img,html[data-tema="oscuro"] .ibtns .iemo{background:var(--field)}
 html[data-tema="oscuro"] #gCharts>div{background:#fff;color:#14232f}
 html[data-tema="oscuro"] ::selection{background:#2e5fd6;color:#fff}
+
+/* ---- Impresión (v1.5.3) ---- */
+#printSheet{display:none}
+@media print{
+  @page{size:A4;margin:16mm 16mm 18mm}
+  html,body{background:#fff!important;color:#000!important}
+  body.pr>*:not(#printSheet){display:none!important}
+  body.pr #printSheet{display:block;color:#000;background:#fff;font:12pt/1.55 Inter,Arial,sans-serif}
+  #printSheet .ptxt{white-space:pre-wrap;word-wrap:break-word;margin:0;font:inherit;orphans:3;widows:3}
+  #printSheet .pcv>div{page-break-inside:avoid;break-inside:avoid;margin:0 0 8mm;padding:0;border:0;background:#fff}
+  #printSheet .pcv svg,#printSheet .pcv img{max-width:100%;height:auto}
+  #printSheet .pfoot{margin-top:10mm;font-size:9pt;color:#555;border-top:1px solid #999;padding-top:2mm}
+}
 </style>
 </head>
 <body>
@@ -1025,7 +1039,8 @@ html[data-tema="oscuro"] ::selection{background:#2e5fd6;color:#fff}
         <option value="auto">Automático por edad</option><option value="0-24">0 a 2 años</option><option value="24-60">2 a 5 años</option>
         <option value="0-60">0 a 5 años</option><option value="60-228">5 a 19 años</option></select></label>
       <label class="chk"><input type="checkbox" id="gNombre" checked> nombre y fecha en la imagen</label>
-      <button class="btn" id="gCopiarTodo" style="margin-left:auto"><svg class="i" aria-hidden="true"><use href="#i-imagen"/></svg> Copiar todas las curvas</button>
+      <button class="btn sec" id="gImprimir" style="margin-left:auto" title="Imprime solo las curvas, una por hoja o dos por hoja"><svg class="i" aria-hidden="true"><use href="#i-hoja"/></svg> Imprimir curvas</button>
+      <button class="btn" id="gCopiarTodo"><svg class="i" aria-hidden="true"><use href="#i-imagen"/></svg> Copiar todas las curvas</button>
     </div>
     <label class="f" style="margin-top:10px">Mediciones previas (una por línea: fecha peso talla PC — “-” si falta; también «12/3 7,2kg 66cm» o el renglón de la HC)
       <textarea id="gPrev" class="sm" placeholder="15/03/2026 6,2 62 41&#10;20/5 7,1kg 66cm&#10;10/08/26 peso 8300 g talla 70 cm PC 44"></textarea></label>
@@ -1349,11 +1364,12 @@ html[data-tema="oscuro"] ::selection{background:#2e5fd6;color:#fff}
 </div>
 
 <!-- ================= VISTA PREVIA ================= -->
+<div id="printSheet" aria-hidden="true"></div>
 <div class="modal hidden" id="preview">
   <div class="sheet">
     <div class="row" style="justify-content:space-between;margin-bottom:8px">
       <h2 style="font-size:18px">Texto para la historia clínica</h2>
-      <div class="btns" style="margin:0"><button class="btn" id="copiar"><svg class="i" aria-hidden="true"><use href="#i-lista"/></svg> Copiar</button><button class="btn ghost" id="cerrarPrev">Cerrar</button></div>
+      <div class="btns" style="margin:0"><button class="btn" id="copiar"><svg class="i" aria-hidden="true"><use href="#i-lista"/></svg> Copiar</button><button class="btn sec" id="imprimir" title="Imprime solo este texto en una hoja A4 limpia (Ctrl+P)"><svg class="i" aria-hidden="true"><use href="#i-hoja"/></svg> Imprimir</button><button class="btn ghost" id="cerrarPrev">Cerrar</button></div>
     </div>
     <div class="row hlbar"><label class="chk"><input type="checkbox" id="hlOn"> Resaltar lo que cambié respecto de la plantilla</label><span class="hint" id="hlInfo" aria-live="polite"></span></div>
     <textarea id="out" spellcheck="false"></textarea>
@@ -1402,7 +1418,7 @@ html[data-tema="oscuro"] ::selection{background:#2e5fd6;color:#fff}
 
 <script>
 "use strict";
-const VERSION = "1.5.2";
+const VERSION = "1.5.3";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3608,6 +3624,29 @@ $("copiar").onclick = copiarHC; $("copiarGrande").onclick = copiarHC;
 $("verTexto").onclick = ()=>{ $("preview").classList.remove("hidden"); $("out").scrollTop=0; };
 try{ $("hlOn").checked = localStorage.getItem("consultorioPed.hl")==="1"; }catch(e){}
 $("hlOn").onchange = ()=>{ try{ localStorage.setItem("consultorioPed.hl", $("hlOn").checked?"1":"0"); }catch(e){} hlRender(); };
+
+/* ---------- impresión (v1.5.3) ---------- */
+function prepararImpresion(modo){
+  const sh=$("printSheet"); sh.innerHTML="";
+  if(modo==="curv"){
+    const c=$("gCharts").cloneNode(true); c.removeAttribute("id"); c.className="pcv";
+    c.querySelectorAll(".btns,button,input,select").forEach(n=>n.remove()); sh.appendChild(c);
+  } else {
+    const p=document.createElement("pre"); p.className="ptxt"; p.textContent=$("out").value||""; sh.appendChild(p);
+    const f=document.createElement("div"); f.className="pfoot"; f.textContent="Consultorio Pediátrico · impreso el "+new Date().toLocaleDateString("es-AR"); sh.appendChild(f);
+  }
+  document.body.classList.add("pr");
+}
+function limpiarImpresion(){ document.body.classList.remove("pr"); $("printSheet").innerHTML=""; }
+function imprimir(modo){
+  if(modo==="curv" && !$("gCharts").children.length){ toast("Cargá edad, peso o talla para ver las curvas"); return; }
+  if(modo!=="curv" && !($("out").value||"").trim()){ toast("No hay texto para imprimir"); return; }
+  prepararImpresion(modo); try{ window.print(); }catch(e){ toast("No se pudo abrir la impresión"); limpiarImpresion(); }
+}
+$("imprimir").onclick = ()=>imprimir("txt");
+$("gImprimir").onclick = ()=>imprimir("curv");
+window.addEventListener("beforeprint", ()=>{ if(!document.body.classList.contains("pr")) prepararImpresion(S.tab==="perc" && $("preview").classList.contains("hidden")?"curv":"txt"); });
+window.addEventListener("afterprint", limpiarImpresion);
 $("cerrarPrev").onclick = ()=>$("preview").classList.add("hidden");
 $("preview").addEventListener("click", ev=>{ if(ev.target.id==="preview") $("preview").classList.add("hidden"); });
 document.addEventListener("keydown", ev=>{ if(ev.key==="Escape"){ $("preview").classList.add("hidden"); $("atajos").classList.add("hidden"); } });

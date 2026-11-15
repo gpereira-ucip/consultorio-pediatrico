@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.5.2 (14/11/2026)
+- Versión actual: 1.5.3 (15/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -120,6 +120,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 16. Sección «Fuentes y actualización» visible con fecha de cada referencia.
 
 ## Problemas conocidos
+- (15/11/2026) Sigue igual (sap.org.ar, argentina.gob.ar, garrahan.gov.ar y who.int sin respuesta). Se tomó el 91 por ser el primero sin contenido clínico. Quedan sin contenido clínico: 92, 94, 95, 99 y 100.
 - (14/11/2026) Sigue igual (sap.org.ar, argentina.gob.ar, garrahan.gov.ar y who.int bloqueados por el proxy). Quedan sin contenido clínico: 91, 92, 94, 95, 99 y 100.
 - (13/11/2026) Sigue igual (sap.org.ar y argentina.gob.ar bloqueados por el proxy). Quedan sin contenido clínico: 90, 91, 92, 94, 95, 99 y 100.
 - (12/11/2026) Sigue igual: WebFetch y curl a sap.org.ar y argentina.gob.ar fallan (dominio no permitido). Mientras no se habiliten, la tarea avanza solo con los ítems sin contenido clínico (quedan 89, 90, 91, 92, 94, 95, 99 y 100).
@@ -189,6 +190,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 15/11/2026 · v1.5.3 · Ítem 91: impresión limpia. `#printSheet` (hijo directo de body) se llena en `prepararImpresion(modo)` (texto de `#out` o clon de `#gCharts`) y `@media print` oculta todo lo demás con `body.pr`; funciona con los botones «Imprimir» / «Imprimir curvas» y con Ctrl+P (`beforeprint`). Probado: sin errores de consola, 7 edades × 2 sexos × 1440/390 px sin desborde ni «undefined/NaN/{», PDF A4 de texto (1 hoja) y curvas, modo oscuro imprime en blanco. Sin contenido clínico. Mismo día sin acceso web (sap/argentina/garrahan/who bloqueados): los ítems con fuente siguen pendientes.
 - 14/11/2026 · v1.5.2 · Ítem 90: modo oscuro opcional (variables `html[data-tema="oscuro"]` al final del `<style>`; ajuste `sTema`, botón `temaBtn`). Probado: sin errores de consola, 1440 y 390 px sin desborde, persistencia al recargar, autodiagnóstico 1469 comprobaciones OK. Sin contenido clínico.
 - 13/11/2026 · v1.5.1 · Paleta azul sobre fondo blanco (pedido de Gonzalo) y chips unificados. Mismas pruebas OK.
 - 13/11/2026 · v1.5.0 · Rediseño visual completo y signos vitales separados de las mediciones (pedido de Gonzalo). Sin contenido clínico nuevo. Probado: sin errores de consola, 1440 y 390 px sin desborde, autodiagnóstico 1469 comprobaciones OK.
