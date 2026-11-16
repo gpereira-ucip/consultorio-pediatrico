@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.5.4 (16/11/2026)
+- Versión actual: 1.5.5 (16/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -121,6 +121,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 
 ## Problemas conocidos
 - (16/11/2026) Sigue igual: sap.org.ar, argentina.gob.ar, garrahan.gov.ar y who.int sin acceso (WebFetch: dominio no permitido). Todos los ítems [~] con contenido clínico (37-39, 46, 47, 54, 59-61, 63, 65, 66, 71, 73, 74, 77-81, 84, 85) siguen esperando que se habiliten esos dominios; se tomó el 92 (sin contenido clínico). Quedan sin contenido clínico: 94, 95, 99 y 100.
+- (16/11/2026, 2.ª corrida) Se tomó el 94 (sin contenido clínico); sin cambios en el acceso web. Quedan sin contenido clínico: 95, 99 y 100.
 - (15/11/2026) Sigue igual (sap.org.ar, argentina.gob.ar, garrahan.gov.ar y who.int sin respuesta). Se tomó el 91 por ser el primero sin contenido clínico. Quedan sin contenido clínico: 92, 94, 95, 99 y 100.
 - (14/11/2026) Sigue igual (sap.org.ar, argentina.gob.ar, garrahan.gov.ar y who.int bloqueados por el proxy). Quedan sin contenido clínico: 91, 92, 94, 95, 99 y 100.
 - (13/11/2026) Sigue igual (sap.org.ar y argentina.gob.ar bloqueados por el proxy). Quedan sin contenido clínico: 90, 91, 92, 94, 95, 99 y 100.
@@ -191,6 +192,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 1.5.5 (16/11/2026) — Ítem 94: franja compacta del paciente (`#pstick`, `psActualizar()`) pegada bajo el encabezado cuando la tarjeta del paciente sale de la pantalla; muestra sexo, edad (+EC), peso, talla, PC y T°; posición absoluta (no mueve el contenido), oculta al imprimir; un toque vuelve arriba. Autodiagnóstico: 1469 comprobaciones sin fallas.
 - 16/11/2026 · v1.5.4 · Ítem 92: accesibilidad. Foco visible global (`:focus-visible`), enlace «Saltar al contenido», `<h1>` en la marca, pestañas con role tablist/tab/tabpanel + aria-selected + flechas Izq/Der/Inicio/Fin, chips (eran `<span>` sin teclado) con role=button, tabindex=0 y Enter/Espacio, aria-pressed en chips y segmentos (sincronizado por MutationObserver al final del script), foco atrapado en ventanas (`.modal`, `#inicio`), etiquetas en los 3 exámenes físicos, th vacío, contraste AA en textos coral/cálidos/grises y en el modo oscuro. Auditoría axe-core 4 (wcag2a/2aa/21aa + best-practice) en claro y oscuro: 0 infracciones. Probado: sin errores de consola, 1440 y 390 px, autodiagnóstico 1469 comprobaciones OK. Sin contenido clínico.
 - 15/11/2026 · v1.5.3 · Ítem 91: impresión limpia. `#printSheet` (hijo directo de body) se llena en `prepararImpresion(modo)` (texto de `#out` o clon de `#gCharts`) y `@media print` oculta todo lo demás con `body.pr`; funciona con los botones «Imprimir» / «Imprimir curvas» y con Ctrl+P (`beforeprint`). Probado: sin errores de consola, 7 edades × 2 sexos × 1440/390 px sin desborde ni «undefined/NaN/{», PDF A4 de texto (1 hoja) y curvas, modo oscuro imprime en blanco. Sin contenido clínico. Mismo día sin acceso web (sap/argentina/garrahan/who bloqueados): los ítems con fuente siguen pendientes.
 - 14/11/2026 · v1.5.2 · Ítem 90: modo oscuro opcional (variables `html[data-tema="oscuro"]` al final del `<style>`; ajuste `sTema`, botón `temaBtn`). Probado: sin errores de consola, 1440 y 390 px sin desborde, persistencia al recargar, autodiagnóstico 1469 comprobaciones OK. Sin contenido clínico.

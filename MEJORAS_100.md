@@ -112,7 +112,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 91. [x] (v1.5.3, 15/11) Diseño de impresión (Ctrl+P) limpio para indicaciones, recetas y curvas. Botón «Imprimir» en la vista previa y «Imprimir curvas» en Percentilos; hoja A4 solo con el texto o las curvas, siempre negro sobre blanco.
 92. [x] (v1.5.4, 16/11) Accesibilidad: foco visible, navegación completa con Tab, etiquetas ARIA, contraste AA. Auditado con axe-core (WCAG 2 A/AA, claro y oscuro, todas las pestañas): 0 infracciones.
 93. [x] (v1.4.62, 11/11) Pantalla «Novedades» con lo que cambió en cada versión.
-94. [ ] Tarjeta del paciente más compacta cuando se hace scroll (encabezado pegajoso con edad, sexo y peso).
+94. [x] (v1.5.5, 16/11) Tarjeta del paciente más compacta cuando se hace scroll (encabezado pegajoso con edad, sexo y peso). Franja bajo el encabezado con sexo, edad (y edad corregida), peso, talla, PC y T°; aparece al salir la tarjeta de la pantalla y un toque vuelve arriba.
 
 ## I. Calidad, respaldo y confianza
 95. [ ] Sección «Fuentes y actualización» con fecha de cada referencia.

@@ -18,7 +18,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.5.4 (2026-11-16)
+  VERSION: 1.5.5 (2026-11-16)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -34,6 +34,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.5.5 — Tarjeta del paciente compacta al hacer scroll (ítem 94): cuando la tarjeta del paciente sale de la pantalla aparece, pegada debajo del encabezado, una franja con sexo, edad, peso, talla, PC y temperatura; un toque en la franja vuelve arriba. No cambia el texto generado y no se imprime.
   1.5.4 — Accesibilidad (ítem 92): foco visible en todos los controles, «Saltar al contenido», navegación completa con Tab (foco atrapado dentro de las ventanas, flechas Izq/Der y Inicio/Fin en las pestañas), roles y estados ARIA (pestañas, chips y segmentos con aria-pressed, ventanas, avisos), título h1, etiquetas en los exámenes físicos y contraste AA en textos de colores (claro y oscuro).
   1.5.3 — Diseño de impresión (ítem 91): botón «Imprimir» en la vista previa y en Percentilos; Ctrl+P imprime la hoja limpia (solo el texto generado —indicaciones, recetas, certificados— o solo las curvas) en A4, sin menús ni barras, siempre en blanco y negro sobre blanco aunque esté el modo oscuro.
   1.5.2 — Modo oscuro opcional para guardias nocturnas (ítem 90): botón en el encabezado y «Tema» en Ajustes (Claro / Oscuro / Automático según el dispositivo; por defecto Claro), guardado en el navegador. Las curvas de percentilos siguen en fondo blanco. Sin contenido clínico nuevo.
@@ -688,6 +689,15 @@ html[data-tema="oscuro"] nav.tabs button[data-t]:not(.on){color:#b4c2cf}
 html[data-tema="oscuro"] nav.tabs button[data-t].on,html[data-tema="oscuro"] .seg button.on{color:#9dbfff}
 html[data-tema="oscuro"] .posbox .f b{color:#e0955f}
 @media (forced-colors:active){:focus-visible{outline:3px solid Highlight}}
+/* ---------- v1.5.5 (ítem 94): franja compacta del paciente al hacer scroll ---------- */
+.pstick{position:absolute;left:0;right:0;top:100%;display:flex;align-items:center;gap:6px 14px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap;width:100%;max-width:100%;margin:0;padding:5px max(16px,calc((100% - 1100px)/2));border:0;border-bottom:1px solid var(--line);border-radius:0;background:var(--panel);color:var(--ink);font:600 13px/1.3 var(--font);text-align:left;cursor:pointer;box-shadow:0 4px 10px rgba(15,35,50,.07);animation:psIn .18s ease-out}
+.pstick.hidden{display:none}
+.pstick b{font-weight:700}
+.pstick .ps-x{color:var(--muted);font-weight:500}
+.pstick .ps-v{color:var(--boy)} .pstick .ps-m{color:var(--girl)}
+@keyframes psIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.pstick{animation:none}}
+@media print{.pstick{display:none!important}}
 </style>
 </head>
 <body>
@@ -711,6 +721,7 @@ html[data-tema="oscuro"] .posbox .f b{color:#e0955f}
     <button class="btn ghost sm" id="compBtn" type="button" title="Modo compacto (para usar en media pantalla al lado del sistema de turnos)" aria-pressed="false">⇔</button>
     <button class="btn ghost sm" id="nuevo" title="Borra los datos del paciente">Nuevo paciente</button>
   </div>
+  <button type="button" class="pstick hidden" id="pstick" title="Volver a los datos del paciente" aria-label="Datos del paciente: volver arriba"></button>
 </header>
 
 <main class="wrap" id="formPanel" tabindex="-1">
@@ -1447,7 +1458,7 @@ html[data-tema="oscuro"] .posbox .f b{color:#e0955f}
 
 <script>
 "use strict";
-const VERSION = "1.5.4";
+const VERSION = "1.5.5";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3474,6 +3485,20 @@ function renderVac(){
 }
 
 /* ---------- ciclo principal ---------- */
+function psActualizar(){
+  const b=$("pstick"), card=document.querySelector("main > section.card"); if(!b||!card) return;
+  const hay = S.sexo || $("fn").value || $("peso").value || $("talla").value;
+  const tb=document.querySelector("header .topbar"); const lim = tb? tb.offsetHeight : 56;
+  const ver = !!(hay && card.getBoundingClientRect().bottom < lim);
+  if(ver){
+    const e=edad(), ec=edadC(), pz=[["Peso",$("peso").value,"kg"],["Talla",$("talla").value,"cm"],["PC",$("pc").value,"cm"],["T",$("temp").value,"°C"]].filter(x=>x[1].trim());
+    const sx = S.sexo==="v"? '<span class="ps-v">♂ Varón</span>' : S.sexo==="m"? '<span class="ps-m">♀ Mujer</span>' : '<span class="ps-x">sin sexo</span>';
+    b.innerHTML = sx+"<span><b>"+mfEsc(edadTxt(e))+"</b>"+(ec? ' <span class="ps-x">EC '+mfEsc(ec.days<0? egTxt(ec.pm)+" sem PM" : edadTxt(ec))+"</span>" : "")+"</span>"+pz.map(x=>"<span>"+x[0]+" <b>"+mfEsc(x[1].trim())+"</b> <span class=ps-x>"+x[2]+"</span></span>").join("");
+  }
+  if(b.classList.contains("hidden")===ver){ b.classList.toggle("hidden", !ver); }
+}
+$("pstick").addEventListener("click", ()=>{ window.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); });
+window.addEventListener("scroll", psActualizar, {passive:true}); window.addEventListener("resize", psActualizar);
 function update(){
   const e=edad();
   const ec=edadC();
@@ -3488,7 +3513,7 @@ function update(){
   renderVac();
   const eRN=edad(); $("pnL").classList.toggle("hidden", !!(eRN && eRN.days>60) && !$("pn").value && !esPrem());
   renderPrem(); renderPesq(); renderSD(); renderEsc();
-  validar(); renderCrec();
+  validar(); renderCrec(); psActualizar();
   if(cB && !cDxDirty) $("cDx").value = dxControlAuto();
   $("cDxReset").classList.toggle("hidden", !cDxDirty); $("cDxHint").textContent = cDxDirty? "Editada a mano (ya no se actualiza sola)." : "Se arma sola con percentilos, pautas madurativas y vacunas; escribí encima para cambiarla.";
   if($("sumDx")) $("sumDx").textContent = $("cDx").value;
