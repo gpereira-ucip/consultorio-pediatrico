@@ -115,7 +115,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 94. [x] (v1.5.5, 16/11) Tarjeta del paciente más compacta cuando se hace scroll (encabezado pegajoso con edad, sexo y peso). Franja bajo el encabezado con sexo, edad (y edad corregida), peso, talla, PC y T°; aparece al salir la tarjeta de la pantalla y un toque vuelve arriba.
 
 ## I. Calidad, respaldo y confianza
-95. [ ] Sección «Fuentes y actualización» con fecha de cada referencia.
+95. [x] (v1.5.6, 16/11) Sección «Fuentes y actualización» con fecha de cada referencia. En Ajustes, desplegable con 25 referencias: año/edición, uso en la app y versión/fecha de carga. No verifica actualizaciones (la app es sin conexión).
 96. [x] (v1.4.64, 11/11) Autodiagnóstico interno (botón en Ajustes) que verifique todas las plantillas y cálculos.
 97. [x] (v1.4.63, 11/11) Exportar e importar toda la configuración (frases, plantillas, ajustes) en un solo archivo.
 98. [!] Adaptar el texto al sistema de HC que usa Gonzalo (campos separados para pegar uno por uno). Necesita que Gonzalo diga qué campos tiene su sistema.

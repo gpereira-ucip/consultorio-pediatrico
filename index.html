@@ -18,7 +18,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.5.5 (2026-11-16)
+  VERSION: 1.5.6 (2026-11-16)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -34,6 +34,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.5.6 — «Fuentes y actualización» (ítem 95): en Ajustes, lista desplegable de todas las referencias que usa la app (guías, tablas y calendario) con el año o edición de cada una, para qué se usa y en qué versión y fecha se cargó; aclara que no hay conexión para verificar actualizaciones y que hay que cotejar con la fuente vigente.
   1.5.5 — Tarjeta del paciente compacta al hacer scroll (ítem 94): cuando la tarjeta del paciente sale de la pantalla aparece, pegada debajo del encabezado, una franja con sexo, edad, peso, talla, PC y temperatura; un toque en la franja vuelve arriba. No cambia el texto generado y no se imprime.
   1.5.4 — Accesibilidad (ítem 92): foco visible en todos los controles, «Saltar al contenido», navegación completa con Tab (foco atrapado dentro de las ventanas, flechas Izq/Der y Inicio/Fin en las pestañas), roles y estados ARIA (pestañas, chips y segmentos con aria-pressed, ventanas, avisos), título h1, etiquetas en los exámenes físicos y contraste AA en textos de colores (claro y oscuro).
   1.5.3 — Diseño de impresión (ítem 91): botón «Imprimir» en la vista previa y en Percentilos; Ctrl+P imprime la hoja limpia (solo el texto generado —indicaciones, recetas, certificados— o solo las curvas) en A4, sin menús ni barras, siempre en blanco y negro sobre blanco aunque esté el modo oscuro.
@@ -698,6 +699,10 @@ html[data-tema="oscuro"] .posbox .f b{color:#e0955f}
 @keyframes psIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.pstick{animation:none}}
 @media print{.pstick{display:none!important}}
+.fuentes{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.fuentes li{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--field);overflow-wrap:anywhere}
+.fuentes li b{display:block;font-weight:600;font-size:14px}
+.fuentes li span{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -1298,6 +1303,13 @@ html[data-tema="oscuro"] .posbox .f b{color:#e0955f}
     <div class="okbox">Las dosis de medicamentos son orientativas (mg/kg con tope máximo) y deben verificarse antes de indicar. Fuentes: plantillas propias, Manual Breve SAP, guía MSAL 2018, Calendario Nacional 2026 y patrones OMS.</div>
     <p class="hint">Versión <span id="ver"></span> · <button type="button" class="linkbtn" id="novBtn2">ver novedades</button> · Realizado por Dr. Gonzalo Gabriel Pereira.</p>
   </section>
+  <section class="card" id="fuentesCard">
+    <details id="fuentesDet">
+      <summary style="font-weight:700;font-size:17px;cursor:pointer">Fuentes y actualización</summary>
+      <p class="hint" style="margin:8px 0">Referencias en las que se basa el contenido, con el año o edición de cada una y cuándo se cargó en la app. La app funciona sin conexión y no verifica si una guía fue reemplazada: antes de usar un dato clínico, cotejalo con la versión vigente. Las dosis y el contenido nuevo están marcados para revisión médica en PROYECTO.md.</p>
+      <ul class="fuentes" id="fuentesList"></ul>
+    </details>
+  </section>
   <section class="card">
     <h2 style="font-size:17px"><svg class="i" aria-hidden="true"><use href="#i-esteto"/></svg> Autodiagnóstico de la app</h2>
     <p class="hint" style="margin:4px 0 8px">Recorre todas las plantillas (controles por edad, intercurrencias en los 3 modos, Mis plantillas, apto, vacunas y percentilos, en ambos sexos) y revisa cálculos de referencia. Tarda alrededor de 20 segundos; al terminar deja el paciente como estaba.</p>
@@ -1458,7 +1470,7 @@ html[data-tema="oscuro"] .posbox .f b{color:#e0955f}
 
 <script>
 "use strict";
-const VERSION = "1.5.5";
+const VERSION = "1.5.6";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -3485,6 +3497,36 @@ function renderVac(){
 }
 
 /* ---------- ciclo principal ---------- */
+/* ---------- fuentes y actualización (v1.5.6, ítem 95): [referencia, año/edición, uso en la app, versión y fecha de carga] ---------- */
+const FUENTES = [
+  ["Calendario Nacional de Vacunación (MSAL)","2026","Vacunas: qué corresponde, próximas dosis y receta","v1.0.0 (06/11/2026)"],
+  ["Recomendaciones para el control en salud hasta los 6 años (MSAL)","2018","Frecuencia de controles y pesquisas por edad","v1.0.0 (06/11/2026)"],
+  ["Manual Breve para la Supervisión de la Salud (SAP)","año de la edición no registrado","Controles por edad: hitos, señales de alerta, examen físico y estudios","v1.0.0 (06/11/2026)"],
+  ["Patrones de crecimiento OMS 0-5 años (tablas LMS, repositorio «anthro»)","2006","Percentilos y z de peso, talla, PC e IMC; curvas","v1.0.0 (06/11/2026)"],
+  ["Referencia OMS 5-19 años (tablas LMS, repositorio «anthroplus»)","2007","Percentilos y z de 5 a 19 años; curvas","v1.0.0 (06/11/2026)"],
+  ["OMS: tablas de peso para la longitud y para la estatura","2006","Peso para la talla (0-5 años)","v1.4.42 (11/11/2026)"],
+  ["OMS: criterios de valores implausibles (paquete «anthro») y definiciones de IMC","sin edición propia","Validación de datos y alertas de crecimiento","v1.4.9 y v1.4.14 (09/11/2026)"],
+  ["MSAL, Abordaje integral de las infecciones respiratorias agudas, Guía N.º 6 (2.ª ed.)","2011","Puntaje de Tal; derivación en bronquiolitis y SBO","v1.4.0 (09/11/2026)"],
+  ["SAP/APAPREM, Libreta de salud para la familia: seguimiento del RN de alto riesgo","2010","Edad corregida de prematuros","v1.4.8 (09/11/2026)"],
+  ["Arch Argent Pediatr 2025;123(6):e202510804 (pérdida de peso y lactancia)","2025","Umbral de descenso de peso del recién nacido","v1.4.15 (09/11/2026)"],
+  ["Flynn y col., Guía AAP de hipertensión arterial (Pediatrics 140:e20171904)","2017","Percentilo de presión arterial y PA anual desde los 3 años","v1.4.18 (09/11/2026) y v1.4.44 (11/11/2026)"],
+  ["MSAL, Cuidados para cada etapa de la vida: salud bucal","año no registrado","Salud bucal por edad","v1.4.20 (09/11/2026)"],
+  ["SAP, Manual de prevención de lesiones (3.ª ed.)","2012","Prevención de lesiones por edad","v1.4.21 (09/11/2026)"],
+  ["Goldenring y Rosen, HEEADSSS (Contemp Pediatr 21:64-90)","2004","Guía de entrevista del adolescente","v1.4.22 (09/11/2026)"],
+  ["Agüero y Berner, Arch Argent Pediatr 121(2):e202202717","2023","Estadios de Tanner (volumen testicular en G2)","v1.4.23 (09/11/2026)"],
+  ["SAP, Deficiencia de hierro y anemia ferropénica: guía de prevención, diagnóstico y tratamiento","2017","Hierro en prematuros","v1.4.24 (09/11/2026)"],
+  ["MSAL, retinopatía del prematuro","2018","Seguimiento del prematuro","v1.4.24 (09/11/2026)"],
+  ["Kaminker y Armando, Síndrome de Down: enfoque clínico-genético (Arch Argent Pediatr 106(3))","2008","Control del síndrome de Down","v1.4.25 (10/11/2026)"],
+  ["SAP, Consenso Nacional de Dermatitis Atópica (Arch Argent Pediatr 112(3):e195)","2013 (publicado en 2014)","Dermatitis atópica","v1.4.27 (10/11/2026)"],
+  ["Sibbald, Rinosinusitis pediátrica (Arch Argent Pediatr 103(3):224-231)","2005","Sinusitis","v1.4.28 (10/11/2026)"],
+  ["MSAL, Normas nacionales de prevención y control de la pediculosis (Res. SPS 117)","1997","Pediculosis","v1.4.29 (10/11/2026)"],
+  ["SAP, Alerta sobre el aumento de casos de coqueluche","octubre de 2025","Coqueluche","v1.4.30 (10/11/2026)"],
+  ["MSAL, Vacuna antirrábica de uso humano: lineamientos técnicos","2011","Mordedura de perro","v1.4.31 (10/11/2026)"],
+  ["Mosteller, Simplified calculation of body-surface area (N Engl J Med 317:1098)","1987","Superficie corporal","v1.4.59 (11/11/2026)"],
+  ["Plantillas propias de evoluciones e historia clínica del Dr. Pereira","2026","Cuadros de intercurrencia originales y sus dosis (pendientes de revisión médica)","v1.0.0 (06/11/2026)"]
+];
+function renderFuentes(){ const ul=$("fuentesList"); if(ul) ul.innerHTML = FUENTES.map(f=>"<li><b>"+mfEsc(f[0])+"</b><span>Referencia: "+mfEsc(f[1])+" · Se usa en: "+mfEsc(f[2])+" · Cargada en la app: "+mfEsc(f[3])+"</span></li>").join(""); }
+renderFuentes();
 function psActualizar(){
   const b=$("pstick"), card=document.querySelector("main > section.card"); if(!b||!card) return;
   const hay = S.sexo || $("fn").value || $("peso").value || $("talla").value;
