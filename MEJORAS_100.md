@@ -119,7 +119,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 96. [x] (v1.4.64, 11/11) Autodiagnóstico interno (botón en Ajustes) que verifique todas las plantillas y cálculos.
 97. [x] (v1.4.63, 11/11) Exportar e importar toda la configuración (frases, plantillas, ajustes) en un solo archivo.
 98. [!] Adaptar el texto al sistema de HC que usa Gonzalo (campos separados para pegar uno por uno). Necesita que Gonzalo diga qué campos tiene su sistema.
-99. [ ] Revisión ortográfica y de estilo de todo el contenido.
+99. [x] (v1.5.7, 17/11) Revisión ortográfica y de estilo de todo el contenido. Sin errores de ortografía en el texto visible; se unificó «percentil» → «percentilo» en el texto generado de crecimiento.
 100. [ ] Optimizar peso y velocidad del archivo (fuentes, imágenes, código) sin perder funciones.
 
 ## Ya hechas antes de esta lista

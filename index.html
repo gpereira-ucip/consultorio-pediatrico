@@ -18,7 +18,7 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.5.6 (2026-11-16)
+  VERSION: 1.5.7 (2026-11-17)
 
   BACKLOG (la tarea diaria toma el primer ítem pendiente, lo implementa, lo tacha y anota en CHANGELOG):
   [x] Percentiles OMS automáticos (peso/talla/PC/IMC 0-5 años, LMS) y OMS 2007 5-19 años, con curvas copiables (v1.0.0)
@@ -34,6 +34,7 @@
   [ ] Pesquisas por edad del MSAL 2018 detalladas (anemia, visión, audición, displasia de cadera)
   [ ] Atajos de teclado y modo compacto para pantallas chicas
   CHANGELOG:
+  1.5.7 — Revisión ortográfica y de estilo (ítem 99): se revisó todo el contenido visible (diccionario español + búsqueda de tildes faltantes, palabras repetidas, signos de interrogación, espacios, puntuación y mezcla de voseo/tuteo): sin errores de ortografía. Único ajuste: en el texto generado de crecimiento («líneas de percentil») se unificó con el resto de la app: «percentilo».
   1.5.6 — «Fuentes y actualización» (ítem 95): en Ajustes, lista desplegable de todas las referencias que usa la app (guías, tablas y calendario) con el año o edición de cada una, para qué se usa y en qué versión y fecha se cargó; aclara que no hay conexión para verificar actualizaciones y que hay que cotejar con la fuente vigente.
   1.5.5 — Tarjeta del paciente compacta al hacer scroll (ítem 94): cuando la tarjeta del paciente sale de la pantalla aparece, pegada debajo del encabezado, una franja con sexo, edad, peso, talla, PC y temperatura; un toque en la franja vuelve arriba. No cambia el texto generado y no se imprime.
   1.5.4 — Accesibilidad (ítem 92): foco visible en todos los controles, «Saltar al contenido», navegación completa con Tab (foco atrapado dentro de las ventanas, flechas Izq/Der y Inicio/Fin en las pestañas), roles y estados ARIA (pestañas, chips y segmentos con aria-pressed, ventanas, avisos), título h1, etiquetas en los exámenes físicos y contraste AA en textos de colores (claro y oscuro).
@@ -1470,7 +1471,7 @@ html[data-tema="oscuro"] .posbox .f b{color:#e0955f}
 
 <script>
 "use strict";
-const VERSION = "1.5.6";
+const VERSION = "1.5.7";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -1543,7 +1544,7 @@ function crecAlertas(){
     // cruce de líneas respecto de la última medición previa
     const prev=prevMediciones().filter(pm=>pm[k]!==null && pm[k]!==undefined && pm.d<e.fc).sort((a,b)=>b.d-a.d)[0];
     if(prev){ const dd=Math.round((prev.d-e.fn)/864e5), l=lmsAt(k,S.sexo,dd); if(l && dd>=0){ const z0=zOf(prev[k],l), a=zona(z0), b=zona(r.z);
-      if(Math.abs(b-a)>=2){ const sube=b>a; out.push({cruce:`${nm[k].toLowerCase()} con ${sube?"ascenso":"descenso"} de ${Math.abs(b-a)} líneas de percentil`, t:`${nm[k]}: ${sube?"ascenso":"descenso"} de ${Math.abs(b-a)} líneas de percentil desde el ${dmy(prev.d)} (de ${PCN[a]} a ${PCN[b]}).`, f:`${nm[k].toLowerCase()} con ${sube?"ascenso":"descenso"} de ${Math.abs(b-a)} líneas de percentil desde el ${dmy(prev.d)} (de ${PCN[a]} a ${PCN[b]})`}); } } }
+      if(Math.abs(b-a)>=2){ const sube=b>a; out.push({cruce:`${nm[k].toLowerCase()} con ${sube?"ascenso":"descenso"} de ${Math.abs(b-a)} líneas de percentilo`, t:`${nm[k]}: ${sube?"ascenso":"descenso"} de ${Math.abs(b-a)} líneas de percentilo desde el ${dmy(prev.d)} (de ${PCN[a]} a ${PCN[b]}).`, f:`${nm[k].toLowerCase()} con ${sube?"ascenso":"descenso"} de ${Math.abs(b-a)} líneas de percentilo desde el ${dmy(prev.d)} (de ${PCN[a]} a ${PCN[b]})`}); } } }
   });
   const dr=descensoRN();
   if(dr && !dr.rec && -dr.pct>=10) out.push({t:`Descenso de peso del ${fmtN(-dr.pct,1)} % respecto del PN a los ${dr.d} días (≥ 10 %).`, f:`descenso de peso del ${fmtN(-dr.pct,1)} % respecto del PN a los ${dr.d} días`, cruce:`descenso de peso ≥ 10 % del PN`});
@@ -1576,7 +1577,7 @@ function crecFrase(){
   const canTxt=n=> n===0? "por debajo del P3" : n===5? "por encima del P97" : "en el canal "+PCN[n];
   const partes=Object.keys(grupos).map(n=>`${joinY(grupos[n])} ${canTxt(+n)}`);
   let t=cap(joinY(partes))+" para la edad"+(e.corr?" corregida":"");
-  if(conPrev) t+= cru.length? `, con ${joinY(cru)} respecto de la medición previa (${dmy(fPrev)})` : `, sin cruces de líneas de percentil respecto de la medición previa (${dmy(fPrev)})`;
+  if(conPrev) t+= cru.length? `, con ${joinY(cru)} respecto de la medición previa (${dmy(fPrev)})` : `, sin cruces de líneas de percentilo respecto de la medición previa (${dmy(fPrev)})`;
   return t+".";
 }
 function renderCrec(){
