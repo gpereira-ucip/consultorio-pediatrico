@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.5.7 (17/11/2026)
+- Versión actual: 1.5.8 (18/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -120,6 +120,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 16. Sección «Fuentes y actualización» visible con fecha de cada referencia.
 
 ## Problemas conocidos
+- (18/11/2026) Sigue igual: sap.org.ar, argentina.gob.ar, garrahan.gov.ar rechazados por el proxy (403). Se tomó el 100, el último sin contenido clínico. Ya no queda nada para avanzar sin habilitar esos dominios; quedan los [~] clínicos y los [!] esperando decisión de Gonzalo. Propuesta de nueva tanda: cuando se resuelva el acceso, cerrar 37-39, 46, 47, 59-61, 63, 65, 66, 71, 73, 74, 77-81, 84, 85 (con fuente).
 - (17/11/2026) Sigue igual: sap.org.ar y garrahan.gov.ar rechazados por el proxy (403) y WebFetch «dominio no permitido». Se tomó el 99 (sin contenido clínico). Queda sin contenido clínico solo el 100. Para destrabar los ítems [~] clínicos hay que habilitar esos dominios (y argentina.gob.ar, who.int) en la red del entorno.
 - (16/11/2026) Sigue igual: sap.org.ar, argentina.gob.ar, garrahan.gov.ar y who.int sin acceso (WebFetch: dominio no permitido). Todos los ítems [~] con contenido clínico (37-39, 46, 47, 54, 59-61, 63, 65, 66, 71, 73, 74, 77-81, 84, 85) siguen esperando que se habiliten esos dominios; se tomó el 92 (sin contenido clínico). Quedan sin contenido clínico: 94, 95, 99 y 100.
 - (16/11/2026, 2.ª corrida) Se tomó el 94 (sin contenido clínico); sin cambios en el acceso web. Quedan sin contenido clínico: 95, 99 y 100.
@@ -194,6 +195,7 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 1.5.8 (18/11/2026) — Ítem 100: archivo más liviano (641→625 KB; gzip 249→238 KB). Favicon 128→48 px, CSS sin comentarios/espacios, backlog viejo del comentario inicial reemplazado por referencia a MEJORAS_100.md. Sin contenido clínico. Probado con Playwright 1440/390 px: autodiagnóstico 1469 comprobaciones OK, sin errores de consola, sin desborde, capturas idénticas a la versión anterior. Nota: el CHANGELOG del comentario lo lee la pantalla Novedades; no recortarlo.
 - 1.5.7 (17/11/2026) — Ítem 99: revisión ortográfica y de estilo. Método: extracción de todo el texto visible y de los strings del JS, diccionario español (pyspellchecker), búsqueda de tildes faltantes, palabras repetidas, signos ¿?, espacios dobles, puntuación y voseo/tuteo. Resultado: sin errores en el texto visible (las palabras sin tilde que aparecen son claves internas y alias de búsqueda, normalizados a propósito). Único cambio: «líneas de percentil» → «percentilo» en la frase de crecimiento y las alertas. Probado: autodiagnóstico 1469 chequeos sin fallas, sin errores de consola, 1440 y 390 px.
 - 1.5.6 (16/11/2026) — Ítem 95: «Fuentes y actualización» en Ajustes (`FUENTES`, `renderFuentes()`, `#fuentesDet`). Los años/ediciones salen de las citas ya anotadas en «Pendiente de revisión médica»; «Manual Breve SAP» y «salud bucal MSAL» figuran sin año porque no está registrado: completar. Al agregar una fuente nueva, sumarla al arreglo `FUENTES`. Autodiagnóstico 1469 sin fallas.
 - 1.5.5 (16/11/2026) — Ítem 94: franja compacta del paciente (`#pstick`, `psActualizar()`) pegada bajo el encabezado cuando la tarjeta del paciente sale de la pantalla; muestra sexo, edad (+EC), peso, talla, PC y T°; posición absoluta (no mueve el contenido), oculta al imprimir; un toque vuelve arriba. Autodiagnóstico: 1469 comprobaciones sin fallas.

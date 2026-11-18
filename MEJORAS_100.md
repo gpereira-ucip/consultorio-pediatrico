@@ -120,7 +120,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 97. [x] (v1.4.63, 11/11) Exportar e importar toda la configuración (frases, plantillas, ajustes) en un solo archivo.
 98. [!] Adaptar el texto al sistema de HC que usa Gonzalo (campos separados para pegar uno por uno). Necesita que Gonzalo diga qué campos tiene su sistema.
 99. [x] (v1.5.7, 17/11) Revisión ortográfica y de estilo de todo el contenido. Sin errores de ortografía en el texto visible; se unificó «percentil» → «percentilo» en el texto generado de crecimiento.
-100. [ ] Optimizar peso y velocidad del archivo (fuentes, imágenes, código) sin perder funciones.
+100. [x] (v1.5.8, 18/11) Optimizar peso y velocidad del archivo sin perder funciones. 641 → 625 KB (gzip 249 → 238 KB): favicon a 48 px, CSS compactado, backlog viejo fuera del comentario. Las fuentes (Inter en woff, ~87 KB) ya estaban subseteadas y el JS/tablas ya eran compactos; no se minificó el JS por riesgo (el CHANGELOG del comentario lo lee «Novedades», no recortarlo).
 
 ## Ya hechas antes de esta lista
 - Mis frases (v1.2.0) · Mis plantillas de intercurrencia (v1.3.0) · Puntaje de Tal (v1.4.0).
