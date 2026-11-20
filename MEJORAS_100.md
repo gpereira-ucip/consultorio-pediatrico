@@ -33,7 +33,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 24. [x] (v1.4.20, 09/11) Salud bucal por edad: flúor, primera consulta odontológica, riesgo de caries.
 25. [x] (v1.4.21, 09/11) Prevención de lesiones por edad ampliada con la SAP, como chips.
 26. [x] (v1.4.22, 09/11) Adolescencia: guía HEEADSSS con chips (lo confidencial no se guarda).
-27. [!] (parcial v1.4.23, 09/11) Tanner con selector visual y edad esperable de cada estadio. Hecho: selector de un clic M/G (según sexo) y VP 1-5 en Apto y en el control de adolescencia (completa «Tanner M_ VP_» del examen físico). Falta: la edad esperable de cada estadio — no encontré tablas oficiales argentinas (SAP/Lejarraga) con media y P3-P97 por estadio; conseguirlas para cargarlas. Sin dibujos (decisión: solo botones con texto).
+27. [x] (v1.4.23 y v1.5.9, 20/11) Tanner con selector visual y edad esperable de cada estadio. v1.5.9: edad media de inicio (mamas 10,8 años, 8,3-13,3; testículos 11,8 años, 8,9-14,7; menarca 12,5 ± 2,2) según SAP 2013 p. 110, y autoevaluación con dibujos esquemáticos para el paciente que prefiere no ser revisado (pedido de Gonzalo). ⚕
 28. [x] (v1.4.24, 09/11) Plantilla de seguimiento del prematuro (ROP, OEA, edad corregida, suplementos, vacunas).
 29. [x] (v1.4.25, 10/11) Plantilla de control en síndrome de Down (guía SAP) con estudios por edad. Fuente: Kaminker y Armando, Arch Argent Pediatr 2008 (SAP). Sin curvas de SD (ítem 54).
 30. [x] (v1.4.26, 10/11) Certificado de salud escolar / libreta de salud listo para copiar (en Apto físico). Cada jurisdicción tiene su formulario: el texto es para transcribir.
