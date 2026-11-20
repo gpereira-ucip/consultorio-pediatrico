@@ -101,6 +101,18 @@ App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la histor
 ## Qué sigue
 **Desde el 09/11/2026 la lista de trabajo es MEJORAS_100.md** (100 mejoras pedidas por Gonzalo, en orden; la tarea diaria resuelve todas las que pueda por día y las tacha ahí). El backlog de abajo quedó incorporado a esa lista y se conserva solo como referencia (tiene notas útiles, por ejemplo dónde buscar la tabla del Pulmonary Score).
 
+### Propuesta de nueva tanda (20/11/2026, sin implementar — a aprobar por Gonzalo)
+Las 100 están resueltas o bloqueadas; lo que queda necesita fuentes oficiales hoy inaccesibles. Ideas que **no suman contenido clínico nuevo** (o usan solo lo ya cargado en la app):
+1. Buscador global (Ctrl+K ampliado) que abra también frases, plantillas, calculadoras y vacunas.
+2. Ordenar y fijar «Mis frases» y «Mis plantillas» (arrastrar, fijar arriba, duplicar).
+3. Atajo «Repetir último control/consulta» (mismo cuadro y chips, sin datos de pacientes).
+4. Vista previa lado a lado con el texto, editable, y botón «Restaurar plantilla».
+5. Instalación PWA más clara (aviso de actualización y botón «Buscar novedades» sin conexión).
+6. Más pruebas automáticas en el autodiagnóstico (casos límite de edad, prematuros, sexo).
+7. Texto de «Novedades» con buscador y filtro por pestaña.
+8. Revisión de contraste y tamaño táctil en 360 px y en tablets.
+Al aprobar, la primera sería la 1.
+
 ### Backlog anterior (referencia)
 1. Scores con texto para la HC: ~~Puntaje de Tal~~ (hecho v1.4.0). Faltan: Pulmonary Score (asma ≥2 a; buscar la tabla oficial en la Guía SAP de asma ≥6 años 2021, cap. 6 «Crisis asmática», Arch Argent Pediatr 2021;119(4):S123 — el PDF v119n4a36s.pdf no traía el cap. 6 legible), Westley, Gorelick (deshidratación), Glasgow pediátrico.
 2. Peso para la talla (OMS) y velocidad de crecimiento.
