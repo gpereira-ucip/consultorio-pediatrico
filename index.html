@@ -18,10 +18,11 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.5.11 (2026-11-20)
+  VERSION: 1.5.12 (2026-11-22)
 
   BACKLOG: ver MEJORAS_100.md en el repositorio.
   CHANGELOG:
+  1.5.12 — Banderas rojas y derivación en pantalla para neumonía, otitis media aguda, faringitis, CVAS y rinofaringitis (SAP IRAB 2021; MSAL 2023). Ítem 37/38, parcial.
   1.5.11 — Tanner: textos ajustados a la SAP 2013 (G2 desde 4 ml; vello 5 distinto en mujeres y varones) y aclaración de que las cifras de la lámina masculina son del autor.
   1.5.10 — Autoevaluación de Tanner con las láminas de M. Komorniczak (Wikimedia Commons, CC BY-SA 3.0) en lugar de los dibujos esquemáticos.
   1.5.9 — Autoevaluación de Tanner con dibujos (para el paciente que no quiere ser revisado) y edad esperable de inicio puberal; alertas de IMC > 30 y de aumento de 2 puntos de IMC en un año (Guía de crecimiento SAP 2013). Pendiente de revisión médica.
@@ -886,7 +887,7 @@
 
 <script>
 "use strict";
-const VERSION = "1.5.11";
+const VERSION = "1.5.12";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -2024,6 +2025,11 @@ function loadInter(id){
 /* banderas rojas y criterios de derivación por cuadro (v1.4.33, ítems 37-38): solo en pantalla. Cada entrada con su fuente.
    br = banderas rojas / signos de alarma para el médico; der = derivación, internación o interconsulta. Pendiente de revisión médica. */
 const ALERTA = {
+  nac:{br:["Signos de alarma de IRAB (menores de 2 años): taquipnea, tiraje, quejido, dificultad para alimentarse, somnolencia excesiva, fiebre.","Alteración del sensorio, convulsiones, descompensación hemodinámica o cianosis.","Rápida progresión (menos de 48-72 hs) o falta de respuesta al antibiótico en 48-72 hs."], der:["Internación: dificultad respiratoria moderada a grave (tiraje, quejido, cianosis); hipoxemia (SatO₂ < 90 %); rechazo o imposibilidad de alimentación; factor de riesgo de IRAB grave; neumonía complicada (necrosis, derrame, absceso).","Menores de 3 meses: internación.","Ambulatorio: control diario las primeras 48 hs y luego cada 48-72 hs hasta el alta."], f:"SAP, Recomendaciones para el manejo de las IRAB en menores de 2 años, Arch Argent Pediatr 2021;119(4):S171-S197 (criterios de internación, p. S184; Tabla 14). El consenso es para menores de 2 años"},
+  oma:{br:["Mastoiditis o parálisis facial: complicación supurada (timpanocentesis indicada).","Toxicidad sistémica o falta de respuesta al tratamiento a las 72 hs.","OMA grave: dolor de oído moderado a severo, de al menos 48 hs, o T ≥ 39 °C.","OMA recurrente: 3 o más episodios en 6 meses o 4 en un año."], der:["Falta de respuesta a las 72 hs, recién nacido, toxicidad sistémica, mastoiditis o parálisis facial: timpanocentesis (derivar a ORL / centro de mayor complejidad)."], f:"MSAL, Algoritmo de manejo ambulatorio de faringitis, sinusitis, otitis, 2023 (el documento orienta el primer nivel de atención y no es exclusivo de pediatría)"},
+  faring:{br:["Membranas que se despegan dejando áreas de hemorragia: pensar en difteria (sin vacunas o con esquema incompleto).","Adenopatías y esplenomegalia: pensar en mononucleosis (virus de Epstein-Barr).","Adolescente sexualmente activo: considerar faringitis gonocócica.","Complicaciones del estreptococo: abscesos, mastoiditis, linfadenitis; prevenir la fiebre reumática con el tratamiento adecuado."], f:"MSAL, Algoritmo de manejo ambulatorio de faringitis, sinusitis, otitis, 2023"},
+  cvas:{br:["Síntomas por más de 7-10 días con rinorrea purulenta y tos persistente: sospechar sinusitis bacteriana.","Fiebre > 39 °C, cefalea intensa, dolor facial o compromiso orbitario o periorbitario: complicación de sinusitis.","Otalgia o fiebre que reaparece: pensar en otitis media aguda (complicación del 0,5-5 % de los resfríos).","Taquipnea, tiraje, quejido, dificultad para alimentarse o somnolencia excesiva: IRAB (consulta inmediata)."], f:"MSAL, Algoritmo de manejo ambulatorio de faringitis, sinusitis, otitis, 2023; SAP, Recomendaciones para el manejo de las IRAB en menores de 2 años, Arch Argent Pediatr 2021;119(4):S171"},
+  rinofa:{br:["Síntomas por más de 7-10 días con rinorrea purulenta y tos persistente: sospechar sinusitis bacteriana.","Fiebre > 39 °C, cefalea intensa, dolor facial o compromiso orbitario o periorbitario: complicación de sinusitis.","Otalgia o fiebre que reaparece: pensar en otitis media aguda.","Taquipnea, tiraje, quejido, dificultad para alimentarse o somnolencia excesiva: IRAB (consulta inmediata)."], f:"MSAL, Algoritmo de manejo ambulatorio de faringitis, sinusitis, otitis, 2023; SAP, Recomendaciones para el manejo de las IRAB en menores de 2 años, Arch Argent Pediatr 2021;119(4):S171"},
   bql:{der:["Puntaje de Tal ≥ 7: requiere oxígeno.","Puntaje de Tal ≥ 9 en la consulta inicial: derivación."], f:"MSAL, Abordaje integral de las IRA, Guía N° 6, 2011, p. 42"},
   bronco:{der:["Puntaje de Tal ≥ 7: requiere oxígeno.","Puntaje de Tal ≥ 9 en la consulta inicial: derivación."], f:"MSAL, Abordaje integral de las IRA, Guía N° 6, 2011, p. 42"},
   da:{br:["Fiebre con vesículas o erosiones agrupadas y adenopatías: eccema herpético (cuadro grave).","Lesiones abscedadas: sospechar S. aureus resistente a meticilina.","Moderada o grave sin respuesta al tratamiento habitual: evaluar alergia alimentaria (dieta de exclusión solo con especialista)."], der:["Formas graves o extensas: especialista (fototerapia > 12 años o tratamiento sistémico)."], f:"SAP, Consenso Nacional de Dermatitis Atópica 2013"},
