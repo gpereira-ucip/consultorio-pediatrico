@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.5.12 (22/11/2026)
+- Versión actual: 1.5.13 (23/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -217,6 +217,7 @@ Al aprobar, la primera sería la 1.
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 1.5.13 (23/11/2026) — Ítem 37/38 (parcial): `ALERTA.asma` (alta con SaO₂ ≥ 94 %, control 24-48 hs, riesgo en la primera semana). Fuente: ateneo Garrahan 2023 que cita la guía SAP asma ≥ 6 años 2021 (no se leyó la guía completa). Laringitis: solo guías españolas, no cargada. Pendiente de revisión médica: confirmar `asma` contra la guía SAP 2021.
 - 1.5.12 (22/11/2026) — Ítems 37/38 (parcial): `ALERTA` con nac, oma, faring, cvas y rinofa (SAP IRAB 2021; MSAL 2023). Se habilitó la red del entorno (SAP, MSAL, Garrahan, OMS, PubMed, AAP, NICE). Pruebas: sin errores de consola en 1440 y 390 px, tarjeta visible en los 5 cuadros y sin «undefined/NaN/{», autodiagnóstico 1474 comprobaciones sin errores. No cambia el texto generado.
 - 1.5.8 (18/11/2026) — Ítem 100: archivo más liviano (641→625 KB; gzip 249→238 KB). Favicon 128→48 px, CSS sin comentarios/espacios, backlog viejo del comentario inicial reemplazado por referencia a MEJORAS_100.md. Sin contenido clínico. Probado con Playwright 1440/390 px: autodiagnóstico 1469 comprobaciones OK, sin errores de consola, sin desborde, capturas idénticas a la versión anterior. Nota: el CHANGELOG del comentario lo lee la pantalla Novedades; no recortarlo.
 - 1.5.7 (17/11/2026) — Ítem 99: revisión ortográfica y de estilo. Método: extracción de todo el texto visible y de los strings del JS, diccionario español (pyspellchecker), búsqueda de tildes faltantes, palabras repetidas, signos ¿?, espacios dobles, puntuación y voseo/tuteo. Resultado: sin errores en el texto visible (las palabras sin tilde que aparecen son claves internas y alias de búsqueda, normalizados a propósito). Único cambio: «líneas de percentil» → «percentilo» en la frase de crecimiento y las alertas. Probado: autodiagnóstico 1469 chequeos sin fallas, sin errores de consola, 1440 y 390 px.

@@ -18,10 +18,11 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.5.12 (2026-11-22)
+  VERSION: 1.5.13 (2026-11-23)
 
   BACKLOG: ver MEJORAS_100.md en el repositorio.
   CHANGELOG:
+  1.5.13 — Asma: criterios de alta de guardia y control en pantalla (SAP, Guía de asma ≥ 6 años 2021, según ateneo Garrahan 2023). Ítem 37/38, parcial.
   1.5.12 — Banderas rojas y derivación en pantalla para neumonía, otitis media aguda, faringitis, CVAS y rinofaringitis (SAP IRAB 2021; MSAL 2023). Ítem 37/38, parcial.
   1.5.11 — Tanner: textos ajustados a la SAP 2013 (G2 desde 4 ml; vello 5 distinto en mujeres y varones) y aclaración de que las cifras de la lámina masculina son del autor.
   1.5.10 — Autoevaluación de Tanner con las láminas de M. Komorniczak (Wikimedia Commons, CC BY-SA 3.0) en lugar de los dibujos esquemáticos.
@@ -887,7 +888,7 @@
 
 <script>
 "use strict";
-const VERSION = "1.5.12";
+const VERSION = "1.5.13";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -2047,6 +2048,7 @@ const ALERTA = {
   sincope:{br:["Síncope durante el ejercicio (causa arrítmica hasta demostrar lo contrario) o en decúbito.","Palpitaciones (el único predictor de causa cardíaca sin cardiopatía conocida).","Antecedentes personales o familiares de muerte súbita; cardiopatía conocida.","ECG con preexcitación, QT largo o patrón de Brugada."], der:["Con cualquiera de las anteriores: cardiología (prueba de esfuerzo si fue con el ejercicio)."], f:"Pace AE, Scaglione J, Arch Argent Pediatr 2004;102(5):461"},
   vv:{br:["Sangrado genital sin causa definida: vaginoscopia por especialista.","Sospecha de cuerpo extraño: Rx o ecografía pelviana.","Flujo crónico o recurrente sin causa definida: vaginoscopia."], f:"SAP, Comité Nacional de Endocrinología, Arch Argent Pediatr 2000;98(6):412"},
   sineq:{der:["Cirugía solo en casos que no responden al tratamiento tópico y tienen obstrucción urinaria grave."], f:"Rubinstein A y col., Arch Argent Pediatr 2018;116(1):65"},
+  asma:{br:["Riesgo de repetir una exacerbación mayor dentro de la primera semana posterior a una exacerbación grave."], der:["Crisis grave sin respuesta a la serie inicial (salbutamol + ipratropio, corticoide) o que sigue con mala mecánica ventilatoria o necesidad de oxígeno: internación.","Alta solo con buena respuesta al tratamiento, SaO₂ ≥ 94 %, síntomas en remisión con salbutamol cada 4-6 hs y sin complicaciones.","Control a las 24-48 hs; revisar técnica inhalatoria y adherencia y subir el nivel de control."], f:"SAP, Guía de diagnóstico y tratamiento: asma bronquial en niños ≥ 6 años, Arch Argent Pediatr 2021;119(4):S123, tal como se cita en «Crisis asmática grave: manejo en guardia e indicaciones al alta», ateneo Hospital Garrahan 2023 (no se leyó la guía completa)"},
   tina:{br:["Placa inflamatoria supurada (querión): agregar corticoide para disminuir la inflamación y evitar la alopecia definitiva."], f:"García-Agudo L, Arch Argent Pediatr 2018;116(2):e296"}
 };
 function renderAlerta(){ const c=$("alertCard"); if(!c) return;
