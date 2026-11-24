@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.5.13 (23/11/2026)
+- Versión actual: 1.5.14 (24/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -132,6 +132,7 @@ Al aprobar, la primera sería la 1.
 16. Sección «Fuentes y actualización» visible con fecha de cada referencia.
 
 ## Problemas conocidos
+- (24/11/2026) Acceso web parcial: curl con User-Agent de navegador abre sap.org.ar (PDF de Archivos Argentinos de Pediatría) y argentina.gob.ar; bancos.salud.gob.ar corta la conexión (reset) y ministeriodesalud.cba.gov.ar (copia de la Guía N.º 8 del MSAL) no está permitido en la red. Sin esa guía no se cargaron los planes A/B/C (ítem 46), banderas de GEA ni déficit (81). WebSearch con allowed_domains devuelve títulos útiles: sirve para ubicar PDFs de sap.org.ar/docs/publicaciones/archivosarg/ y bajarlos con curl + pdftotext. Si Gonzalo habilita ministeriodesalud.cba.gov.ar o pasa el PDF de la Guía 8, se completan 46, 37/38 (GEA) y 81.
 - (22/11/2026) RESUELTO: Gonzalo pidió habilitar el acceso; se agregaron al entorno «Default» sap.org.ar, argentina.gob.ar, bancos.salud.gob.ar, garrahan.gov.ar, who.int, iris.who.int, PubMed/NCBI/PMC, publications.aap.org y nice.org.uk. curl con User-Agent de navegador funciona. El conector PubMed de claude.ai no está cargado en las sesiones en la nube (se usó la web directamente).
 - (22/11/2026) Sin cambios: curl a sap.org.ar, argentina.gob.ar, garrahan.gov.ar y who.int sin respuesta; WebSearch con dominios SAP/MSAL/Garrahan devuelve solo títulos y resúmenes (p. ej. consenso IRAB 2021, algoritmo MSAL faringitis-sinusitis-otitis 2023), sin texto citable de banderas rojas. Ítem 37 (primer pendiente) sin avanzar: no se cargó contenido de memoria; la app sigue en v1.5.8. Con acceso a esos PDF se podría cargar primero el ítem 37 desde el consenso IRAB 2021 (SAP) y el algoritmo MSAL 2023.
 - (21/11/2026) Sin cambios: curl a sap.org.ar, argentina.gob.ar, garrahan.gov.ar, who.int y bancos.salud.gob.ar sin respuesta; WebSearch para «OMA signos de alarma SAP» no devolvió guía argentina (solo Merck/Andalucía/Colombia, no sirven como fuente local). Se intentó el ítem 37 (primer pendiente): no se cargó contenido de memoria; la app sigue igual. Se necesita habilitar esos dominios o que Gonzalo pase las referencias.
@@ -217,6 +218,7 @@ Al aprobar, la primera sería la 1.
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 1.5.14 (24/11/2026) — Ítem 81 (parcial): calculadora «Líquidos de mantenimiento (Holliday-Segar)» en Calculadoras (100 ml/kg/día los primeros 10 kg, 50 los segundos 10, 20 por kg adicional; ml/día y ml/h; peso precargado). Fuente: Bilkis M y col., Arch Argent Pediatr 2007;105(5):436-443 (cita Holliday y Segar). Pendiente de revisión médica: confirmar que es la referencia que Gonzalo quiere y si prefiere el tope de 2400 ml/día u otra convención (no se agregó ninguno). Probado: autodiagnóstico 1477 comprobaciones sin fallas, 1440 y 390 px sin scroll horizontal ni errores de consola.
 - 1.5.13 (23/11/2026) — Ítem 37/38 (parcial): `ALERTA.asma` (alta con SaO₂ ≥ 94 %, control 24-48 hs, riesgo en la primera semana). Fuente: ateneo Garrahan 2023 que cita la guía SAP asma ≥ 6 años 2021 (no se leyó la guía completa). Laringitis: solo guías españolas, no cargada. Pendiente de revisión médica: confirmar `asma` contra la guía SAP 2021.
 - 1.5.12 (22/11/2026) — Ítems 37/38 (parcial): `ALERTA` con nac, oma, faring, cvas y rinofa (SAP IRAB 2021; MSAL 2023). Se habilitó la red del entorno (SAP, MSAL, Garrahan, OMS, PubMed, AAP, NICE). Pruebas: sin errores de consola en 1440 y 390 px, tarjeta visible en los 5 cuadros y sin «undefined/NaN/{», autodiagnóstico 1474 comprobaciones sin errores. No cambia el texto generado.
 - 1.5.8 (18/11/2026) — Ítem 100: archivo más liviano (641→625 KB; gzip 249→238 KB). Favicon 128→48 px, CSS sin comentarios/espacios, backlog viejo del comentario inicial reemplazado por referencia a MEJORAS_100.md. Sin contenido clínico. Probado con Playwright 1440/390 px: autodiagnóstico 1469 comprobaciones OK, sin errores de consola, sin desborde, capturas idénticas a la versión anterior. Nota: el CHANGELOG del comentario lo lee la pantalla Novedades; no recortarlo.

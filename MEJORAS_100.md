@@ -97,7 +97,7 @@ Todo contenido clínico nuevo va con fuente oficial (SAP, MSAL, Garrahan, OMS) y
 78. [~] Score de Westley (laringitis) con texto para la HC. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
 79. [~] Escala de Gorelick (deshidratación). No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
 80. [~] Glasgow pediátrico. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.
-81. [~] Holliday-Segar y déficit de líquidos. No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar. (La ventana de calculadoras de la v1.4.58 ya está: solo falta cargar la fórmula con su fuente.)
+81. [~] (v1.5.14, 24/11) Holliday-Segar y déficit de líquidos. Hecho: calculadora de líquidos de mantenimiento por peso (100/50/20 ml/kg/día; fuente: Bilkis y col., Arch Argent Pediatr 2007;105(5):436, que cita a Holliday y Segar). Falta: la parte de déficit (planes A/B/C del MSAL, Guía N.º 8: el PDF no se pudo leer el 24/11, ver «Problemas conocidos»).
 82. [x] (v1.4.59, 11/11) Superficie corporal (Mosteller).
 83. [x] (v1.4.58, 11/11) Calculadora de dosis libre (mg/kg → ml según concentración, con tope).
 84. [~] Score de McIsaac para faringitis (en pantalla, apoya la decisión del test). No empezado: sin acceso web a las fuentes oficiales el 11/11 (ver «Problemas conocidos» en PROYECTO.md). Reintentar.

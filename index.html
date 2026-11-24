@@ -18,10 +18,11 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.5.13 (2026-11-23)
+  VERSION: 1.5.14 (2026-11-24)
 
   BACKLOG: ver MEJORAS_100.md en el repositorio.
   CHANGELOG:
+  1.5.14 — Calculadoras: líquidos de mantenimiento por peso (Holliday-Segar, 100/50/20 ml/kg/día; SAP, Bilkis 2007). Ítem 81, parcial (falta el déficit).
   1.5.13 — Asma: criterios de alta de guardia y control en pantalla (SAP, Guía de asma ≥ 6 años 2021, según ateneo Garrahan 2023). Ítem 37/38, parcial.
   1.5.12 — Banderas rojas y derivación en pantalla para neumonía, otitis media aguda, faringitis, CVAS y rinofaringitis (SAP IRAB 2021; MSAL 2023). Ítem 37/38, parcial.
   1.5.11 — Tanner: textos ajustados a la SAP 2013 (G2 desde 4 ml; vello 5 distinto en mujeres y varones) y aclaración de que las cifras de la lámina masculina son del autor.
@@ -807,6 +808,14 @@
         <div class="btns"><button type="button" class="btn sec sm" id="scCopy">Copiar</button><span class="hint">SC (m²) = √(talla en cm × peso en kg ÷ 3600). Mosteller RD, N Engl J Med 1987;317:1098.</span></div>
       </section>
       <section class="calcsec">
+        <h3>Líquidos de mantenimiento <span class="hint">Holliday-Segar</span></h3>
+        <div class="row">
+          <label class="f">Peso kg<input id="hsPeso" class="n" inputmode="decimal"></label>
+        </div>
+        <div id="hsRes" class="calcres"></div>
+        <div class="btns"><button type="button" class="btn sec sm" id="hsCopy">Copiar</button><span class="hint">Requerimientos basales: primeros 10 kg 100 ml/kg/día; segundos 10 kg 50 ml/kg/día; cada kg adicional 20 ml/kg/día (Holliday y Segar; Bilkis y col., Arch Argent Pediatr 2007;105(5):436). Solo el volumen basal: no incluye el déficit ni las pérdidas, ni la composición de la solución. Verificá siempre.</span></div>
+      </section>
+      <section class="calcsec">
         <h3>Conversor de unidades</h3>
         <div class="row">
           <label class="f">Libras<input id="cvLb" class="n" inputmode="decimal"></label><label class="f">Onzas<input id="cvOz" class="n" inputmode="decimal"></label><span class="cveq">=</span><label class="f">Kilogramos<input id="cvKg" class="n" inputmode="decimal"></label>
@@ -888,7 +897,7 @@
 
 <script>
 "use strict";
-const VERSION = "1.5.13";
+const VERSION = "1.5.14";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -2984,6 +2993,7 @@ const FUENTES = [
   ["SAP, Alerta sobre el aumento de casos de coqueluche","octubre de 2025","Coqueluche","v1.4.30 (10/11/2026)"],
   ["MSAL, Vacuna antirrábica de uso humano: lineamientos técnicos","2011","Mordedura de perro","v1.4.31 (10/11/2026)"],
   ["Mosteller, Simplified calculation of body-surface area (N Engl J Med 317:1098)","1987","Superficie corporal","v1.4.59 (11/11/2026)"],
+  ["Bilkis M y col., Hidratación endovenosa en la práctica clínica (Arch Argent Pediatr 105(5):436-443), que cita a Holliday y Segar","2007","Líquidos de mantenimiento (calculadora)","v1.5.14 (24/11/2026)"],
   ["Plantillas propias de evoluciones e historia clínica del Dr. Pereira","2026","Cuadros de intercurrencia originales y sus dosis (pendientes de revisión médica)","v1.0.0 (06/11/2026)"]
 ];
 function renderFuentes(){ const ul=$("fuentesList"); if(ul) ul.innerHTML = FUENTES.map(f=>"<li><b>"+mfEsc(f[0])+"</b><span>Referencia: "+mfEsc(f[1])+" · Se usa en: "+mfEsc(f[2])+" · Cargada en la app: "+mfEsc(f[3])+"</span></li>").join(""); }
@@ -3270,8 +3280,8 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") novAbrir(false); 
 const nv=id=>{ const v=parseFloat(($(id).value||"").replace(",",".")); return isNaN(v)? null : v; };
 const fmg=x=> x<10? fmtN(x,2) : x<100? fmtN(x,1) : fmtN(x,0);
 function calcAbrir(v){ const m=$("calc"), show = v===undefined? m.classList.contains("hidden") : v; m.classList.toggle("hidden", !show);
-  if(show){ const p=$("peso").value, t=$("talla").value; if(p){ if(!$("dcPeso").value || $("dcPeso").dataset.auto) { $("dcPeso").value=p; $("dcPeso").dataset.auto="1"; } if(!$("scPeso").value || $("scPeso").dataset.auto){ $("scPeso").value=p; $("scPeso").dataset.auto="1"; } }
-    if(t && (!$("scTalla").value || $("scTalla").dataset.auto)){ $("scTalla").value=t; $("scTalla").dataset.auto="1"; } calcDosis(); calcSC(); setTimeout(()=>$("dcF").focus(),0); } }
+  if(show){ const p=$("peso").value, t=$("talla").value; if(p){ if(!$("dcPeso").value || $("dcPeso").dataset.auto) { $("dcPeso").value=p; $("dcPeso").dataset.auto="1"; } if(!$("scPeso").value || $("scPeso").dataset.auto){ $("scPeso").value=p; $("scPeso").dataset.auto="1"; } if(!$("hsPeso").value || $("hsPeso").dataset.auto){ $("hsPeso").value=p; $("hsPeso").dataset.auto="1"; } }
+    if(t && (!$("scTalla").value || $("scTalla").dataset.auto)){ $("scTalla").value=t; $("scTalla").dataset.auto="1"; } calcDosis(); calcSC(); calcHS(); setTimeout(()=>$("dcF").focus(),0); } }
 function dosisCalc(){ const w=nv("dcPeso"), d=nv("dcDosis"); if(!w || !d || w<=0 || d<=0) return null;
   const h=+$("dcInt").value, n=24/h, base=$("dcBase").value, max=nv("dcMax"); let por, dia, tope=false;
   if(base==="dia"){ dia=d*w; if(max && dia>max){ dia=max; tope=true; } por=dia/n; } else { por=d*w; if(max && por>max){ por=max; tope=true; } dia=por*n; }
@@ -3292,6 +3302,12 @@ function scTxt(r){ return `Superficie corporal ${fmtN(r.sc,2)} m² (Mosteller; p
 function calcSC(){ const r=scCalc(); $("scRes").textContent = r? scTxt(r) : ""; }
 ["scPeso","scTalla","scDosis"].forEach(id=>$(id).addEventListener("input", ev=>{ $(id).dataset.auto=""; ev.stopImmediatePropagation(); calcSC(); }, true));
 $("scCopy").onclick=()=>{ const r=scCalc(); r? copy(scTxt(r), "Copiado") : toast("Cargá peso y talla"); };
+/* líquidos de mantenimiento — Holliday y Segar (Pediatrics 1957), tal como los cita Bilkis M y col., Arch Argent Pediatr 2007;105(5):436: 100 ml/kg/día los primeros 10 kg, 50 ml/kg/día los segundos 10 kg y 20 ml/kg/día cada kg adicional. */
+function hsCalc(){ const w=nv("hsPeso"); if(!w || w<=0) return null; const dia=Math.min(w,10)*100+Math.max(0,Math.min(w,20)-10)*50+Math.max(0,w-20)*20; return {w, dia, h:dia/24}; }
+function hsTxt(r){ return `Líquidos de mantenimiento (Holliday-Segar), peso ${fmtN(r.w,2)} kg: ${fmtN(r.dia,0)} ml/día (${fmtN(r.h,1)} ml/h). Solo requerimiento basal.`; }
+function calcHS(){ const r=hsCalc(); $("hsRes").textContent = r? hsTxt(r) : ""; }
+$("hsPeso").addEventListener("input", ev=>{ $("hsPeso").dataset.auto=""; ev.stopImmediatePropagation(); calcHS(); }, true);
+$("hsCopy").onclick=()=>{ const r=hsCalc(); r? copy(hsTxt(r), "Copiado") : toast("Cargá el peso"); };
 /* conversor de unidades: 1 lb = 0,45359237 kg; 1 oz = 1/16 lb; °C = (°F − 32) × 5/9; 1 in = 2,54 cm (definiciones exactas). */
 const cvSet=(id,x,d)=>{ $(id).value = x===null||isNaN(x)? "" : fmtN(x,d); };
 function cvCalc(src){ const LB=0.45359237;
@@ -3703,7 +3719,7 @@ async function autodiag(){
     ["w","h","pc","imc"].forEach(k=>["v","m"].forEach(sx=>{ const t=LMS[k][sx]; ok(Array.isArray(t)&&t.length>10, "LMS "+k+" "+sx+" sin datos"); [0,Math.floor(t.length/2),t.length-1].forEach(i=>{ const l=t[i].slice(1); nCalc++; ok(Math.abs(zOf(l[1],l))<1e-9, `z de la mediana ≠ 0 (${k} ${sx} fila ${i})`); ok(Math.abs(zOf(xOf(1.881,l),l)-1.881)<1e-6, `ida y vuelta P97 (${k} ${sx} fila ${i})`); }); }));
     ["l","h"].forEach(tp=>["v","m"].forEach(sx=>{ const t=LMS_PT[tp][sx], l=ptLMS(sx,t[5][0],tp); nCalc++; ok(l && Math.abs(l[1]-t[5][2])<1e-9, "peso/talla "+tp+" "+sx); ok(ptLMS(sx,t[0][0]-1,tp)===null, "peso/talla fuera de tabla "+tp+" "+sx); }));
     nCalc+=6; ok(Math.abs(zAdj(xOf(3,[1,10,0.1])+ (xOf(3,[1,10,0.1])-xOf(2,[1,10,0.1])),[1,10,0.1])-4)<1e-9, "z ajustado OMS (> 3)");
-    ok(Math.abs(Math.sqrt(170*70/3600)-1.818)<0.001, "Mosteller"); ok(Math.abs(Phi(0)-0.5)<1e-6 && Math.abs(Phi(1.881)-0.97)<0.001, "Phi");
+    ok(Math.abs(Math.sqrt(170*70/3600)-1.818)<0.001, "Mosteller"); $("hsPeso").value="25"; ok(hsCalc().dia===1600 && Math.abs(hsCalc().h-66.67)<0.01, "Holliday-Segar 25 kg = 1600 ml/día"); $("hsPeso").value="8"; ok(hsCalc().dia===800, "Holliday-Segar 8 kg"); $("hsPeso").value=""; calcHS(); ok(Math.abs(Phi(0)-0.5)<1e-6 && Math.abs(Phi(1.881)-0.97)<0.001, "Phi");
     ok(BP_T.v.length===17 && BP_T.m.length===17 && BP_T.v.every(r=>r.length===6 && r.every(c=>c.length===7)), "tabla de presión arterial incompleta");
     ok(BP_T.v.every(r=>r[0].every((x,i)=>x<r[1][i] && r[1][i]<r[2][i])) && BP_T.m.every(r=>r[3].every((x,i)=>x<r[4][i] && r[4][i]<r[5][i])), "presión arterial: P50 < P90 < P95");
     ok(dm(sumar(new Date(2026,11,28),10))==="07/01", "suma de fechas"); const rr=parseMedLinea("12/3 7,2kg 66cm", new Date(2026,10,11)); ok(rr && rr.w===7.2 && rr.h===66, "lector de mediciones");
