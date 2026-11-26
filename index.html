@@ -18,10 +18,11 @@
   Autor: Dr. Gonzalo Gabriel Pereira
   Fuentes: Plantillas propias de evoluciones e HC; Manual Breve para la Supervisión de la Salud (SAP);
            Recomendaciones para el control en salud hasta los 6 años (MSAL 2018); Calendario Nacional de Vacunación 2026 (MSAL).
-  VERSION: 1.5.14 (2026-11-24)
+  VERSION: 1.5.15 (2026-11-26)
 
   BACKLOG: ver MEJORAS_100.md en el repositorio.
   CHANGELOG:
+  1.5.15 — Banderas rojas y derivación (ítem 37-38, parcial) para laringitis (SAP 2022: epiglotitis, cuerpo extraño laríngeo, estridor atípico) e ITU (SAP 2022: ITU atípica, recurrente, recién nacidos, antibióticos parenterales). Solo en pantalla.
   1.5.14 — Calculadoras: líquidos de mantenimiento por peso (Holliday-Segar, 100/50/20 ml/kg/día; SAP, Bilkis 2007). Ítem 81, parcial (falta el déficit).
   1.5.13 — Asma: criterios de alta de guardia y control en pantalla (SAP, Guía de asma ≥ 6 años 2021, según ateneo Garrahan 2023). Ítem 37/38, parcial.
   1.5.12 — Banderas rojas y derivación en pantalla para neumonía, otitis media aguda, faringitis, CVAS y rinofaringitis (SAP IRAB 2021; MSAL 2023). Ítem 37/38, parcial.
@@ -897,7 +898,7 @@
 
 <script>
 "use strict";
-const VERSION = "1.5.14";
+const VERSION = "1.5.15";
 const $ = id => document.getElementById(id);
 const S = { sexo:"", tab:"control", iModo:"ini", vFmt:"junta", doc:"rp" };
 
@@ -2057,6 +2058,8 @@ const ALERTA = {
   sincope:{br:["Síncope durante el ejercicio (causa arrítmica hasta demostrar lo contrario) o en decúbito.","Palpitaciones (el único predictor de causa cardíaca sin cardiopatía conocida).","Antecedentes personales o familiares de muerte súbita; cardiopatía conocida.","ECG con preexcitación, QT largo o patrón de Brugada."], der:["Con cualquiera de las anteriores: cardiología (prueba de esfuerzo si fue con el ejercicio)."], f:"Pace AE, Scaglione J, Arch Argent Pediatr 2004;102(5):461"},
   vv:{br:["Sangrado genital sin causa definida: vaginoscopia por especialista.","Sospecha de cuerpo extraño: Rx o ecografía pelviana.","Flujo crónico o recurrente sin causa definida: vaginoscopia."], f:"SAP, Comité Nacional de Endocrinología, Arch Argent Pediatr 2000;98(6):412"},
   sineq:{der:["Cirugía solo en casos que no responden al tratamiento tópico y tienen obstrucción urinaria grave."], f:"Rubinstein A y col., Arch Argent Pediatr 2018;116(1):65"},
+  laring:{br:["Aspecto tóxico, fiebre elevada, odinofagia, sialorrea, posición en trípode, estridor inspiratorio y dificultad respiratoria que empeora rápido: pensar en epiglotitis (2 a 6 años). No revisar las fauces con bajalenguas (puede precipitar el espasmo laríngeo).","Estridor y dificultad respiratoria de inicio brusco, jugando o comiendo, o laringitis que empieza de forma inusual y no mejora con el tratamiento habitual: pensar en cuerpo extraño laríngeo.","Estridor de curso inhabitual, con apneas, cianosis, dificultad para alimentarse, dificultad respiratoria o falla de medro: necesita estudio adicional (endoscopia).","Laringitis recurrente o persistente en un lactante menor de 6 meses: sospechar hemangioma subglótico."], der:["Epiglotitis: internación en terapia intensiva y posible intubación.","Casos graves de crup: internación y tratamiento específico (epinefrina, corticoides por vía intravenosa).","Dificultad respiratoria grave y progresiva: la estabilización de la vía aérea tiene prioridad sobre cualquier otro procedimiento."], f:"SAP, Cuestas G y Rodríguez H, Algoritmo para el manejo de la obstrucción laríngea en pediatría, Arch Argent Pediatr 2022;120(3):209-216 (Tabla 1). La guía no fija un puntaje de Westley para internar"},
+  itu:{br:["Menores de 1 año: se asume pielonefritis (no se distingue ITU baja de alta). Ante duda, tratar como ITU alta.","ITU atípica (ITU alta con alguno de estos): compromiso del estado general, sepsis, sin respuesta a las 48 hs de antibiótico adecuado, urocultivo con germen distinto de E. coli, caída del filtrado glomerular no atribuible a deshidratación o nefrotoxicidad.","Aspecto tóxico o séptico, inmunocomprometido o antecedente quirúrgico de la vía urinaria: hemocultivos. En recién nacidos la bacteriemia es más frecuente (15 %).","ITU recurrente (en 1 año o menos): 2 o más ITU altas, 1 alta + 1 baja, o 3 o más bajas.","Si el tratamiento empieza después de 48 hs de síntomas, el riesgo de cicatrices renales aumenta un 50 %: tomar el urocultivo e iniciar el antibiótico sin demora.","Persistencia de fiebre o complicaciones con antibiótico acorde al antibiograma: nuevo urocultivo y ecografía renal y de vías urinarias (absceso, uropatía obstructiva)."], der:["Antibiótico parenteral (internación): recién nacidos, lactantes menores de 2 meses, sepsis, ITU atípica, inmunocompromiso grave, intolerancia a la vía oral, uropatías complejas (RVU de alto grado, obstructiva), mala respuesta al antibiótico oral, litiasis renal o cuerpo extraño, trasplante renal con ITU febril y compromiso de la función renal.","Recién nacido con ITU: pedir ionograma (riesgo de pseudohipoaldosteronismo).","Uropatías, vejiga neurogénica, trasplante o inmunocompromiso: tratamiento acordado con nefrología o infectología."], f:"SAP, Ramírez F y col., Guía para el diagnóstico, estudio y tratamiento de la infección urinaria: actualización 2022, Arch Argent Pediatr 2022;120(5):S69-S87 (Tabla 4)"},
   asma:{br:["Riesgo de repetir una exacerbación mayor dentro de la primera semana posterior a una exacerbación grave."], der:["Crisis grave sin respuesta a la serie inicial (salbutamol + ipratropio, corticoide) o que sigue con mala mecánica ventilatoria o necesidad de oxígeno: internación.","Alta solo con buena respuesta al tratamiento, SaO₂ ≥ 94 %, síntomas en remisión con salbutamol cada 4-6 hs y sin complicaciones.","Control a las 24-48 hs; revisar técnica inhalatoria y adherencia y subir el nivel de control."], f:"SAP, Guía de diagnóstico y tratamiento: asma bronquial en niños ≥ 6 años, Arch Argent Pediatr 2021;119(4):S123, tal como se cita en «Crisis asmática grave: manejo en guardia e indicaciones al alta», ateneo Hospital Garrahan 2023 (no se leyó la guía completa)"},
   tina:{br:["Placa inflamatoria supurada (querión): agregar corticoide para disminuir la inflamación y evitar la alopecia definitiva."], f:"García-Agudo L, Arch Argent Pediatr 2018;116(2):e296"}
 };
@@ -2993,6 +2996,7 @@ const FUENTES = [
   ["SAP, Alerta sobre el aumento de casos de coqueluche","octubre de 2025","Coqueluche","v1.4.30 (10/11/2026)"],
   ["MSAL, Vacuna antirrábica de uso humano: lineamientos técnicos","2011","Mordedura de perro","v1.4.31 (10/11/2026)"],
   ["Mosteller, Simplified calculation of body-surface area (N Engl J Med 317:1098)","1987","Superficie corporal","v1.4.59 (11/11/2026)"],
+  ["SAP, Cuestas G y Rodríguez H, Algoritmo para el manejo de la obstrucción laríngea en pediatría (Arch Argent Pediatr 120(3):209-216) y Ramírez F y col., Guía de infección urinaria, actualización 2022 (120(5):S69-S87)","2022","Banderas rojas y derivación de laringitis e ITU","v1.5.15 (26/11/2026)"],
   ["Bilkis M y col., Hidratación endovenosa en la práctica clínica (Arch Argent Pediatr 105(5):436-443), que cita a Holliday y Segar","2007","Líquidos de mantenimiento (calculadora)","v1.5.14 (24/11/2026)"],
   ["Plantillas propias de evoluciones e historia clínica del Dr. Pereira","2026","Cuadros de intercurrencia originales y sus dosis (pendientes de revisión médica)","v1.0.0 (06/11/2026)"]
 ];
