@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.5.17 (27/11/2026)
+- Versión actual: 1.5.18 (27/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -152,6 +152,7 @@ Al aprobar, la primera sería la 1.
 - (v1.4.1) Resuelto el desborde horizontal en celular. En ≤600 px las pestañas se deslizan horizontalmente y la barra inferior muestra «Ver», «Receta» y COPIAR sin el texto chico.
 
 ## Pendiente de revisión médica (Gonzalo)
+- (v1.5.18, 27/11/2026) Banderas rojas de varicela (solo en pantalla). Fuente leída hoy: MSAL, página «Varicela» de vacunas (argentina.gob.ar/salud/vacunas/varicela): grupos con riesgo de complicaciones y complicaciones graves. No encontré guía SAP/MSAL con criterios de internación ni aciclovir (solo un editorial SAP de 2004 y fichas ANMAT de 1995, descartados por viejos); no se cargaron. Si Gonzalo pasa la referencia que usa, se completa. Revisar.
 - (v1.5.17, 27/11/2026) Banderas rojas e internación del síndrome febril sin foco (solo en pantalla). Fuente leída hoy: SAP, Bruno M y Ellis A, «Consenso para el uso adecuado de antibióticos en el niño menor de 36 meses con fiebre sin foco de infección evidente», Arch Argent Pediatr 2017;115(Supl 2):S27-S37 (criterios de bajo riesgo por edad, Yale, estudios, internación). No se cargaron dosis de antibióticos ni los algoritmos de las figuras. Es de 2017: confirmar que sigue vigente. Revisar.
 - (v1.5.16, 27/11/2026) Banderas rojas, internación y alta del dengue (solo en pantalla). Fuente leída hoy: MSAL, Guía de bolsillo para el equipo de salud «El dengue se puede prevenir y tratar», 2024 (argentina.gob.ar/sites/default/files/2024/09/triptico_dengue-web.pdf); signos de alarma en niños cotejados con el tríptico pediátrico del Hospital Posadas 2023. La guía es para todas las edades (no trae criterios pediátricos específicos más allá de «menores de 1 año»). Revisar.
 - (v1.5.15, 26/11/2026) Banderas rojas y derivación (solo en pantalla) para laringitis e ITU. Fuentes leídas hoy: (1) SAP, Cuestas G y Rodríguez H, «Algoritmo para el manejo de la obstrucción laríngea en pediatría», Arch Argent Pediatr 2022;120(3):209-216 (Tabla 1: crup vs. epiglotitis; cuerpo extraño laríngeo; estridor atípico; hemangioma subglótico), https://www.sap.org.ar/docs/publicaciones/archivosarg/2022/v120n3a18.pdf. No trae puntaje de Westley ni criterios de internación del crup más allá de «casos graves»; el material de curso de la SAP da cortes distintos (≥5 vs >5), no cargados (ítem 78). (2) SAP, Ramírez F y col., «Guía para el diagnóstico, estudio y tratamiento de la infección urinaria: actualización 2022», Arch Argent Pediatr 2022;120(5):S69-S87 (definiciones de ITU atípica y recurrente, Tabla 4 de antibióticos parenterales, bacteriemia en RN, cicatrices si se demora >48 hs), https://www.sap.org.ar/docs/publicaciones/archivosarg/2022/v120n5a25s.pdf. Revisar la redacción de las banderas.
@@ -221,6 +222,7 @@ Al aprobar, la primera sería la 1.
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 1.5.18 (27/11/2026): ítem 37 (parcial) — banderas rojas de varicela (MSAL). Contenido clínico → pendiente de revisión. Probado con Playwright (1440/390 px, sin errores, autodiagnóstico sin fallas).
 - 1.5.17 (27/11/2026): ítems 37-38 (parcial) — banderas rojas e internación del síndrome febril sin foco (SAP 2017). Contenido clínico → pendiente de revisión. Probado con Playwright (1440/390 px, sin scroll horizontal ni errores de consola; autodiagnóstico 1481 comprobaciones sin fallas).
 - 1.5.16 (27/11/2026): ítems 37-38 (parcial) — banderas rojas, internación y alta del dengue (MSAL 2024). Contenido clínico → pendiente de revisión. Probado con Playwright.
 - 1.5.15 (26/11/2026): ítems 37-38 (parcial) — banderas rojas y derivación para laringitis e ITU, con fuente SAP 2022. Contenido clínico → pendiente de revisión. Probado con Playwright (1440/390 px, sin scroll horizontal, sin errores de consola; autodiagnóstico: 1479 comprobaciones sin errores).
