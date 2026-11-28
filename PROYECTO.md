@@ -3,7 +3,7 @@
 App de Gonzalo Gabriel Pereira (pediatra) para escribir evoluciones en la historia clínica del consultorio. Un único HTML sin conexión que se abre en una pestaña al lado del sistema de turnos; se copia el texto generado y se pega en la HC.
 
 ## Estado
-- Versión actual: 1.5.18 (27/11/2026)
+- Versión actual: 1.5.19 (28/11/2026)
 - Archivo de la app: `index.html` de este artifact (es el código fuente completo; no hay build).
 
 ## Qué hace (v1.0.0)
@@ -222,6 +222,7 @@ Al aprobar, la primera sería la 1.
 - v1.4.59 Superficie corporal: fórmula de Mosteller RD, «Simplified calculation of body-surface area», N Engl J Med 1987;317:1098 (PMID 3657876), confirmada por búsqueda web (no pude abrir el artículo original); verificado con 170 cm y 70 kg = 1,82 m².
 
 ## Historial
+- 1.5.19 (28/11/2026): ítem 37 (parcial) — `ALERTA.const`: banderas rojas de la constipación (SAP, Estreñimiento funcional en pediatría, Arch Argent Pediatr 2021;119(1):S39-S47, Tabla 3) y cuándo pedir estudios. Contenido clínico → pendiente de revisión médica: confirmar la redacción contra el consenso. Probado con Playwright (1440/390 px, sin errores de consola ni scroll horizontal; autodiagnóstico 1483 comprobaciones sin fallas). No cambia el texto generado.
 - 1.5.18 (27/11/2026): ítem 37 (parcial) — banderas rojas de varicela (MSAL). Contenido clínico → pendiente de revisión. Probado con Playwright (1440/390 px, sin errores, autodiagnóstico sin fallas).
 - 1.5.17 (27/11/2026): ítems 37-38 (parcial) — banderas rojas e internación del síndrome febril sin foco (SAP 2017). Contenido clínico → pendiente de revisión. Probado con Playwright (1440/390 px, sin scroll horizontal ni errores de consola; autodiagnóstico 1481 comprobaciones sin fallas).
 - 1.5.16 (27/11/2026): ítems 37-38 (parcial) — banderas rojas, internación y alta del dengue (MSAL 2024). Contenido clínico → pendiente de revisión. Probado con Playwright.
